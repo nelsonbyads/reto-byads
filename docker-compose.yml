@@ -1,0 +1,9 @@
+services:
+  dadofit-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dadofit-web
+    ports:
+      - "8781:80"
+    restart: unless-stopped

@@ -1,0 +1,14 @@
+DADOFIT UI/UX V1 - REEMPLAZO RAPIDO
+
+1. Deten npm run dev (Ctrl+C).
+2. En la raiz de reto-byads, renombra tu carpeta src actual a src-backup si quieres conservar respaldo.
+3. Copia la carpeta src de este ZIP a la raiz del proyecto.
+4. NO borres ni reemplaces: .git, data, images, videos, public, scripts, package.json, package-lock.json, LICENSE, NOTICE.md.
+5. No necesitas npm install: no se agregaron dependencias.
+6. Ejecuta:
+   npm test
+   npm run build
+   npm run dev
+7. Abre http://localhost:5175/app
+
+Esta entrega mantiene el login existente.

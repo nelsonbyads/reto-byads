@@ -1,0 +1,26 @@
+DadoFit UI/UX V2
+
+REEMPLAZAR:
+- src/
+- .gitignore
+
+AGREGAR:
+- Dockerfile
+- docker-compose.yml
+- .dockerignore
+- docker/nginx.conf
+- DOCKER.md
+
+NO BORRAR / NO REEMPLAZAR:
+- .git/
+- data/
+- images/
+- videos/
+- public/
+- scripts/
+- package.json
+- package-lock.json
+- LICENSE
+- NOTICE.md
+- vite.config.ts
+- tsconfig*.json

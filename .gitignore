@@ -1,8 +1,13 @@
-__pycache__/
-*.pyc
+node_modules/
+dist/
+coverage/
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+src-backup/
+*-backup/
 .DS_Store
-.venv/
-*.zip
-
-# Claude Code local settings (do not publish)
-.claude/
+.vscode/
+.idea/
