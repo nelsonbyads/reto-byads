@@ -17,7 +17,6 @@ import { bodyPartLabel, equipmentLabel } from '../lib/translations';
 import type { DiceLevel, ExerciseFilters } from '../types/exercise';
 
 interface SessionState { exercises: number; reps: number; }
-
 type FilterKey = keyof ExerciseFilters;
 
 export function WorkoutPage() {
@@ -43,7 +42,6 @@ export function WorkoutPage() {
   const activeFilters = useMemo(() => countActiveFilters(filters), [filters]);
   const markDone = () => setSession((current) => ({ exercises: current.exercises + 1, reps: current.reps + reps }));
   const resetSession = () => { if (window.confirm('¿Reiniciar la sesión actual?')) setSession({ exercises: 0, reps: 0 }); };
-
   const removeFilter = (key: FilterKey, value: string) => setFilters((current) => ({ ...current, [key]: current[key].filter((item) => item !== value) }));
   const filterChips = [
     ...filters.equipment.map((value) => ({ key: 'equipment' as const, value, label: equipmentLabel(value) })),
@@ -55,33 +53,38 @@ export function WorkoutPage() {
   if (error) return <main className="state-screen"><h1>DadoFit</h1><p>{error}</p><button className="primary-small" onClick={retry}>Reintentar</button></main>;
 
   return (
-    <div className="workout-layout">
+    <div className="workout-layout workout-layout-v7">
       <AppHeader/>
       <div className="app-shell">
         <SessionSummary exercises={session.exercises} reps={session.reps} onReset={resetSession}/>
-        <main>
+        <main className="workout-main-v7">
           <DiceLevelSelector value={diceLevel} onChange={setDiceLevel}/>
 
-          <div className="toolbar">
-            <button className="filter-btn" onClick={() => setFiltersOpen(true)}><SlidersHorizontal size={18}/> Filtros {activeFilters > 0 && <span>{activeFilters}</span>}</button>
+          <div className="toolbar toolbar-v7">
+            <div className="toolbar-left-v7">
+              <button className="filter-btn" onClick={() => setFiltersOpen(true)}><SlidersHorizontal size={18}/> Filtros {activeFilters > 0 && <span>{activeFilters}</span>}</button>
+              {filterChips.length > 0 && <div className="active-filter-chips">{filterChips.map((chip) => <button key={`${chip.key}-${chip.value}`} type="button" onClick={() => removeFilter(chip.key, chip.value)}>{chip.label}<X size={13}/></button>)}</div>}
+            </div>
             <p><strong>{filtered.length}</strong> ejercicios disponibles</p>
           </div>
-
-          {filterChips.length > 0 && <div className="active-filter-chips">{filterChips.map((chip) => <button key={`${chip.key}-${chip.value}`} type="button" onClick={() => removeFilter(chip.key, chip.value)}>{chip.label}<X size={13}/></button>)}</div>}
 
           {filtered.length === 0 ? (
             <section className="empty-state"><h2>No hay ejercicios con estos filtros.</h2><p>Quita una condición o limpia la selección para ampliar el pool.</p><button className="primary-small" onClick={() => setFilters(EMPTY_FILTERS)}>Limpiar filtros</button></section>
           ) : <>
-            <div className="dice-grid">
+            <div className="dice-grid dice-grid-v7">
               <RepDice value={previewReps} rolling={rolling} sides={dice.sides} minimum={dice.minimum} maximum={dice.maximum}/>
               <ExerciseDice name={previewExercise?.name} rolling={rolling}/>
             </div>
-            <button className="roll-button" onClick={() => void rollBoth()} disabled={rolling}><Dice5 size={22}/>{rolling ? 'LANZANDO...' : 'LANZAR DADOS'}</button>
-            <div className="secondary-roll-actions">
-              <button type="button" onClick={() => void rollRepsOnly()} disabled={rolling}><RotateCw size={16}/> Solo repeticiones</button>
-              <button type="button" onClick={() => void rollExerciseOnly()} disabled={rolling}><RefreshCw size={16}/> Cambiar ejercicio</button>
+
+            <div className="roll-controls-v7">
+              <button className="roll-button" onClick={() => void rollBoth()} disabled={rolling}><Dice5 size={22}/>{rolling ? 'LANZANDO...' : 'LANZAR DADOS'}</button>
+              <div className="secondary-roll-actions">
+                <button type="button" onClick={() => void rollRepsOnly()} disabled={rolling}><RotateCw size={16}/> Solo repeticiones</button>
+                <button type="button" onClick={() => void rollExerciseOnly()} disabled={rolling}><RefreshCw size={16}/> Cambiar ejercicio</button>
+              </div>
+              <p className="keyboard-hint">Tip: en escritorio puedes lanzar ambos con la barra espaciadora.</p>
             </div>
-            <p className="keyboard-hint">Tip: en escritorio puedes lanzar ambos con la barra espaciadora.</p>
+
             {exercise && <ExerciseResult key={`${currentRollId}-${exercise.id}-${reps}`} rollId={currentRollId || `current-${exercise.id}-${reps}`} exercise={exercise} reps={reps} onDone={markDone}/>} 
             <RollHistory history={history}/>
           </>}

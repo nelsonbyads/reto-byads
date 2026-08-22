@@ -1,4 +1,4 @@
-import { Activity, Camera, FileVideo2, Image as ImageIcon, Link2, Trash2, Upload, Video } from 'lucide-react';
+import { Camera, FileVideo2, Image as ImageIcon, Link2, ShieldCheck, Trash2, Video } from 'lucide-react';
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { deleteEvidence, listEvidenceForRoll, saveEvidence } from '../lib/evidenceStore';
 import type { AppExercise, EvidenceRecord } from '../types/exercise';
@@ -12,12 +12,12 @@ function formatBytes(bytes: number): string {
 
 function formatEvidenceDate(timestamp: number): string {
   try {
-    return new Intl.DateTimeFormat('es-CO', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(timestamp));
+    const date = new Date(timestamp);
+    const now = new Date();
+    const sameDay = date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+    const time = new Intl.DateTimeFormat('es-CO', { hour: '2-digit', minute: '2-digit' }).format(date);
+    if (sameDay) return `Hoy · ${time}`;
+    return new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
   } catch {
     return '';
   }
@@ -33,7 +33,7 @@ function EvidencePreview({ item, onDelete }: { item: EvidenceRecord; onDelete: (
   }, [item.blob]);
 
   return (
-    <article className="evidence-item">
+    <article className="evidence-item evidence-item-v7">
       <div className="evidence-preview">
         {url && item.kind === 'image' && <img src={url} alt={`Evidencia ${item.fileName}`} />}
         {url && item.kind === 'video' && <video src={url} controls preload="metadata" />}
@@ -46,15 +46,10 @@ function EvidencePreview({ item, onDelete }: { item: EvidenceRecord; onDelete: (
           </span>
           <small>{formatEvidenceDate(item.createdAt)}</small>
         </div>
-
         <strong title={item.fileName}>{item.fileName}</strong>
-
         <span className="evidence-workout-tag" title={`${item.reps} repeticiones de ${item.exerciseName}`}>
-          <Activity size={13}/>
-          <b>{item.reps}×</b>
-          <span>{item.exerciseName}</span>
+          <b>{item.reps}×</b><span>{item.exerciseName}</span>
         </span>
-
         <small>{formatBytes(item.size)}</small>
       </div>
 
@@ -123,42 +118,30 @@ export function EvidencePanel({ rollId, exercise, reps }: Props) {
   };
 
   return (
-    <section className="evidence-section">
-      <div className="evidence-heading">
+    <section className="evidence-section evidence-section-v7">
+      <div className="evidence-heading evidence-heading-v7">
         <div>
-          <span className="eyebrow">EVIDENCIA</span>
-          <h3>Guarda tu progreso</h3>
-          <p>Opcional · queda guardado en este dispositivo.</p>
+          <span className="eyebrow"><ShieldCheck size={14}/> EVIDENCIA DEL EJERCICIO ACTUAL</span>
+          <h3>{reps}× {exercise.name}</h3>
+          <p><Link2 size={13}/> Vinculada únicamente a esta tirada.</p>
         </div>
-        <Upload size={20}/>
+        <span className="evidence-count-v7">{items.length}<small>{items.length === 1 ? 'archivo' : 'archivos'}</small></span>
       </div>
 
-      <div className="evidence-linked-roll" aria-label="Ejercicio asociado a estas evidencias">
-        <div className="evidence-linked-icon"><Link2 size={17}/></div>
-        <div className="evidence-linked-copy">
-          <span>Vinculada a esta tirada</span>
-          <strong>{reps}× {exercise.name}</strong>
-          <small>Las fotos y videos que subas aquí quedan ligados únicamente a este ejercicio.</small>
-        </div>
-        <span className="evidence-count">{items.length} {items.length === 1 ? 'archivo' : 'archivos'}</span>
-      </div>
-
-      <div className="evidence-actions">
-        <button type="button" onClick={() => imageInput.current?.click()} disabled={saving}>
-          <Camera size={18}/> Subir foto
-        </button>
-        <button type="button" onClick={() => videoInput.current?.click()} disabled={saving}>
-          <Video size={18}/> Subir video
-        </button>
+      <div className="evidence-actions evidence-actions-v7">
+        <button type="button" onClick={() => imageInput.current?.click()} disabled={saving}><Camera size={18}/> Subir foto</button>
+        <button type="button" onClick={() => videoInput.current?.click()} disabled={saving}><Video size={18}/> Subir video</button>
         <input ref={imageInput} className="sr-only" type="file" accept="image/*" onChange={(event) => void addFile(event, 'image')} />
         <input ref={videoInput} className="sr-only" type="file" accept="video/*" onChange={(event) => void addFile(event, 'video')} />
       </div>
 
       {message && <p className="evidence-message">{message}</p>}
-      {items.length > 0 && (
-        <div className="evidence-list">
+      {items.length > 0 ? (
+        <div className="evidence-list evidence-list-v7">
           {items.map((item) => <EvidencePreview key={item.id} item={item} onDelete={(id) => void remove(id)} />)}
         </div>
+      ) : (
+        <div className="evidence-empty-v7"><ShieldCheck size={18}/><span>Agrega una foto o video si quieres guardar evidencia de esta ronda.</span></div>
       )}
     </section>
   );
