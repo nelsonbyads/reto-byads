@@ -1,4 +1,4 @@
-import { Check, Flame, Swords, UserRound, X } from 'lucide-react';
+import { Check, Flame, ShieldCheck, Swords, UserRound, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -134,7 +134,8 @@ export function ChallengeGymbroButton({ exercise, reps, diceLevel }: Props) {
                 <span className="eyebrow">RETO ENVIADO</span>
                 <h2>Ahora le toca a {sentTo.display_name || sentTo.username || 'tu Gymbro'}.</h2>
                 <p>{title}</p>
-                <div className="challenge-reward-v10"><Flame size={18}/><span>Si lo completa y apruebas su evidencia:</span><strong>+25 DC · +50 XP</strong></div>
+                <div className="challenge-reward-v10"><Flame size={18}/><span>Si lo completa y apruebas su evidencia:</span><strong>Hasta +25 DC · +50 XP</strong></div>
+                <div className="challenge-muted-box-v10"><ShieldCheck size={16}/> Anti-farming: una recompensa por pareja cada 24 h y máximo 5 recompensas 1 vs 1 por usuario en 24 h.</div>
                 <div className="challenge-modal-actions-v10">
                   <Link to="/challenges">Ver mis retos</Link>
                   <button type="button" onClick={close}>Cerrar</button>
@@ -152,8 +153,10 @@ export function ChallengeGymbroButton({ exercise, reps, diceLevel }: Props) {
                   <div><span>Ejercicio</span><strong>{exercise.name}</strong></div>
                   <div><span>Repeticiones</span><strong>{reps}</strong></div>
                   <div><span>Tiempo</span><strong>48 h</strong></div>
-                  <div><span>Recompensa</span><strong>25 DC + 50 XP</strong></div>
+                  <div><span>Recompensa</span><strong>Hasta 25 DC + 50 XP</strong></div>
                 </div>
+
+                <div className="challenge-muted-box-v10"><ShieldCheck size={16}/> La recompensa se evalúa al aprobar: 1 por pareja cada 24 h y máximo 5 recompensas 1 vs 1 por usuario en 24 h.</div>
 
                 {error && <div className="auth-error">{error}</div>}
 
