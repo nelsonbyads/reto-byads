@@ -1,0 +1,186 @@
+import { ArrowLeft, Bell, Check, CheckCheck, RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { AppHeader } from '../components/AppHeader';
+import { useAuth } from '../auth/AuthContext';
+import { supabase } from '../lib/supabase';
+
+interface NotificationRow {
+  id: string;
+  notification_type: string;
+  title: string;
+  body: string | null;
+  data: Record<string, unknown> | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+type NotificationFilter = 'all' | 'unread' | 'read';
+const PAGE_SIZE = 30;
+
+function notificationTarget(item: NotificationRow): string {
+  const type = item.notification_type;
+  if (type.startsWith('squad_') || item.data?.battle_id || item.data?.group_id) return '/squads';
+  if (type.startsWith('challenge_') || item.data?.challenge_id) return '/challenges';
+  if (type.startsWith('friend')) return '/gymbros';
+  return '/profile';
+}
+
+function formatWhen(value: string): string {
+  try {
+    return new Intl.DateTimeFormat('es-CO', {
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
+}
+
+export function NotificationsPage() {
+  const { user } = useAuth();
+  const [filter, setFilter] = useState<NotificationFilter>('all');
+  const [items, setItems] = useState<NotificationRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [markingAll, setMarkingAll] = useState(false);
+  const [error, setError] = useState('');
+
+  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+
+  const fetchPage = useCallback(async (offset: number, append: boolean) => {
+    if (!cloudReady || !user || !supabase) return;
+    const client = supabase;
+    append ? setLoadingMore(true) : setLoading(true);
+    setError('');
+
+    let query = client
+      .from('notifications')
+      .select('id, notification_type, title, body, data, read_at, created_at', { count: 'exact' })
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (filter === 'unread') query = query.is('read_at', null);
+    if (filter === 'read') query = query.not('read_at', 'is', null);
+
+    const [itemsResult, unreadResult] = await Promise.all([
+      query,
+      client.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).is('read_at', null),
+    ]);
+
+    if (itemsResult.error || unreadResult.error) {
+      setError(itemsResult.error?.message ?? unreadResult.error?.message ?? 'No pudimos cargar tus notificaciones.');
+    } else {
+      const next = (itemsResult.data ?? []) as NotificationRow[];
+      setItems((current) => append ? [...current, ...next] : next);
+      setTotal(Number(itemsResult.count ?? 0));
+      setUnreadCount(Number(unreadResult.count ?? 0));
+    }
+
+    setLoading(false);
+    setLoadingMore(false);
+  }, [cloudReady, filter, user]);
+
+  useEffect(() => {
+    void fetchPage(0, false);
+  }, [fetchPage]);
+
+  const markRead = async (id: string) => {
+    if (!supabase || !user) return;
+    const now = new Date().toISOString();
+    const client = supabase;
+    const { error: updateError } = await client
+      .from('notifications')
+      .update({ read_at: now })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .is('read_at', null);
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+    setItems((current) => filter === 'unread'
+      ? current.filter((item) => item.id !== id)
+      : current.map((item) => item.id === id ? { ...item, read_at: now } : item));
+    setUnreadCount((current) => Math.max(0, current - 1));
+    if (filter === 'unread') setTotal((current) => Math.max(0, current - 1));
+  };
+
+  const markAllRead = async () => {
+    if (!supabase || unreadCount === 0) return;
+    setMarkingAll(true);
+    setError('');
+    const { error: rpcError } = await supabase.rpc('mark_all_notifications_read');
+    setMarkingAll(false);
+    if (rpcError) {
+      setError(rpcError.message);
+      return;
+    }
+    await fetchPage(0, false);
+  };
+
+  const hasMore = items.length < total;
+  const title = useMemo(() => filter === 'unread' ? 'No leídas' : filter === 'read' ? 'Leídas' : 'Todas', [filter]);
+
+  return (
+    <div className="profile-shell-v9 notifications-shell-v113">
+      <AppHeader/>
+      <main className="profile-page-v9 notifications-page-v113">
+        <div className="notifications-topline-v113">
+          <Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link>
+          <button type="button" onClick={() => { void fetchPage(0, false); }} disabled={loading}><RefreshCw size={15}/> Actualizar</button>
+        </div>
+
+        <section className="profile-hero-v9 notifications-hero-v113">
+          <div className="profile-avatar-v9"><Bell size={30}/></div>
+          <div><span className="eyebrow">CENTRO DE ACTIVIDAD</span><h1>Notificaciones</h1><p>Consulta todo lo que pasó en tus retos, Gymbros y Squads.</p></div>
+          <div className="notifications-unread-v113"><strong>{unreadCount}</strong><span>sin leer</span></div>
+        </section>
+
+        {!cloudReady ? (
+          <section className="profile-card-v9 profile-cloud-callout-v9"><h2>Necesitas una cuenta cloud</h2><p>Las notificaciones sociales están disponibles para cuentas conectadas a DadoFit.</p></section>
+        ) : (
+          <>
+            <section className="notifications-toolbar-v113">
+              <div role="tablist" aria-label="Filtrar notificaciones">
+                <button type="button" className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>Todas</button>
+                <button type="button" className={filter === 'unread' ? 'active' : ''} onClick={() => setFilter('unread')}>No leídas <span>{unreadCount}</span></button>
+                <button type="button" className={filter === 'read' ? 'active' : ''} onClick={() => setFilter('read')}>Leídas</button>
+              </div>
+              {unreadCount > 0 && <button type="button" className="notifications-mark-all-v113" onClick={() => { void markAllRead(); }} disabled={markingAll}><CheckCheck size={15}/>{markingAll ? 'Marcando…' : 'Marcar todas como leídas'}</button>}
+            </section>
+
+            {error && <div className="auth-error">{error}</div>}
+
+            <section className="profile-card-v9 notifications-list-card-v113">
+              <div className="notifications-list-heading-v113"><strong>{title}</strong><span>{total} {total === 1 ? 'notificación' : 'notificaciones'}</span></div>
+              {loading ? (
+                <p className="notifications-empty-v113">Cargando notificaciones…</p>
+              ) : items.length === 0 ? (
+                <p className="notifications-empty-v113">No hay notificaciones en este filtro.</p>
+              ) : (
+                <div className="notifications-list-v113">
+                  {items.map((item) => (
+                    <article key={item.id} className={item.read_at ? 'read' : 'unread'}>
+                      <div className="notifications-state-v113"><i/></div>
+                      <Link to={notificationTarget(item)} onClick={() => { if (!item.read_at) void markRead(item.id); }}>
+                        <strong>{item.title}</strong>
+                        {item.body && <p>{item.body}</p>}
+                        <small>{formatWhen(item.created_at)}</small>
+                      </Link>
+                      {!item.read_at && <button type="button" onClick={() => { void markRead(item.id); }} title="Marcar como leída"><Check size={16}/><span>Leída</span></button>}
+                    </article>
+                  ))}
+                </div>
+              )}
+
+              {hasMore && <button type="button" className="notifications-load-more-v113" onClick={() => { void fetchPage(items.length, true); }} disabled={loadingMore}>{loadingMore ? 'Cargando…' : 'Cargar más'}</button>}
+            </section>
+          </>
+        )}
+      </main>
+    </div>
+  );
+}

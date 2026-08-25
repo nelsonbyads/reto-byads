@@ -12,9 +12,12 @@ interface ProfileStats {
   challengesCompleted: number;
   coins: number;
   gymbros: number;
+  squads: number;
+  squadPoints: number;
+  pendingChallenges: number;
 }
 
-const EMPTY_STATS: ProfileStats = { xp: 0, level: 1, currentStreak: 0, challengesCompleted: 0, coins: 0, gymbros: 0 };
+const EMPTY_STATS: ProfileStats = { xp: 0, level: 1, currentStreak: 0, challengesCompleted: 0, coins: 0, gymbros: 0, squads: 0, squadPoints: 0, pendingChallenges: 0 };
 
 export function ProfilePage() {
   const { user } = useAuth();
@@ -35,12 +38,14 @@ export function ProfilePage() {
     const client = supabase;
     let active = true;
     const load = async () => {
-      const [profileResult, progressResult, walletResult, sentGymbros, receivedGymbros] = await Promise.all([
+      const [profileResult, progressResult, walletResult, sentGymbros, receivedGymbros, squadsResult, dashboardResult] = await Promise.all([
         client.from('profiles').select('display_name, username').eq('id', user.id).single(),
         client.from('user_progress').select('xp, level, current_streak, challenges_completed').eq('user_id', user.id).single(),
         client.from('wallets').select('balance').eq('user_id', user.id).single(),
         client.from('friendships').select('id', { count: 'exact', head: true }).eq('requester_id', user.id).eq('status', 'accepted'),
         client.from('friendships').select('id', { count: 'exact', head: true }).eq('addressee_id', user.id).eq('status', 'accepted'),
+        client.from('group_members').select('group_id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active'),
+        client.rpc('get_dadofit_dashboard_summary'),
       ]);
 
       if (!active) return;
@@ -48,6 +53,7 @@ export function ProfilePage() {
         setDisplayName(profileResult.data.display_name ?? '');
         setUsername(profileResult.data.username ?? '');
       }
+      const dashboard = (dashboardResult.data ?? {}) as { squad_contribution_points?: number; direct_pending?: number; squad_pending?: number };
       setStats({
         xp: Number(progressResult.data?.xp ?? 0),
         level: Number(progressResult.data?.level ?? 1),
@@ -55,6 +61,9 @@ export function ProfilePage() {
         challengesCompleted: Number(progressResult.data?.challenges_completed ?? 0),
         coins: Number(walletResult.data?.balance ?? 0),
         gymbros: Number(sentGymbros.count ?? 0) + Number(receivedGymbros.count ?? 0),
+        squads: Number(squadsResult.count ?? 0),
+        squadPoints: Number(dashboard.squad_contribution_points ?? 0),
+        pendingChallenges: Number(dashboard.direct_pending ?? 0) + Number(dashboard.squad_pending ?? 0),
       });
       setLoading(false);
     };
@@ -75,8 +84,9 @@ export function ProfilePage() {
       return;
     }
 
+    const client = supabase;
     setSaving(true);
-    const { error: updateError } = await supabase
+    const { error: updateError } = await client
       .from('profiles')
       .update({ display_name: displayName.trim(), username: normalizedUsername })
       .eq('id', user.id);
@@ -132,8 +142,11 @@ export function ProfilePage() {
                 <span className="eyebrow">ACTIVIDAD SOCIAL</span><h2>Tu camino comienza aquí</h2>
                 <div className="profile-social-stat-v9"><span>Retos completados</span><strong>{stats.challengesCompleted}</strong></div>
                 <div className="profile-social-stat-v9"><span>Gymbros</span><strong>{stats.gymbros}</strong></div>
-                <div className="profile-social-stat-v9"><span>Squads</span><strong>0</strong></div>
+                <div className="profile-social-stat-v9"><span>Squads</span><strong>{stats.squads}</strong></div>
+                <div className="profile-social-stat-v9"><span>Aporte a Squads</span><strong>{stats.squadPoints.toLocaleString()} TP</strong></div>
+                <div className="profile-social-stat-v9"><span>Retos pendientes</span><strong>{stats.pendingChallenges}</strong></div>
                 <Link className="profile-primary-v9 profile-gymbros-link-v9" to="/gymbros"><UsersRound size={16}/> Gestionar Gymbros</Link>
+                <Link className="profile-primary-v9 profile-squads-link-v11" to="/squads">Gestionar Squads</Link>
               </section>
             </section>
           </>

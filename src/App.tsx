@@ -4,8 +4,10 @@ import { useAuth } from './auth/AuthContext';
 import { ChallengesPage } from './pages/ChallengesPage';
 import { GymbrosPage } from './pages/GymbrosPage';
 import { LoginPage } from './pages/LoginPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
+import { SquadsPage } from './pages/SquadsPage';
 import { WorkoutPage } from './pages/WorkoutPage';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -29,6 +31,8 @@ export default function App() {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>}/>
       <Route path="/gymbros" element={<ProtectedRoute><GymbrosPage/></ProtectedRoute>}/>
       <Route path="/challenges" element={<ProtectedRoute><ChallengesPage/></ProtectedRoute>}/>
+      <Route path="/squads" element={<ProtectedRoute><SquadsPage/></ProtectedRoute>}/>
+      <Route path="/notifications" element={<ProtectedRoute><NotificationsPage/></ProtectedRoute>}/>
       <Route path="/dashboard" element={<Navigate to="/app" replace/>}/>
       <Route path="*" element={<Navigate to={user ? '/app' : '/login'} replace/>}/>
     </Routes>

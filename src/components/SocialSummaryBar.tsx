@@ -1,0 +1,79 @@
+import { BellRing, Coins, Shield, Swords, Trophy } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { supabase } from '../lib/supabase';
+
+interface DashboardSummary {
+  xp: number;
+  level: number;
+  coins: number;
+  challenges_completed: number;
+  squad_contribution_points: number;
+  direct_pending: number;
+  squad_pending: number;
+  unread_notifications: number;
+  active_squads: number;
+}
+
+const EMPTY: DashboardSummary = {
+  xp: 0,
+  level: 1,
+  coins: 0,
+  challenges_completed: 0,
+  squad_contribution_points: 0,
+  direct_pending: 0,
+  squad_pending: 0,
+  unread_notifications: 0,
+  active_squads: 0,
+};
+
+export function SocialSummaryBar() {
+  const { user } = useAuth();
+  const [summary, setSummary] = useState<DashboardSummary>(EMPTY);
+  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+
+  const load = useCallback(async () => {
+    if (!cloudReady || !supabase) return;
+    const client = supabase;
+    const { data, error } = await client.rpc('get_dadofit_dashboard_summary');
+    if (!error && data) setSummary({ ...EMPTY, ...(data as Partial<DashboardSummary>) });
+  }, [cloudReady]);
+
+  useEffect(() => {
+    if (!cloudReady) return;
+    void load();
+    const interval = window.setInterval(() => { void load(); }, 30000);
+    const handleFocus = () => { void load(); };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [cloudReady, load]);
+
+  if (!cloudReady) return null;
+
+  const pending = summary.direct_pending + summary.squad_pending;
+
+  return (
+    <section className="social-summary-v112" aria-label="Resumen social DadoFit">
+      <div className="social-summary-stats-v112">
+        <Link to="/profile"><Trophy size={16}/><span>XP</span><strong>{summary.xp.toLocaleString()}</strong></Link>
+        <Link to="/profile"><Coins size={16}/><span>DadoCoins</span><strong>{summary.coins.toLocaleString()}</strong></Link>
+        <Link to="/squads"><Shield size={16}/><span>Mi aporte Squad</span><strong>{summary.squad_contribution_points.toLocaleString()} TP</strong></Link>
+        <Link to={summary.direct_pending > 0 ? '/challenges' : '/squads'} className={pending > 0 ? 'has-pending' : ''}><BellRing size={16}/><span>Pendientes</span><strong>{pending}</strong></Link>
+      </div>
+
+      {pending > 0 && (
+        <div className="social-pending-v112">
+          <div><BellRing size={16}/><span>Tienes actividad pendiente</span></div>
+          <div>
+            {summary.direct_pending > 0 && <Link to="/challenges"><Swords size={14}/> {summary.direct_pending} {summary.direct_pending === 1 ? 'reto 1v1' : 'retos 1v1'}</Link>}
+            {summary.squad_pending > 0 && <Link to="/squads"><Shield size={14}/> {summary.squad_pending} {summary.squad_pending === 1 ? 'batalla Squad' : 'batallas Squad'}</Link>}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}

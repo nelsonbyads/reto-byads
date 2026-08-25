@@ -1,10 +1,11 @@
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
 import { bodyPartLabel, equipmentLabel } from '../lib/translations';
 import type { AppExercise, DiceLevel } from '../types/exercise';
 import { ChallengeGymbroButton } from './ChallengeGymbroButton';
 import { EvidencePanel } from './EvidencePanel';
 import { ExerciseMedia } from './ExerciseMedia';
+import { SquadChallengeButton } from './SquadChallengeButton';
 
 interface Props {
   exercise: AppExercise;
@@ -17,12 +18,14 @@ interface Props {
 export function ExerciseResult({ exercise, reps, rollId, diceLevel, onDone }: Props) {
   const [completed, setCompleted] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
+  const [evidenceCount, setEvidenceCount] = useState(0);
   const steps = exercise.instructionStepsEs.length ? exercise.instructionStepsEs : [exercise.instructionsEs].filter(Boolean);
+  const canComplete = evidenceCount > 0;
+
   const markDone = () => {
-    if (completed) return;
+    if (completed || !canComplete) return;
     setCompleted(true);
     onDone();
-    window.setTimeout(() => setCompleted(false), 1800);
   };
 
   return (
@@ -59,16 +62,23 @@ export function ExerciseResult({ exercise, reps, rollId, diceLevel, onDone }: Pr
             {instructionsOpen && <ol>{steps.map((step, index) => <li key={`${exercise.id}-${index}`}>{step}</li>)}</ol>}
           </div>
 
-          <div className="result-completion-v7">
-            <div><strong>¿Listo para cerrar esta ronda?</strong><span>La evidencia es opcional para tu entrenamiento personal.</span></div>
-            <button className={`done-btn ${completed ? 'completed' : ''}`} onClick={markDone}>
+          <div className="result-completion-v7 result-completion-v113">
+            <div>
+              <strong>¿Listo para cerrar esta ronda?</strong>
+              <span>{completed ? 'Ronda cerrada. Esta tirada ya no puede contarse dos veces.' : canComplete ? `${evidenceCount} evidencia${evidenceCount === 1 ? '' : 's'} lista${evidenceCount === 1 ? '' : 's'} para validar la ronda.` : 'Sube al menos una foto o video antes de marcarla como completada.'}</span>
+            </div>
+            <button className={`done-btn ${completed ? 'completed' : ''}`} onClick={markDone} disabled={!canComplete || completed}>
               {completed ? <><Check/> ¡Completado!</> : <><Check/> Marcar como completado</>}
             </button>
-            <ChallengeGymbroButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
+            {!canComplete && !completed && <p className="completion-evidence-guard-v113"><ShieldAlert size={14}/> Evidencia obligatoria para cerrar la ronda.</p>}
+            <div className="social-challenge-actions-v11">
+              <ChallengeGymbroButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
+              <SquadChallengeButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
+            </div>
           </div>
         </div>
 
-        <EvidencePanel rollId={rollId} exercise={exercise} reps={reps}/>
+        <EvidencePanel rollId={rollId} exercise={exercise} reps={reps} onCountChange={setEvidenceCount} locked={completed}/>
       </div>
 
       <p className="safety-note">Entrena con técnica adecuada y dentro de tus capacidades.</p>

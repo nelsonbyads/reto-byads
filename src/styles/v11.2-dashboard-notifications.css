@@ -1,0 +1,33 @@
+/* DadoFit V11.2 — Social summary, accumulated Squad points and notifications */
+
+.notification-bell-v112{position:relative;display:inline-flex;align-items:center}
+.notification-bell-trigger-v112{position:relative;width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:inherit;cursor:pointer}
+.notification-bell-trigger-v112:hover{background:rgba(128,140,160,.12)}
+.notification-bell-trigger-v112>span{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;display:grid;place-items:center;border:2px solid #171d29;border-radius:999px;background:#c9f32f;color:#111722;font-size:8px;font-weight:950;line-height:1}
+.notification-popover-v112{position:absolute;right:0;top:38px;z-index:80;width:min(360px,calc(100vw - 24px));overflow:hidden;border:1px solid #dce2e7;border-radius:14px;background:#fff;color:#172033;box-shadow:0 18px 48px rgba(20,27,39,.18)}
+.notification-popover-v112>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;border-bottom:1px solid #eceff2}
+.notification-popover-v112>header>div{display:flex;flex-direction:column;gap:2px}.notification-popover-v112>header strong{font-size:12px}.notification-popover-v112>header span{font-size:9px;color:#7a8493}
+.notification-popover-v112>header button{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:#627083;font-size:9px;font-weight:850;cursor:pointer}
+.notification-list-v112{max-height:360px;overflow:auto}.notification-list-v112>a{display:grid;grid-template-columns:7px 1fr;gap:8px;padding:11px 13px;border-bottom:1px solid #f0f2f4;color:inherit;text-decoration:none}.notification-list-v112>a:last-child{border-bottom:0}.notification-list-v112>a:hover{background:#f8faf7}.notification-list-v112>a>i{width:7px;height:7px;margin-top:4px;border-radius:50%;background:#d7dce2}.notification-list-v112>a.unread>i{background:#9ec500;box-shadow:0 0 0 3px rgba(201,243,47,.18)}
+.notification-list-v112>a>div{min-width:0;display:flex;flex-direction:column;gap:3px}.notification-list-v112 strong{font-size:10px}.notification-list-v112 span{color:#697587;font-size:9px;line-height:1.4}.notification-list-v112 small{color:#9aa2ae;font-size:8px}.notification-empty-v112{margin:0;padding:22px;text-align:center;color:#7c8797;font-size:10px}
+
+.social-summary-v112{width:min(1180px,calc(100% - 32px));margin:4px auto 12px}
+.social-summary-stats-v112{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.social-summary-stats-v112>a{min-height:54px;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:9px;align-items:center;padding:9px 11px;border:1px solid var(--line,#dfe3e8);border-radius:11px;background:var(--panel,#fff);color:var(--text,#172033);text-decoration:none;box-shadow:var(--shadow-soft,0 6px 18px rgba(34,42,54,.045))}
+.social-summary-stats-v112 svg{grid-row:1/3;color:var(--secondary,#316fd3)}.social-summary-stats-v112 span{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted,#7a8493)}.social-summary-stats-v112 strong{font-size:13px}.social-summary-stats-v112>a.has-pending{border-color:color-mix(in srgb,var(--primary,#c7eb34) 75%,var(--line,#dfe3e8));background:color-mix(in srgb,var(--primary,#c7eb34) 10%,var(--panel,#fff))}.social-summary-stats-v112>a.has-pending svg{color:#7e9e00}
+.social-pending-v112{margin-top:7px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 11px;border:1px solid color-mix(in srgb,var(--primary,#c7eb34) 65%,var(--line,#dfe3e8));border-radius:10px;background:color-mix(in srgb,var(--primary,#c7eb34) 9%,var(--panel,#fff));color:var(--text,#172033)}.social-pending-v112>div{display:flex;align-items:center;gap:7px}.social-pending-v112 span{font-size:10px;font-weight:800}.social-pending-v112 a{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:5px 8px;background:var(--panel,#fff);color:inherit;text-decoration:none;font-size:9px;font-weight:850}
+
+.squads-hero-stats-v11{grid-template-columns:repeat(3,minmax(82px,1fr))}
+.squad-antifarming-note-v112{display:flex;align-items:center;gap:7px;margin-top:8px;padding:9px 11px;border-radius:10px;background:#fff6dd;color:#7b5b0e;font-size:9px;font-weight:750}
+
+html[data-dadofit-theme='dark'] .notification-popover-v112{background:#171d27;border-color:#303a47;color:#f4f6fa;box-shadow:0 18px 50px rgba(0,0,0,.38)}
+html[data-dadofit-theme='dark'] .notification-popover-v112>header,html[data-dadofit-theme='dark'] .notification-list-v112>a{border-color:#29323f}
+html[data-dadofit-theme='dark'] .notification-list-v112>a:hover{background:#202733}
+html[data-dadofit-theme='dark'] .notification-bell-trigger-v112>span{border-color:#111720}
+html[data-dadofit-theme='dark'] .squad-antifarming-note-v112{background:#2a2415;color:#f1d486}
+html[data-dadofit-theme='pastel'] .notification-bell-trigger-v112>span{background:#79cbbb;color:#173934}
+html[data-dadofit-theme='pastel'] .squad-antifarming-note-v112{background:#fff1e8;color:#935d45}
+
+@media(max-width:900px){.social-summary-stats-v112{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.notification-popover-v112{position:fixed;top:70px;right:11px;left:11px;width:auto}.social-summary-v112{width:min(100% - 22px,1180px)}.social-pending-v112{align-items:flex-start;flex-direction:column}.social-pending-v112>div:last-child{flex-wrap:wrap}.squads-hero-stats-v11{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){.social-summary-stats-v112{grid-template-columns:1fr 1fr}.social-summary-stats-v112>a{padding:8px}.squads-hero-stats-v11{grid-template-columns:1fr 1fr}.squads-hero-stats-v11>div:last-child{grid-column:1/-1}}

@@ -1,7 +1,8 @@
-import { Dice5, LogOut, Moon, Palette, Sun, Swords, UserRound, UsersRound } from 'lucide-react';
+import { Dice5, LogOut, Moon, Palette, Shield, Sun, Swords, UserRound, UsersRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { NotificationBell } from './NotificationBell';
 
 type DadoFitTheme = 'pastel' | 'light' | 'dark';
 
@@ -59,6 +60,8 @@ export function AppHeader() {
         </div>
 
         <div className="account-chip">
+          <NotificationBell/>
+          {user?.provider === 'supabase' && <Link className="account-squads-link-v11" to="/squads" title="Squads" aria-label="Abrir Squads"><Shield size={16}/></Link>}
           {user?.provider === 'supabase' && <Link className="account-challenges-link-v10" to="/challenges" title="Retos" aria-label="Abrir Retos"><Swords size={16}/></Link>}
           {user?.provider === 'supabase' && <Link className="account-gymbros-link-v9" to="/gymbros" title="Gymbros" aria-label="Abrir Gymbros"><UsersRound size={16}/></Link>}
           <Link className="account-profile-link-v9" to="/profile" title="Abrir perfil">

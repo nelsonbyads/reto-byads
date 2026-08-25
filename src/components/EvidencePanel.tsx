@@ -3,7 +3,13 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { deleteEvidence, listEvidenceForRoll, saveEvidence } from '../lib/evidenceStore';
 import type { AppExercise, EvidenceRecord } from '../types/exercise';
 
-interface Props { rollId: string; exercise: AppExercise; reps: number; }
+interface Props {
+  rollId: string;
+  exercise: AppExercise;
+  reps: number;
+  onCountChange?: (count: number) => void;
+  locked?: boolean;
+}
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -23,7 +29,7 @@ function formatEvidenceDate(timestamp: number): string {
   }
 }
 
-function EvidencePreview({ item, onDelete }: { item: EvidenceRecord; onDelete: (id: string) => void }) {
+function EvidencePreview({ item, onDelete }: { item: EvidenceRecord; onDelete?: (id: string) => void }) {
   const [url, setUrl] = useState('');
 
   useEffect(() => {
@@ -53,14 +59,16 @@ function EvidencePreview({ item, onDelete }: { item: EvidenceRecord; onDelete: (
         <small>{formatBytes(item.size)}</small>
       </div>
 
-      <button className="evidence-delete" type="button" onClick={() => onDelete(item.id)} aria-label={`Eliminar ${item.fileName}`}>
-        <Trash2 size={17}/>
-      </button>
+      {onDelete && (
+        <button className="evidence-delete" type="button" onClick={() => onDelete(item.id)} aria-label={`Eliminar ${item.fileName}`}>
+          <Trash2 size={17}/>
+        </button>
+      )}
     </article>
   );
 }
 
-export function EvidencePanel({ rollId, exercise, reps }: Props) {
+export function EvidencePanel({ rollId, exercise, reps, onCountChange, locked = false }: Props) {
   const imageInput = useRef<HTMLInputElement>(null);
   const videoInput = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<EvidenceRecord[]>([]);
@@ -75,10 +83,14 @@ export function EvidencePanel({ rollId, exercise, reps }: Props) {
     return () => { active = false; };
   }, [rollId]);
 
+  useEffect(() => {
+    onCountChange?.(items.length);
+  }, [items.length, onCountChange]);
+
   const addFile = async (event: ChangeEvent<HTMLInputElement>, kind: 'image' | 'video') => {
     const file = event.target.files?.[0];
     event.target.value = '';
-    if (!file) return;
+    if (!file || locked) return;
     if (file.size > 50 * 1024 * 1024) {
       setMessage('El archivo supera el límite local de 50 MB.');
       return;
@@ -112,7 +124,7 @@ export function EvidencePanel({ rollId, exercise, reps }: Props) {
   };
 
   const remove = async (id: string) => {
-    if (!window.confirm('¿Eliminar esta evidencia?')) return;
+    if (locked || !window.confirm('¿Eliminar esta evidencia?')) return;
     await deleteEvidence(id);
     setItems((current) => current.filter((item) => item.id !== id));
   };
@@ -123,25 +135,26 @@ export function EvidencePanel({ rollId, exercise, reps }: Props) {
         <div>
           <span className="eyebrow"><ShieldCheck size={14}/> EVIDENCIA DEL EJERCICIO ACTUAL</span>
           <h3>{reps}× {exercise.name}</h3>
-          <p><Link2 size={13}/> Vinculada únicamente a esta tirada.</p>
+          <p><Link2 size={13}/> Debes adjuntar al menos una evidencia para cerrar esta ronda.</p>
         </div>
         <span className="evidence-count-v7">{items.length}<small>{items.length === 1 ? 'archivo' : 'archivos'}</small></span>
       </div>
 
       <div className="evidence-actions evidence-actions-v7">
-        <button type="button" onClick={() => imageInput.current?.click()} disabled={saving}><Camera size={18}/> Subir foto</button>
-        <button type="button" onClick={() => videoInput.current?.click()} disabled={saving}><Video size={18}/> Subir video</button>
+        <button type="button" onClick={() => imageInput.current?.click()} disabled={saving || locked}><Camera size={18}/> Subir foto</button>
+        <button type="button" onClick={() => videoInput.current?.click()} disabled={saving || locked}><Video size={18}/> Subir video</button>
         <input ref={imageInput} className="sr-only" type="file" accept="image/*" onChange={(event) => void addFile(event, 'image')} />
         <input ref={videoInput} className="sr-only" type="file" accept="video/*" onChange={(event) => void addFile(event, 'video')} />
       </div>
 
+      {locked && <p className="evidence-message evidence-locked-v113">Ronda cerrada: la evidencia queda bloqueada para conservar la validación.</p>}
       {message && <p className="evidence-message">{message}</p>}
       {items.length > 0 ? (
         <div className="evidence-list evidence-list-v7">
-          {items.map((item) => <EvidencePreview key={item.id} item={item} onDelete={(id) => void remove(id)} />)}
+          {items.map((item) => <EvidencePreview key={item.id} item={item} onDelete={locked ? undefined : (id) => void remove(id)} />)}
         </div>
       ) : (
-        <div className="evidence-empty-v7"><ShieldCheck size={18}/><span>Agrega una foto o video si quieres guardar evidencia de esta ronda.</span></div>
+        <div className="evidence-empty-v7 evidence-required-v113"><ShieldCheck size={18}/><span>Sube una foto o video para habilitar “Marcar como completado”.</span></div>
       )}
     </section>
   );
