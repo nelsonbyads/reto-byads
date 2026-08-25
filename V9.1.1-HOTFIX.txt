@@ -1,0 +1,12 @@
+DadoFit V9.1.1 - Profile Supabase nullability hotfix
+
+Replace only:
+  src/pages/ProfilePage.tsx
+
+Reason:
+  TypeScript does not preserve the nullable Supabase client narrowing inside the nested async load() closure.
+  The fix stores the already-validated client in a local const before creating the async function.
+
+Then run:
+  npm test
+  npm run build

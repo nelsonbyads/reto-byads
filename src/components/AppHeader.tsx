@@ -1,5 +1,6 @@
-import { Dice5, LogOut, Moon, Palette, Sun, UserRound } from 'lucide-react';
+import { Dice5, LogOut, Moon, Palette, Sun, UserRound, UsersRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 type DadoFitTheme = 'pastel' | 'light' | 'dark';
@@ -49,15 +50,8 @@ export function AppHeader() {
               const Icon = option.icon;
               const selected = theme === option.id;
               return (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={selected ? 'selected' : ''}
-                  aria-pressed={selected}
-                  onClick={() => setTheme(option.id)}
-                >
-                  <Icon size={15} />
-                  <span>{option.label}</span>
+                <button key={option.id} type="button" className={selected ? 'selected' : ''} aria-pressed={selected} onClick={() => setTheme(option.id)}>
+                  <Icon size={15} /><span>{option.label}</span>
                 </button>
               );
             })}
@@ -65,9 +59,12 @@ export function AppHeader() {
         </div>
 
         <div className="account-chip">
-          <UserRound size={16}/>
-          <span>{user?.name ?? 'Invitado'}</span>
-          <button type="button" onClick={logout} aria-label="Cerrar sesión"><LogOut size={16}/></button>
+          {user?.provider === 'supabase' && <Link className="account-gymbros-link-v9" to="/gymbros" title="Gymbros" aria-label="Abrir Gymbros"><UsersRound size={16}/></Link>}
+          <Link className="account-profile-link-v9" to="/profile" title="Abrir perfil">
+            <UserRound size={16}/><span>{user?.name ?? 'Invitado'}</span>
+            {user?.provider === 'supabase' && <i className="cloud-dot-v9" title="Cuenta cloud" />}
+          </Link>
+          <button type="button" onClick={() => { void logout(); }} aria-label="Cerrar sesión"><LogOut size={16}/></button>
         </div>
       </div>
     </header>
