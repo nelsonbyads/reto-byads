@@ -1,0 +1,33 @@
+DADOFIT V8 — LATERAL AD RAILS
+
+COPIAR/REEMPLAZAR:
+- src/pages/WorkoutPage.tsx
+- src/main.tsx
+
+NUEVOS:
+- src/components/AdRail.tsx
+- src/components/AdSlot.tsx
+- src/config/ads.ts
+- src/styles/v8-ads.css
+
+NO TOCAR:
+- src/styles/v7-themes.css
+- login/register
+- data/
+- images/
+- videos/
+- package.json
+- Dockerfile
+
+COMPORTAMIENTO:
+- >= 1600px: aparecen 2 slots laterales de 160x600.
+- < 1600px: se ocultan automáticamente.
+- Pastel / Light / Dark: los slots heredan el tema seleccionado.
+- V8 NO integra todavía una red publicitaria real.
+
+CHECK:
+npm test
+npm run build
+npm run dev
+
+Abrir: http://localhost:5175/app

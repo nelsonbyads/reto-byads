@@ -1,5 +1,6 @@
 import { Dice5, RefreshCw, RotateCw, SlidersHorizontal, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { AdRail } from '../components/AdRail';
 import { AppHeader } from '../components/AppHeader';
 import { DiceLevelSelector } from '../components/DiceLevelSelector';
 import { ExerciseDice } from '../components/ExerciseDice';
@@ -54,8 +55,11 @@ export function WorkoutPage() {
 
   return (
     <div className="workout-layout workout-layout-v7">
-      <AppHeader/>
-      <div className="app-shell">
+      <div className="monetized-page-v8">
+        <AdRail side="left" />
+        <div className="workout-center-v8">
+          <AppHeader/>
+          <div className="app-shell">
         <SessionSummary exercises={session.exercises} reps={session.reps} onReset={resetSession}/>
         <main className="workout-main-v7">
           <DiceLevelSelector value={diceLevel} onChange={setDiceLevel}/>
@@ -89,7 +93,10 @@ export function WorkoutPage() {
             <RollHistory history={history}/>
           </>}
         </main>
-        <FilterPanel open={filtersOpen} onClose={() => setFiltersOpen(false)} filters={filters} onChange={setFilters} equipment={equipment} bodyParts={bodyParts} targets={targets} count={filtered.length}/>
+            <FilterPanel open={filtersOpen} onClose={() => setFiltersOpen(false)} filters={filters} onChange={setFilters} equipment={equipment} bodyParts={bodyParts} targets={targets} count={filtered.length}/>
+          </div>
+        </div>
+        <AdRail side="right" />
       </div>
     </div>
   );
