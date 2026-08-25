@@ -89,7 +89,7 @@ export function WorkoutPage() {
               <p className="keyboard-hint">Tip: en escritorio puedes lanzar ambos con la barra espaciadora.</p>
             </div>
 
-            {exercise && <ExerciseResult key={`${currentRollId}-${exercise.id}-${reps}`} rollId={currentRollId || `current-${exercise.id}-${reps}`} exercise={exercise} reps={reps} onDone={markDone}/>} 
+            {exercise && <ExerciseResult key={`${currentRollId}-${exercise.id}-${reps}`} rollId={currentRollId || `current-${exercise.id}-${reps}`} exercise={exercise} reps={reps} diceLevel={diceLevel} onDone={markDone}/>} 
             <RollHistory history={history}/>
           </>}
         </main>

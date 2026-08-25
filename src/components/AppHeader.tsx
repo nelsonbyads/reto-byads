@@ -1,4 +1,4 @@
-import { Dice5, LogOut, Moon, Palette, Sun, UserRound, UsersRound } from 'lucide-react';
+import { Dice5, LogOut, Moon, Palette, Sun, Swords, UserRound, UsersRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -59,6 +59,7 @@ export function AppHeader() {
         </div>
 
         <div className="account-chip">
+          {user?.provider === 'supabase' && <Link className="account-challenges-link-v10" to="/challenges" title="Retos" aria-label="Abrir Retos"><Swords size={16}/></Link>}
           {user?.provider === 'supabase' && <Link className="account-gymbros-link-v9" to="/gymbros" title="Gymbros" aria-label="Abrir Gymbros"><UsersRound size={16}/></Link>}
           <Link className="account-profile-link-v9" to="/profile" title="Abrir perfil">
             <UserRound size={16}/><span>{user?.name ?? 'Invitado'}</span>

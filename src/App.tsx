@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
+import { ChallengesPage } from './pages/ChallengesPage';
 import { GymbrosPage } from './pages/GymbrosPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -27,6 +28,7 @@ export default function App() {
       <Route path="/app" element={<ProtectedRoute><WorkoutPage/></ProtectedRoute>}/>
       <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>}/>
       <Route path="/gymbros" element={<ProtectedRoute><GymbrosPage/></ProtectedRoute>}/>
+      <Route path="/challenges" element={<ProtectedRoute><ChallengesPage/></ProtectedRoute>}/>
       <Route path="/dashboard" element={<Navigate to="/app" replace/>}/>
       <Route path="*" element={<Navigate to={user ? '/app' : '/login'} replace/>}/>
     </Routes>

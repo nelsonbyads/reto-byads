@@ -1,13 +1,20 @@
 import { Check, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { bodyPartLabel, equipmentLabel } from '../lib/translations';
-import type { AppExercise } from '../types/exercise';
+import type { AppExercise, DiceLevel } from '../types/exercise';
+import { ChallengeGymbroButton } from './ChallengeGymbroButton';
 import { EvidencePanel } from './EvidencePanel';
 import { ExerciseMedia } from './ExerciseMedia';
 
-interface Props { exercise: AppExercise; reps: number; rollId: string; onDone: () => void; }
+interface Props {
+  exercise: AppExercise;
+  reps: number;
+  rollId: string;
+  diceLevel: DiceLevel;
+  onDone: () => void;
+}
 
-export function ExerciseResult({ exercise, reps, rollId, onDone }: Props) {
+export function ExerciseResult({ exercise, reps, rollId, diceLevel, onDone }: Props) {
   const [completed, setCompleted] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const steps = exercise.instructionStepsEs.length ? exercise.instructionStepsEs : [exercise.instructionsEs].filter(Boolean);
@@ -53,10 +60,11 @@ export function ExerciseResult({ exercise, reps, rollId, onDone }: Props) {
           </div>
 
           <div className="result-completion-v7">
-            <div><strong>¿Listo para cerrar esta ronda?</strong><span>La evidencia es opcional.</span></div>
+            <div><strong>¿Listo para cerrar esta ronda?</strong><span>La evidencia es opcional para tu entrenamiento personal.</span></div>
             <button className={`done-btn ${completed ? 'completed' : ''}`} onClick={markDone}>
               {completed ? <><Check/> ¡Completado!</> : <><Check/> Marcar como completado</>}
             </button>
+            <ChallengeGymbroButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
           </div>
         </div>
 
