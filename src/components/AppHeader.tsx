@@ -1,4 +1,4 @@
-import { Building2, Dice5, LogOut, Moon, Palette, Shield, Sun, Swords, UserRound, UsersRound } from 'lucide-react';
+import { Building2, Dice5, LogOut, Moon, Palette, Shield, Sun, Swords, Trophy, UserRound, UsersRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -53,6 +53,7 @@ export function AppHeader() {
 
         <div className="account-chip">
           <NotificationBell/>
+          {user?.provider === 'supabase' && <Link className="account-gym-battles-link-v121" to="/gym-battles" title="Gym vs Gym" aria-label="Abrir batallas Gym vs Gym"><Trophy size={16}/></Link>}
           {user?.provider === 'supabase' && <Link className="account-organizations-link-v12" to="/organizations" title="Gyms & Organizations" aria-label="Abrir Organizations"><Building2 size={16}/></Link>}
           {user?.provider === 'supabase' && <Link className="account-squads-link-v11" to="/squads" title="Squads" aria-label="Abrir Squads"><Shield size={16}/></Link>}
           {user?.provider === 'supabase' && <Link className="account-challenges-link-v10" to="/challenges" title="Retos" aria-label="Abrir Retos"><Swords size={16}/></Link>}

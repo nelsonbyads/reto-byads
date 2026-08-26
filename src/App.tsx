@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { ChallengesPage } from './pages/ChallengesPage';
 import { GymbrosPage } from './pages/GymbrosPage';
+import { GymBattlesPage } from './pages/GymBattlesPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { OrganizationChallengesPage } from './pages/OrganizationChallengesPage';
@@ -32,6 +33,7 @@ export default function App() {
       <Route path="/app" element={<ProtectedRoute><WorkoutPage/></ProtectedRoute>}/>
       <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>}/>
       <Route path="/gymbros" element={<ProtectedRoute><GymbrosPage/></ProtectedRoute>}/>
+      <Route path="/gym-battles" element={<ProtectedRoute><GymBattlesPage/></ProtectedRoute>}/>
       <Route path="/challenges" element={<ProtectedRoute><ChallengesPage/></ProtectedRoute>}/>
       <Route path="/squads" element={<ProtectedRoute><SquadsPage/></ProtectedRoute>}/>
       <Route path="/organizations" element={<ProtectedRoute><OrganizationsPage/></ProtectedRoute>}/>

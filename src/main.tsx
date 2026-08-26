@@ -12,6 +12,7 @@ import './styles/v11-squads.css';
 import './styles/v11.2-dashboard-notifications.css';
 import './styles/v11.3-notifications-evidence.css';
 import './styles/v12-organizations.css';
+import './styles/v12.1-gym-battles.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

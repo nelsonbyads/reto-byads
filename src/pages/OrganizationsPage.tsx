@@ -288,7 +288,7 @@ export function OrganizationsPage() {
 
             <section className="organizations-layout-v12">
               <div className="organizations-list-v12">
-                <div className="organizations-section-heading-v12"><div><span className="eyebrow">MIS ORGANIZACIONES</span><h2>{loading ? 'Cargando…' : `${views.length} activas`}</h2></div><Link to="/organization-challenges">Ver retos</Link></div>
+                <div className="organizations-section-heading-v12"><div><span className="eyebrow">MIS ORGANIZACIONES</span><h2>{loading ? 'Cargando…' : `${views.length} activas`}</h2></div><div className="organization-section-links-v121"><Link to="/organization-challenges">Ver retos</Link><Link to="/gym-battles">Gym vs Gym</Link></div></div>
 
                 {!loading && views.length === 0 ? (
                   <section className="profile-card-v9 organization-empty-v12"><Building2 size={32}/><h3>Aún no perteneces a una organización</h3><p>Crea un Gym, empresa o marca y empieza a construir su comunidad.</p></section>

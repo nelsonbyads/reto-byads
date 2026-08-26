@@ -11,6 +11,7 @@ const PAGE_SIZE = 30;
 
 function notificationTarget(item: NotificationRow): string {
   const type = item.notification_type;
+  if (type.startsWith('gym_battle_') || item.data?.organization_battle_id) return '/gym-battles';
   if (type.startsWith('organization_challenge_')) return '/organization-challenges';
   if (type.startsWith('organization_') || item.data?.organization_id) return '/organizations';
   if (type.startsWith('squad_') || item.data?.battle_id || item.data?.group_id) return '/squads';

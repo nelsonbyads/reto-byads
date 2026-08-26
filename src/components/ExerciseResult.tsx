@@ -5,6 +5,7 @@ import type { AppExercise, DiceLevel } from '../types/exercise';
 import { ChallengeGymbroButton } from './ChallengeGymbroButton';
 import { EvidencePanel } from './EvidencePanel';
 import { ExerciseMedia } from './ExerciseMedia';
+import { OrganizationBattleButton } from './OrganizationBattleButton';
 import { OrganizationChallengeButton } from './OrganizationChallengeButton';
 import { SquadChallengeButton } from './SquadChallengeButton';
 
@@ -54,6 +55,7 @@ export function ExerciseResult({ exercise, reps, rollId, diceLevel, onDone }: Pr
               <ChallengeGymbroButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
               <SquadChallengeButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
               <OrganizationChallengeButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
+              <OrganizationBattleButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
             </div>
           </div>
         </div>
