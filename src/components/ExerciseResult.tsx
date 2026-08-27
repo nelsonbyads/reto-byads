@@ -2,6 +2,7 @@ import { Check, ChevronDown, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
 import { bodyPartLabel, equipmentLabel } from '../lib/translations';
 import type { AppExercise, DiceLevel } from '../types/exercise';
+import { useWorkspace } from '../context/WorkspaceContext';
 import { ChallengeGymbroButton } from './ChallengeGymbroButton';
 import { EvidencePanel } from './EvidencePanel';
 import { ExerciseMedia } from './ExerciseMedia';
@@ -18,11 +19,15 @@ interface Props {
 }
 
 export function ExerciseResult({ exercise, reps, rollId, diceLevel, onDone }: Props) {
+  const { activeWorkspace } = useWorkspace();
   const [completed, setCompleted] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [evidenceCount, setEvidenceCount] = useState(0);
   const steps = exercise.instructionStepsEs.length ? exercise.instructionStepsEs : [exercise.instructionsEs].filter(Boolean);
   const canComplete = evidenceCount > 0;
+  const personal = activeWorkspace.kind === 'personal';
+  const gym = activeWorkspace.kind === 'gym';
+  const canManageGym = gym && ['owner', 'admin', 'coach'].includes(activeWorkspace.role ?? '');
 
   const markDone = () => {
     if (completed || !canComplete) return;
@@ -47,20 +52,28 @@ export function ExerciseResult({ exercise, reps, rollId, diceLevel, onDone }: Pr
             {instructionsOpen && <ol>{steps.map((step, index) => <li key={`${exercise.id}-${index}`}>{step}</li>)}</ol>}
           </div>
 
-          <div className="result-completion-v7 result-completion-v113">
-            <div><strong>¿Listo para cerrar esta ronda?</strong><span>{completed ? 'Ronda cerrada. Esta tirada ya no puede contarse dos veces.' : canComplete ? `${evidenceCount} evidencia${evidenceCount === 1 ? '' : 's'} lista${evidenceCount === 1 ? '' : 's'} para validar la ronda.` : 'Sube al menos una foto o video antes de marcarla como completada.'}</span></div>
-            <button className={`done-btn ${completed ? 'completed' : ''}`} onClick={markDone} disabled={!canComplete || completed}>{completed ? <><Check/> ¡Completado!</> : <><Check/> Marcar como completado</>}</button>
-            {!canComplete && !completed && <p className="completion-evidence-guard-v113"><ShieldAlert size={14}/> Evidencia obligatoria para cerrar la ronda.</p>}
-            <div className="social-challenge-actions-v11 social-challenge-actions-v12">
-              <ChallengeGymbroButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
-              <SquadChallengeButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
-              <OrganizationChallengeButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
-              <OrganizationBattleButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
+          {personal && (
+            <div className="result-completion-v7 result-completion-v113">
+              <div><strong>¿Listo para cerrar esta ronda?</strong><span>{completed ? 'Ronda cerrada. Esta tirada ya no puede contarse dos veces.' : canComplete ? `${evidenceCount} evidencia${evidenceCount === 1 ? '' : 's'} lista${evidenceCount === 1 ? '' : 's'} para validar la ronda.` : 'Sube al menos una foto o video antes de marcarla como completada.'}</span></div>
+              <button className={`done-btn ${completed ? 'completed' : ''}`} onClick={markDone} disabled={!canComplete || completed}>{completed ? <><Check/> ¡Completado!</> : <><Check/> Marcar como completado</>}</button>
+              {!canComplete && !completed && <p className="completion-evidence-guard-v113"><ShieldAlert size={14}/> Evidencia obligatoria para cerrar la ronda.</p>}
+              <div className="social-challenge-actions-v11 social-challenge-actions-v12">
+                <ChallengeGymbroButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
+                <SquadChallengeButton exercise={exercise} reps={reps} diceLevel={diceLevel}/>
+              </div>
             </div>
-          </div>
+          )}
+
+          {gym && (
+            <div className="workspace-gym-actions-v122">
+              <span className="eyebrow">ACCIONES DEL GYM</span>
+              <h3>{activeWorkspace.label}</h3>
+              {canManageGym ? <><p>Esta tirada es un borrador institucional. No suma progreso personal mientras operas como Gym.</p><div><OrganizationChallengeButton exercise={exercise} reps={reps} diceLevel={diceLevel}/><OrganizationBattleButton exercise={exercise} reps={reps} diceLevel={diceLevel}/></div></> : <p>Tu rol de Member puede participar, pero solo Owner, Admin o Coach pueden publicar retos institucionales.</p>}
+            </div>
+          )}
         </div>
 
-        <EvidencePanel rollId={rollId} exercise={exercise} reps={reps} onCountChange={setEvidenceCount} locked={completed}/>
+        {personal && <EvidencePanel rollId={rollId} exercise={exercise} reps={reps} onCountChange={setEvidenceCount} locked={completed}/>} 
       </div>
       <p className="safety-note">Entrena con técnica adecuada y dentro de tus capacidades.</p>
     </section>

@@ -3,6 +3,8 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { readStorage, writeStorage } from '../lib/storage';
 
+export type SignupIntent = 'personal' | 'gym' | 'brand';
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -11,6 +13,7 @@ export interface AuthUser {
   provider: 'supabase' | 'guest' | 'local';
   username?: string | null;
   avatarUrl?: string | null;
+  signupIntent?: SignupIntent | null;
 }
 
 interface StoredUser extends Omit<AuthUser, 'provider'> {
@@ -25,7 +28,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<RegisterResult>;
+  register: (name: string, email: string, password: string, signupIntent?: SignupIntent) => Promise<RegisterResult>;
   loginAsGuest: () => void;
   logout: () => Promise<void>;
 }
@@ -38,6 +41,7 @@ const DEMO_USER: StoredUser = {
   name: 'Admin DadoFit',
   role: 'admin',
   password: 'admin123',
+  signupIntent: 'personal',
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -54,6 +58,7 @@ function localPublicUser(user: StoredUser): AuthUser {
     name: user.name,
     role: user.role,
     provider: 'local',
+    signupIntent: 'personal',
   };
 }
 
@@ -71,16 +76,24 @@ async function cloudPublicUser(user: SupabaseUser): Promise<AuthUser> {
     user.email?.split('@')[0] ||
     'Gymbro';
 
-  let profile: { display_name?: string | null; username?: string | null; avatar_url?: string | null } | null = null;
+  let profile: { display_name?: string | null; username?: string | null; avatar_url?: string | null; signup_intent?: string | null } | null = null;
 
   if (supabase) {
     const { data } = await supabase
       .from('profiles')
-      .select('display_name, username, avatar_url')
+      .select('display_name, username, avatar_url, signup_intent')
       .eq('id', user.id)
       .maybeSingle();
     profile = data;
   }
+
+  const profileIntent = profile?.signup_intent;
+  const metadataIntent = user.user_metadata?.account_type;
+  const signupIntent: SignupIntent = profileIntent === 'gym' || profileIntent === 'brand'
+    ? profileIntent
+    : metadataIntent === 'gym' || metadataIntent === 'brand'
+      ? metadataIntent
+      : 'personal';
 
   return {
     id: user.id,
@@ -90,6 +103,7 @@ async function cloudPublicUser(user: SupabaseUser): Promise<AuthUser> {
     avatarUrl: profile?.avatar_url ?? null,
     role: user.app_metadata?.role === 'admin' ? 'admin' : 'user',
     provider: 'supabase',
+    signupIntent,
   };
 }
 
@@ -174,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     writeStorage(SESSION_KEY, next);
   };
 
-  const register = async (name: string, email: string, password: string): Promise<RegisterResult> => {
+  const register = async (name: string, email: string, password: string, signupIntent: SignupIntent = 'personal'): Promise<RegisterResult> => {
     const normalized = email.trim().toLowerCase();
     const cleanName = name.trim();
 
@@ -182,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.auth.signUp({
         email: normalized,
         password,
-        options: { data: { display_name: cleanName } },
+        options: { data: { display_name: cleanName, account_type: signupIntent } },
       });
       if (error) throw new Error(error.message);
 
@@ -206,6 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: cleanName,
       role: 'user',
       password,
+      signupIntent: 'personal',
     };
     writeStorage(USERS_KEY, [...users, nextStored]);
     const next = localPublicUser(nextStored);
@@ -221,6 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: 'Invitado',
       role: 'guest',
       provider: 'guest',
+      signupIntent: 'personal',
     };
     setUser(next);
     writeStorage(SESSION_KEY, next);
