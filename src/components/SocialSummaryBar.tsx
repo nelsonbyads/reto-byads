@@ -1,4 +1,4 @@
-import { BellRing, Building2, Coins, Shield, Swords, Trophy } from 'lucide-react';
+import { BellRing, Building2, Coins, Shield, Sparkles, Swords, Trophy } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -10,8 +10,9 @@ interface DashboardSummary {
   squad_contribution_points: number; organization_contribution_points: number;
   direct_pending: number; squad_pending: number; organization_pending: number; gym_battle_pending: number;
   unread_notifications: number; active_squads: number; active_organizations: number;
+  sponsored_pending: number;
 }
-const EMPTY: DashboardSummary = { xp: 0, level: 1, coins: 0, challenges_completed: 0, squad_contribution_points: 0, organization_contribution_points: 0, direct_pending: 0, squad_pending: 0, organization_pending: 0, gym_battle_pending: 0, unread_notifications: 0, active_squads: 0, active_organizations: 0 };
+const EMPTY: DashboardSummary = { xp: 0, level: 1, coins: 0, challenges_completed: 0, squad_contribution_points: 0, organization_contribution_points: 0, direct_pending: 0, squad_pending: 0, organization_pending: 0, gym_battle_pending: 0, unread_notifications: 0, active_squads: 0, active_organizations: 0, sponsored_pending: 0 };
 
 export function SocialSummaryBar() {
   const { user } = useAuth();
@@ -21,8 +22,12 @@ export function SocialSummaryBar() {
 
   const load = useCallback(async () => {
     if (!cloudReady || !supabase) return;
-    const { data, error } = await supabase.rpc('get_dadofit_dashboard_summary');
-    if (!error && data) setSummary({ ...EMPTY, ...(data as Partial<DashboardSummary>) });
+    const client = supabase;
+    const [dashboard, sponsored] = await Promise.all([
+      client.rpc('get_dadofit_dashboard_summary'),
+      client.rpc('get_sponsored_pending_count'),
+    ]);
+    if (!dashboard.error && dashboard.data) setSummary({ ...EMPTY, ...(dashboard.data as Partial<DashboardSummary>), sponsored_pending: sponsored.error ? 0 : Number(sponsored.data ?? 0) });
   }, [cloudReady]);
 
   useEffect(() => {
@@ -35,8 +40,8 @@ export function SocialSummaryBar() {
   }, [cloudReady, load]);
 
   if (!cloudReady) return null;
-  const pending = summary.direct_pending + summary.squad_pending + summary.organization_pending + summary.gym_battle_pending;
-  const pendingTarget = summary.direct_pending > 0 ? '/challenges' : summary.squad_pending > 0 ? '/squads' : '/organization-challenges';
+  const pending = summary.direct_pending + summary.squad_pending + summary.organization_pending + summary.gym_battle_pending + summary.sponsored_pending;
+  const pendingTarget = summary.direct_pending > 0 ? '/challenges' : summary.squad_pending > 0 ? '/squads' : summary.sponsored_pending > 0 ? '/sponsored-challenges' : '/organization-challenges';
 
-  return <section className="social-summary-v112 social-summary-v12" aria-label="Resumen social DadoFit"><div className="social-summary-stats-v112"><Link to="/profile"><Trophy size={16}/><span>XP</span><strong>{summary.xp.toLocaleString()}</strong></Link><Link to="/profile"><Coins size={16}/><span>DadoCoins</span><strong>{summary.coins.toLocaleString()}</strong></Link><Link to="/squads"><Shield size={16}/><span>Mi aporte Squad</span><strong>{summary.squad_contribution_points.toLocaleString()} TP</strong></Link><Link to="/profile"><Building2 size={16}/><span>Mi aporte Gym</span><strong>{summary.organization_contribution_points.toLocaleString()} SP</strong></Link><Link to={pendingTarget} className={pending > 0 ? 'has-pending' : ''}><BellRing size={16}/><span>Pendientes</span><strong>{pending}</strong></Link></div>{pending > 0 && <div className="social-pending-v112"><div><BellRing size={16}/><span>Tienes actividad pendiente</span></div><div>{summary.direct_pending > 0 && <Link to="/challenges"><Swords size={14}/> {summary.direct_pending} reto(s) 1v1</Link>}{summary.squad_pending > 0 && <Link to="/squads"><Shield size={14}/> {summary.squad_pending} batalla(s) Squad</Link>}{summary.organization_pending > 0 && <Link to="/organization-challenges"><Building2 size={14}/> {summary.organization_pending} reto(s) de Gym</Link>}</div></div>}</section>;
+  return <section className="social-summary-v112 social-summary-v12" aria-label="Resumen social DadoFit"><div className="social-summary-stats-v112"><Link to="/profile"><Trophy size={16}/><span>XP</span><strong>{summary.xp.toLocaleString()}</strong></Link><Link to="/profile"><Coins size={16}/><span>DadoCoins</span><strong>{summary.coins.toLocaleString()}</strong></Link><Link to="/squads"><Shield size={16}/><span>Mi aporte Squad</span><strong>{summary.squad_contribution_points.toLocaleString()} TP</strong></Link><Link to="/profile"><Building2 size={16}/><span>Mi aporte Gym</span><strong>{summary.organization_contribution_points.toLocaleString()} SP</strong></Link><Link to={pendingTarget} className={pending > 0 ? 'has-pending' : ''}><BellRing size={16}/><span>Pendientes</span><strong>{pending}</strong></Link></div>{pending > 0 && <div className="social-pending-v112"><div><BellRing size={16}/><span>Tienes actividad pendiente</span></div><div>{summary.direct_pending > 0 && <Link to="/challenges"><Swords size={14}/> {summary.direct_pending} reto(s) 1v1</Link>}{summary.squad_pending > 0 && <Link to="/squads"><Shield size={14}/> {summary.squad_pending} batalla(s) Squad</Link>}{summary.organization_pending > 0 && <Link to="/organization-challenges"><Building2 size={14}/> {summary.organization_pending} reto(s) de Gym</Link>}{summary.sponsored_pending > 0 && <Link to="/sponsored-challenges"><Sparkles size={14}/> {summary.sponsored_pending} Branded Challenge(s)</Link>}</div></div>}</section>;
 }

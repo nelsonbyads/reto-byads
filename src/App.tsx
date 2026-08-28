@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { useWorkspace, workspaceHome, type WorkspaceKind } from './context/WorkspaceContext';
+import { BrandCampaignsPage } from './pages/BrandCampaignsPage';
 import { ChallengesPage } from './pages/ChallengesPage';
 import { BusinessSetupPage } from './pages/BusinessSetupPage';
 import { GymbrosPage } from './pages/GymbrosPage';
@@ -12,6 +13,7 @@ import { OrganizationChallengesPage } from './pages/OrganizationChallengesPage';
 import { OrganizationsPage } from './pages/OrganizationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { RegisterPage } from './pages/RegisterPage';
+import { SponsoredChallengesPage } from './pages/SponsoredChallengesPage';
 import { SquadsPage } from './pages/SquadsPage';
 import { WorkoutPage } from './pages/WorkoutPage';
 import { WorkspaceHomePage } from './pages/WorkspaceHomePage';
@@ -62,10 +64,12 @@ export default function App() {
       <Route path="/gymbros" element={<ProtectedRoute><WorkspaceRoute allow={['personal']}><GymbrosPage/></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/challenges" element={<ProtectedRoute><WorkspaceRoute allow={['personal']}><ChallengesPage/></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/squads" element={<ProtectedRoute><WorkspaceRoute allow={['personal']}><SquadsPage/></WorkspaceRoute></ProtectedRoute>}/>
+      <Route path="/sponsored-challenges" element={<ProtectedRoute><WorkspaceRoute allow={['personal']}><SponsoredChallengesPage/></WorkspaceRoute></ProtectedRoute>}/>
 
       <Route path="/organizations" element={<ProtectedRoute><WorkspaceRoute allow={['personal', 'gym', 'brand']}><OrganizationsPage/></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/organization-challenges" element={<ProtectedRoute><WorkspaceRoute allow={['personal', 'gym']}><OrganizationChallengesPage/></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/gym-battles" element={<ProtectedRoute><WorkspaceRoute allow={['gym']}><GymBattlesPage/></WorkspaceRoute></ProtectedRoute>}/>
+      <Route path="/brand-campaigns" element={<ProtectedRoute><WorkspaceRoute allow={['brand']}><BrandCampaignsPage/></WorkspaceRoute></ProtectedRoute>}/>
 
       <Route path="/dashboard" element={<Navigate to="/" replace/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>

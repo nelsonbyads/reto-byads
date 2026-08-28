@@ -1,4 +1,4 @@
-import { Building2, Dice5, LogOut, Moon, Palette, Shield, Sun, Swords, Tag, Trophy, UserRound, UsersRound } from 'lucide-react';
+import { Building2, Dice5, LogOut, Megaphone, Moon, Palette, Shield, Sparkles, Sun, Swords, Tag, Trophy, UserRound, UsersRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -53,6 +53,7 @@ export function AppHeader() {
 
         <div className="account-chip">
           <NotificationBell/>
+          {cloud && personal && <Link to="/sponsored-challenges" title="Retos patrocinados" aria-label="Abrir retos patrocinados"><Sparkles size={16}/></Link>}
           {cloud && personal && <Link to="/squads" title="Squads" aria-label="Abrir Squads"><Shield size={16}/></Link>}
           {cloud && personal && <Link to="/challenges" title="Retos 1v1" aria-label="Abrir Retos"><Swords size={16}/></Link>}
           {cloud && personal && <Link to="/gymbros" title="Gymbros" aria-label="Abrir Gymbros"><UsersRound size={16}/></Link>}
@@ -62,6 +63,7 @@ export function AppHeader() {
           {cloud && gym && <Link to="/gym-battles" title="Gym vs Gym" aria-label="Gym vs Gym"><Trophy size={16}/></Link>}
           {cloud && gym && <Link to="/organizations" title="Administrar Gym" aria-label="Administrar Gym"><Building2 size={16}/></Link>}
 
+          {cloud && brand && <Link to="/brand-campaigns" title="Campañas de Marca" aria-label="Campañas de Marca"><Megaphone size={16}/></Link>}
           {cloud && brand && <Link to="/workspace" title="Dashboard Marca" aria-label="Dashboard Marca"><Tag size={16}/></Link>}
           {cloud && brand && <Link to="/organizations" title="Administrar Marca" aria-label="Administrar Marca"><Building2 size={16}/></Link>}
 

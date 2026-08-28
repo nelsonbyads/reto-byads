@@ -15,6 +15,9 @@ import './styles/v11.3-notifications-evidence.css';
 import './styles/v12-organizations.css';
 import './styles/v12.1-gym-battles.css';
 import './styles/v12.2-workspaces-rbac.css';
+import './styles/v13-brands-sponsored.css';
+import './styles/v13.1-exercise-catalog.css';
+import './styles/v13.2-sponsored-goals.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -1,0 +1,38 @@
+.exercise-picker-v131 { display: grid; gap: 10px; position: relative; }
+.exercise-picker-title-v131 { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 800; }
+.exercise-picker-title-v131 button, .exercise-custom-toggle-v131 { border: 0; background: transparent; padding: 0; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.exercise-search-v131 { display: grid; gap: 6px; }
+.exercise-search-v131 > span { font-weight: 800; }
+.exercise-search-v131 > div { min-height: 48px; display: flex; align-items: center; gap: 9px; padding: 0 14px; border: 1px solid var(--line, #d8d8d8); border-radius: 13px; background: var(--surface, #fff); }
+.exercise-search-v131 input { width: 100%; border: 0 !important; outline: 0; box-shadow: none !important; background: transparent !important; padding: 0 !important; }
+.exercise-suggestions-v131 { display: grid; gap: 7px; }
+.exercise-suggestions-v131 > span { font-size: 11px; font-weight: 800; opacity: .65; text-transform: uppercase; letter-spacing: .08em; }
+.exercise-suggestions-v131 > div { display: flex; gap: 6px; flex-wrap: wrap; }
+.exercise-suggestions-v131 button { border: 1px solid var(--line, #d8d8d8); border-radius: 999px; background: transparent; padding: 7px 10px; font-size: 12px; cursor: pointer; }
+.exercise-results-v131 { display: grid; max-height: 270px; overflow-y: auto; border: 1px solid var(--line, #d8d8d8); border-radius: 13px; background: var(--surface, #fff); box-shadow: 0 14px 34px rgba(0,0,0,.11); }
+.exercise-results-v131 > p { margin: 0; padding: 14px; font-size: 13px; opacity: .7; }
+.exercise-results-v131 > button { width: 100%; border: 0; border-bottom: 1px solid var(--line, #ececec); background: transparent; display: flex; align-items: center; gap: 10px; text-align: left; padding: 11px 13px; cursor: pointer; color: inherit; }
+.exercise-results-v131 > button:last-child { border-bottom: 0; }
+.exercise-results-v131 > button:hover { background: rgba(227,253,99,.22); }
+.exercise-results-v131 > button span { display: grid; gap: 2px; }
+.exercise-results-v131 strong { font-size: 13px; }
+.exercise-results-v131 small { font-size: 11px; opacity: .65; }
+.exercise-selected-v131 { display: grid; grid-template-columns: 54px minmax(0,1fr) 30px; align-items: center; gap: 11px; padding: 10px; border: 1px solid var(--line, #d8d8d8); border-radius: 14px; background: rgba(227,253,99,.12); }
+.exercise-selected-media-v131 { width: 54px; height: 54px; border-radius: 11px; background: #fff; overflow: hidden; display: grid; place-items: center; }
+.exercise-selected-media-v131 img { width: 100%; height: 100%; object-fit: contain; }
+.exercise-selected-v131 > div:nth-child(2) { min-width: 0; display: grid; gap: 2px; }
+.exercise-selected-v131 span { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; opacity: .6; }
+.exercise-selected-v131 strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exercise-selected-v131 small { opacity: .65; }
+.exercise-selected-v131 > button { border: 0; background: transparent; cursor: pointer; color: inherit; }
+.exercise-custom-v131 { display: grid; gap: 6px; }
+.brand-form-row-v13 label > small { display: block; margin-top: 5px; opacity: .6; font-size: 11px; }
+.sponsored-catalog-exercise-v131 { margin: 12px 0; display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 14px; align-items: start; border: 1px solid var(--line, #e5e5e5); border-radius: 16px; padding: 12px; background: rgba(227,253,99,.07); }
+.sponsored-catalog-exercise-v131 .media-frame { min-height: 150px; border-radius: 12px; overflow: hidden; background: #fff; }
+.sponsored-catalog-exercise-v131 .media-frame img { width: 100%; height: 180px; object-fit: contain; }
+.sponsored-catalog-exercise-v131 > div:last-child { display: grid; gap: 6px; }
+.sponsored-catalog-exercise-v131 small { opacity: .65; }
+.sponsored-catalog-exercise-v131 details { margin-top: 6px; }
+.sponsored-catalog-exercise-v131 summary { cursor: pointer; font-weight: 800; font-size: 12px; }
+.sponsored-catalog-exercise-v131 ol { padding-left: 18px; margin: 8px 0 0; font-size: 12px; line-height: 1.45; }
+@media (max-width: 720px) { .sponsored-catalog-exercise-v131 { grid-template-columns: 1fr; } .exercise-picker-title-v131 { align-items: flex-start; flex-direction: column; } }
