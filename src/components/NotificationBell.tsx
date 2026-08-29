@@ -9,6 +9,7 @@ interface NotificationRow { id: string; notification_type: string; title: string
 
 function notificationTarget(item: NotificationRow): string {
   const type = item.notification_type;
+  if (type === 'sponsored_audit_required') return '/brand-audit';
   if (type === 'sponsored_evidence_submitted') return '/brand-campaigns';
   if (type.startsWith('sponsored_')) return '/sponsored-challenges';
   if (type.startsWith('gym_battle_') || item.data?.organization_battle_id) return '/gym-battles';
@@ -46,7 +47,7 @@ export function NotificationBell() {
   const markAllRead = async () => { if (!supabase || unreadCount === 0) return; setMarkingAll(true); setError(''); const { error: rpcError } = await supabase.rpc('mark_all_notifications_read'); setMarkingAll(false); if (rpcError) { setError(rpcError.message); return; } const now = new Date().toISOString(); setItems((current) => current.map((item) => item.read_at ? item : { ...item, read_at: now })); setUnreadCount(0); };
 
   const prepareWorkspace = (item: NotificationRow) => {
-    if (item.notification_type === 'sponsored_evidence_submitted') {
+    if (item.notification_type === 'sponsored_evidence_submitted' || item.notification_type === 'sponsored_audit_required') {
       const organizationId = typeof item.data?.organization_id === 'string' ? item.data.organization_id : null;
       if (organizationId) selectWorkspace(`org:${organizationId}`);
       return;

@@ -35,8 +35,23 @@ export function readSponsoredGoal(metadata: Record<string, unknown> | null | und
   return { type, value, unit };
 }
 
+function displayGoalUnit(goal: SponsoredGoal): string {
+  const singular = goal.value === 1;
+  if (goal.type === 'repetitions') return singular ? 'repetición' : 'repeticiones';
+  if (goal.type === 'time') {
+    if (goal.unit === 'hours') return singular ? 'hora' : 'horas';
+    return singular ? 'minuto' : 'minutos';
+  }
+  if (goal.type === 'distance') {
+    if (goal.unit === 'm') return singular ? 'metro' : 'metros';
+    return 'km';
+  }
+  if (goal.unit === 'steps') return singular ? 'paso' : 'pasos';
+  if (goal.unit === 'times') return singular ? 'vez' : 'veces';
+  return singular ? 'unidad' : 'unidades';
+}
+
 export function formatSponsoredGoal(goal: SponsoredGoal): string {
   const formatted = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 }).format(goal.value);
-  const unit = SPONSORED_GOAL_UNITS[goal.type].find((item) => item.value === goal.unit)?.label ?? goal.unit;
-  return `${formatted} ${unit}`;
+  return `${formatted} ${displayGoalUnit(goal)}`;
 }

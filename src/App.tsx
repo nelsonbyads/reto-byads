@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { useWorkspace, workspaceHome, type WorkspaceKind } from './context/WorkspaceContext';
+import { BrandAuditPage } from './pages/BrandAuditPage';
 import { BrandCampaignsPage } from './pages/BrandCampaignsPage';
 import { ChallengesPage } from './pages/ChallengesPage';
 import { BusinessSetupPage } from './pages/BusinessSetupPage';
@@ -70,6 +71,7 @@ export default function App() {
       <Route path="/organization-challenges" element={<ProtectedRoute><WorkspaceRoute allow={['personal', 'gym']}><OrganizationChallengesPage/></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/gym-battles" element={<ProtectedRoute><WorkspaceRoute allow={['gym']}><GymBattlesPage/></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/brand-campaigns" element={<ProtectedRoute><WorkspaceRoute allow={['brand']}><BrandCampaignsPage/></WorkspaceRoute></ProtectedRoute>}/>
+      <Route path="/brand-audit" element={<ProtectedRoute><WorkspaceRoute allow={['brand']}><BrandAuditPage/></WorkspaceRoute></ProtectedRoute>}/>
 
       <Route path="/dashboard" element={<Navigate to="/" replace/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>

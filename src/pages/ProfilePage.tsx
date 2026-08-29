@@ -64,7 +64,7 @@ export function ProfilePage() {
     event.preventDefault(); setMessage(''); setError('');
     if (!user || user.provider !== 'supabase' || !supabase) return;
     const normalizedUsername = username.trim().toLowerCase();
-    if (!/^[a-z0-9_.]{3,30}$/.test(normalizedUsername)) { setError('El username debe tener 3–30 caracteres: letras minúsculas, números, punto o guion bajo.'); return; }
+    if (!/^[a-z0-9_.]{3,30}$/.test(normalizedUsername)) { setError('El username debe tener 3-30 caracteres: letras minúsculas, números, punto o guion bajo.'); return; }
     setSaving(true);
     const { error: updateError } = await supabase.from('profiles').update({ display_name: displayName.trim(), username: normalizedUsername }).eq('id', user.id);
     setSaving(false);
@@ -73,14 +73,51 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="profile-shell-v9"><AppHeader/><main className="profile-page-v9">
+    <div className="profile-shell-v9 profile-shell-v133"><AppHeader/><main className="profile-page-v9 profile-page-v133">
       <Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link>
-      <section className="profile-hero-v9"><div className="profile-avatar-v9"><UserRound size={34}/></div><div><span className="eyebrow">PERFIL DADOFIT</span><h1>{user?.name ?? 'Gymbro'}</h1><p>{user?.provider === 'supabase' ? 'Cuenta cloud conectada' : user?.provider === 'guest' ? 'Sesión de invitado' : 'Cuenta local de recuperación'}</p></div></section>
-      {user?.provider !== 'supabase' ? <section className="profile-card-v9 profile-cloud-callout-v9"><h2>Activa tu perfil social</h2><p>Los Gymbros, retos, DadoCoins, Squads y Organizations requieren una cuenta cloud.</p><Link className="profile-primary-v9" to="/register">Crear cuenta DadoFit</Link></section> : loading ? <section className="profile-card-v9">Cargando perfil…</section> : <>
-        <section className="profile-stats-v9"><article><Trophy size={20}/><span>Nivel</span><strong>{stats.level}</strong></article><article><span className="profile-xp-icon-v9">XP</span><span>Experiencia</span><strong>{stats.xp.toLocaleString()}</strong></article><article><Coins size={20}/><span>DadoCoins</span><strong>{stats.coins.toLocaleString()} DC</strong></article><article><span className="profile-fire-v9">🔥</span><span>Racha</span><strong>{stats.currentStreak} días</strong></article></section>
-        <section className="profile-grid-v9">
-          <form className="profile-card-v9 profile-form-v9" onSubmit={save}><div><span className="eyebrow">IDENTIDAD</span><h2>Tu perfil</h2></div><label>Nombre visible<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={60} required/></label><label>Username<div className="profile-username-field-v9"><span>@</span><input value={username} onChange={(e) => setUsername(e.target.value)} minLength={3} maxLength={30} required/></div></label>{error && <div className="auth-error">{error}</div>}{message && <div className="auth-success">{message}</div>}<button className="profile-primary-v9" type="submit" disabled={saving}><Save size={16}/>{saving ? 'Guardando…' : 'Guardar perfil'}</button></form>
-          <section className="profile-card-v9"><span className="eyebrow">ACTIVIDAD SOCIAL</span><h2>Tu ecosistema DadoFit</h2><div className="profile-social-stat-v9"><span>Retos completados</span><strong>{stats.challengesCompleted}</strong></div><div className="profile-social-stat-v9"><span>Gymbros</span><strong>{stats.gymbros}</strong></div><div className="profile-social-stat-v9"><span>Squads</span><strong>{stats.squads}</strong></div><div className="profile-social-stat-v9"><span>Aporte a Squads</span><strong>{stats.squadPoints.toLocaleString()} TP</strong></div><div className="profile-social-stat-v9"><span>Organizations</span><strong>{stats.organizations}</strong></div><div className="profile-social-stat-v9"><span>Aporte a Organizations</span><strong>{stats.organizationPoints.toLocaleString()} SP</strong></div><div className="profile-social-stat-v9"><span>Retos pendientes</span><strong>{stats.pendingChallenges}</strong></div><Link className="profile-primary-v9 profile-gymbros-link-v9" to="/gymbros"><UsersRound size={16}/> Gestionar Gymbros</Link><Link className="profile-primary-v9 profile-squads-link-v11" to="/squads">Gestionar Squads</Link><Link className="profile-primary-v9 profile-organizations-link-v12" to="/organizations"><Building2 size={16}/> Gestionar Organizations</Link><Link className="profile-primary-v9 profile-gym-battles-link-v121" to="/gym-battles">Gym vs Gym</Link></section>
+      <section className="profile-hero-v9 profile-hero-v133">
+        <div className="profile-avatar-v9 profile-avatar-v133"><UserRound size={34}/></div>
+        <div className="profile-hero-copy-v133">
+          <span className="eyebrow">PERFIL DADOFIT</span>
+          <h1>{displayName || user?.name || 'Gymbro'}</h1>
+          <p>@{username || 'gymbro'} · Nivel {stats.level}</p>
+        </div>
+        <span className="profile-cloud-badge-v133">{user?.provider === 'supabase' ? 'Cloud conectado' : 'Sesión local'}</span>
+      </section>
+
+      {user?.provider !== 'supabase' ? <section className="profile-card-v9 profile-cloud-callout-v9"><h2>Activa tu perfil social</h2><p>Los Gymbros, retos, DadoCoins, Squads y organizaciones requieren una cuenta cloud.</p><Link className="profile-primary-v9" to="/register">Crear cuenta DadoFit</Link></section> : loading ? <section className="profile-card-v9">Cargando perfil…</section> : <>
+        <section className="profile-stats-v9 profile-stats-v133">
+          <article><Trophy size={20}/><span>Nivel</span><strong>{stats.level}</strong></article>
+          <article><span className="profile-xp-icon-v9">XP</span><span>Experiencia</span><strong>{stats.xp.toLocaleString()}</strong></article>
+          <article><Coins size={20}/><span>DadoCoins</span><strong>{stats.coins.toLocaleString()} DC</strong></article>
+          <article><span className="profile-fire-v9">🔥</span><span>Racha</span><strong>{stats.currentStreak} días</strong></article>
+        </section>
+
+        <section className="profile-grid-v9 profile-grid-v133">
+          <section className="profile-card-v9 profile-community-v133">
+            <div><span className="eyebrow">ACTIVIDAD SOCIAL</span><h2>Tu ecosistema DadoFit</h2><p className="profile-section-copy-v133">Tu progreso social, participación y actividad competitiva.</p></div>
+            <div className="profile-community-grid-v133">
+              <div><span>Retos completados</span><strong>{stats.challengesCompleted}</strong></div>
+              <div><span>Gymbros</span><strong>{stats.gymbros}</strong></div>
+              <div><span>Squads</span><strong>{stats.squads}</strong></div>
+              <div><span>Retos pendientes</span><strong>{stats.pendingChallenges}</strong></div>
+              <div><span>Aporte a Squads</span><strong>{stats.squadPoints.toLocaleString()} TP</strong></div>
+              <div><span>Aporte a organizaciones</span><strong>{stats.organizationPoints.toLocaleString()} SP</strong></div>
+            </div>
+            <div className="profile-action-links-v133">
+              <Link to="/gymbros"><UsersRound size={16}/> Gymbros</Link>
+              <Link to="/squads"><Trophy size={16}/> Squads</Link>
+              <Link to="/organizations"><Building2 size={16}/> Organizaciones ({stats.organizations})</Link>
+            </div>
+          </section>
+
+          <form className="profile-card-v9 profile-form-v9 profile-settings-v133" onSubmit={save}>
+            <div><span className="eyebrow">IDENTIDAD</span><h2>Perfil y cuenta</h2><p className="profile-section-copy-v133">Configura cómo te ven los demás Gymbros.</p></div>
+            <label>Nombre visible<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={60} required/></label>
+            <label>Username<div className="profile-username-field-v9"><span>@</span><input value={username} onChange={(e) => setUsername(e.target.value)} minLength={3} maxLength={30} required/></div></label>
+            {error && <div className="auth-error">{error}</div>}{message && <div className="auth-success">{message}</div>}
+            <button className="profile-primary-v9" type="submit" disabled={saving}><Save size={16}/>{saving ? 'Guardando…' : 'Guardar cambios'}</button>
+          </form>
         </section>
       </>}
     </main></div>

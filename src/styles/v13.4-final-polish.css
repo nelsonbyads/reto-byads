@@ -1,0 +1,572 @@
+/* =========================================================
+   DadoFit V13.4 — Final UX/UI Polish
+   Visual-only layer. No domain, auth, RPC, reward or RLS logic.
+   Extends V13.3 tokens and unifies legacy feature screens.
+   ========================================================= */
+
+.profile-shell-v9 {
+  --df-radius-xs: 9px;
+  --df-radius-sm: 12px;
+  --df-radius-md: 16px;
+  --df-radius-lg: 20px;
+  --df-space-1: 6px;
+  --df-space-2: 10px;
+  --df-space-3: 14px;
+  --df-space-4: 18px;
+  --df-space-5: 24px;
+  --df-space-6: 32px;
+  --df-hover: color-mix(in srgb, var(--df-primary) 7%, var(--df-panel));
+  --df-primary-soft: color-mix(in srgb, var(--df-primary) 12%, var(--df-panel));
+  --df-success-soft: color-mix(in srgb, var(--df-success) 10%, var(--df-panel));
+  --df-danger-soft: color-mix(in srgb, var(--df-danger) 9%, var(--df-panel));
+}
+
+/* ---------- Shared page rhythm ---------- */
+.profile-shell-v9 :is(
+  .gymbros-page-v9,
+  .challenges-page-v10,
+  .squads-page-v11,
+  .organizations-page-v12,
+  .organization-challenges-page-v12,
+  .gym-battles-page-v121,
+  .sponsored-page-v13,
+  .notifications-page-v113
+) {
+  width: min(1120px, calc(100% - 40px));
+  margin-inline: auto;
+  padding-top: 18px;
+  padding-bottom: 72px;
+}
+
+.profile-shell-v9 :is(
+  .gymbros-topline-v9,
+  .challenges-topline-v10,
+  .squads-topline-v11,
+  .organizations-topline-v12,
+  .gym-battles-topline-v121,
+  .notifications-topline-v113
+) {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.profile-shell-v9 :is(
+  .gymbros-topline-v9,
+  .challenges-topline-v10,
+  .squads-topline-v11,
+  .organizations-topline-v12,
+  .gym-battles-topline-v121,
+  .notifications-topline-v113
+) > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--df-line);
+  border-radius: 11px;
+  background: var(--df-panel);
+  color: var(--df-text);
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
+}
+.profile-shell-v9 :is(
+  .gymbros-topline-v9,
+  .challenges-topline-v10,
+  .squads-topline-v11,
+  .organizations-topline-v12,
+  .gym-battles-topline-v121,
+  .notifications-topline-v113
+) > button:hover { background: var(--df-panel-soft); transform: translateY(-1px); }
+
+/* ---------- Unified hero ---------- */
+.profile-shell-v9 :is(
+  .gymbros-hero-v9,
+  .challenges-hero-v10,
+  .squads-hero-v11,
+  .organizations-hero-v12,
+  .gym-battles-hero-v121,
+  .sponsored-hero-v13,
+  .notifications-hero-v113
+) {
+  min-height: 132px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 26px !important;
+  margin-bottom: 16px;
+  border: 1px solid var(--df-line) !important;
+  border-radius: var(--df-radius-lg) !important;
+  background: var(--df-panel) !important;
+  color: var(--df-text) !important;
+  box-shadow: var(--df-shadow);
+}
+.profile-shell-v9 :is(
+  .gymbros-hero-v9,
+  .challenges-hero-v10,
+  .squads-hero-v11,
+  .organizations-hero-v12,
+  .gym-battles-hero-v121,
+  .sponsored-hero-v13,
+  .notifications-hero-v113
+) h1 {
+  margin: 3px 0 4px;
+  color: var(--df-text);
+  font-size: clamp(24px, 3vw, 31px);
+  line-height: 1.05;
+  letter-spacing: -.035em;
+}
+.profile-shell-v9 :is(
+  .gymbros-hero-v9,
+  .challenges-hero-v10,
+  .squads-hero-v11,
+  .organizations-hero-v12,
+  .gym-battles-hero-v121,
+  .sponsored-hero-v13,
+  .notifications-hero-v113
+) p { margin: 0; max-width: 650px; color: var(--df-soft); font-size: 12px; line-height: 1.55; }
+.profile-shell-v9 :is(
+  .gymbros-hero-v9,
+  .challenges-hero-v10,
+  .squads-hero-v11,
+  .organizations-hero-v12,
+  .gym-battles-hero-v121,
+  .sponsored-hero-v13,
+  .notifications-hero-v113
+) .eyebrow { color: var(--df-muted); }
+
+/* ---------- Shared cards / sections ---------- */
+.profile-shell-v9 :is(
+  .profile-card-v9,
+  .challenge-card-v10,
+  .squad-battle-card-v11,
+  .organization-card-v12,
+  .organization-challenge-card-v12,
+  .gym-battle-card-v121,
+  .sponsored-card-v13,
+  .notifications-list-card-v113
+) {
+  border-color: var(--df-line) !important;
+  border-radius: var(--df-radius-md) !important;
+  background: var(--df-panel) !important;
+  color: var(--df-text) !important;
+  box-shadow: none !important;
+}
+.profile-shell-v9 :is(
+  .challenge-card-v10,
+  .squad-battle-card-v11,
+  .organization-card-v12,
+  .organization-challenge-card-v12,
+  .gym-battle-card-v121,
+  .sponsored-card-v13
+) { transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+.profile-shell-v9 :is(
+  .challenge-card-v10,
+  .squad-battle-card-v11,
+  .organization-card-v12,
+  .organization-challenge-card-v12,
+  .gym-battle-card-v121,
+  .sponsored-card-v13
+):hover { border-color: var(--df-line-strong) !important; background: color-mix(in srgb, var(--df-panel) 96%, var(--df-primary)) !important; }
+
+/* ---------- Buttons: one common language ---------- */
+.profile-shell-v9 :is(
+  .gymbro-search-v9 > button,
+  .gymbro-row-actions-v9 button:not(.secondary),
+  .challenge-accept-v10,
+  .challenge-submit-v10,
+  .challenge-approve-v10,
+  .squad-send-battle-v11,
+  .squad-submit-v11,
+  .organization-submit-v12,
+  .organization-review-v12 .approve,
+  .gym-battle-send-v121,
+  .gym-battle-submit-v121,
+  .sponsored-join-v13,
+  .sponsored-submit-v13,
+  .notifications-mark-all-v113
+) {
+  border: 0 !important;
+  border-radius: 11px !important;
+  background: var(--df-primary) !important;
+  color: var(--df-primary-text) !important;
+  font-weight: 900 !important;
+  box-shadow: none !important;
+}
+.profile-shell-v9 :is(
+  .gymbro-search-v9 > button,
+  .gymbro-row-actions-v9 button,
+  .challenge-accept-v10,
+  .challenge-submit-v10,
+  .challenge-approve-v10,
+  .squad-send-battle-v11,
+  .organization-submit-v12,
+  .gym-battle-send-v121,
+  .gym-battle-submit-v121,
+  .sponsored-join-v13,
+  .sponsored-submit-v13
+):not(:disabled):hover { filter: brightness(.98); transform: translateY(-1px); }
+.profile-shell-v9 button:disabled { cursor: not-allowed; opacity: .52; }
+
+/* ---------- Tabs / segmented controls ---------- */
+.profile-shell-v9 :is(
+  .challenge-tabs-v10,
+  .squads-tabs-v11,
+  .organization-challenge-tabs-v12,
+  .gym-battle-tabs-v121,
+  .notifications-toolbar-v113
+) {
+  padding: 5px;
+  border: 1px solid var(--df-line);
+  border-radius: 13px;
+  background: var(--df-panel-soft);
+}
+.profile-shell-v9 :is(
+  .challenge-tabs-v10,
+  .squads-tabs-v11,
+  .organization-challenge-tabs-v12,
+  .gym-battle-tabs-v121
+) button {
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  color: var(--df-soft) !important;
+  font-weight: 850 !important;
+}
+.profile-shell-v9 :is(
+  .challenge-tabs-v10,
+  .squads-tabs-v11,
+  .organization-challenge-tabs-v12,
+  .gym-battle-tabs-v121
+) button.active {
+  background: var(--df-panel) !important;
+  color: var(--df-text) !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,.06) !important;
+}
+
+/* =========================================================
+   GYMBROS
+   ========================================================= */
+.gymbro-total-v9 {
+  min-width: 108px !important;
+  padding: 12px 15px !important;
+  border-color: var(--df-line) !important;
+  border-radius: 14px !important;
+  background: var(--df-panel-soft) !important;
+}
+.gymbro-total-v9 strong { font-size: 25px !important; color: var(--df-text); }
+.gymbro-search-card-v9 { padding: 22px !important; }
+.gymbro-search-card-v9 > div:first-child p { color: var(--df-soft) !important; }
+.gymbro-search-v9 { gap: 10px !important; }
+.gymbro-search-v9 > div {
+  min-height: 44px;
+  border-color: var(--df-line) !important;
+  border-radius: 11px !important;
+  background: var(--df-panel) !important;
+}
+.gymbro-search-v9 > div:focus-within { border-color: color-mix(in srgb,var(--df-primary) 65%,var(--df-line)) !important; box-shadow: 0 0 0 3px var(--df-primary-soft) !important; }
+.gymbros-grid-v9 { gap: 14px !important; align-items: start; }
+.gymbros-grid-v9 > .profile-card-v9 { min-height: 245px; padding: 20px !important; }
+.gymbro-row-v9 { padding: 13px 0 !important; border-color: var(--df-line) !important; }
+.gymbro-avatar-v9 { border-radius: 12px !important; background: var(--df-panel-soft) !important; color: var(--df-text) !important; border: 1px solid var(--df-line); }
+.gymbro-status-v9 { background: var(--df-panel-soft) !important; color: var(--df-soft) !important; border: 1px solid var(--df-line); }
+.gymbro-status-v9.accepted { background: var(--df-success-soft) !important; color: var(--df-success) !important; border-color: color-mix(in srgb,var(--df-success) 25%,var(--df-line)); }
+.gymbro-row-actions-v9 button.secondary { background: var(--df-panel-soft) !important; color: var(--df-text) !important; border: 1px solid var(--df-line) !important; }
+.gymbro-text-action-v9 { color: var(--df-soft) !important; }
+.gymbro-text-action-v9.danger { color: var(--df-danger) !important; }
+
+/* =========================================================
+   1v1 CHALLENGES
+   ========================================================= */
+.challenges-hero-v10 { position: relative; }
+.challenge-pending-total-v10 { border-color: var(--df-line) !important; background: var(--df-primary-soft) !important; color: var(--df-text) !important; }
+.challenge-summary-v10 { gap: 10px !important; margin: 14px 0 !important; }
+.challenge-summary-v10 > * { border-color: var(--df-line) !important; background: var(--df-panel-soft) !important; border-radius: 12px !important; }
+.challenge-list-v10 { gap: 12px !important; }
+.challenge-card-v10 { padding: 19px !important; }
+.challenge-card-head-v10 { gap: 14px; }
+.challenge-exercise-v10 { font-size: 18px !important; letter-spacing: -.02em; }
+.challenge-meta-v10 { color: var(--df-soft) !important; }
+.challenge-reward-v10 { border-radius: 999px !important; background: var(--df-primary-soft) !important; color: var(--df-text) !important; }
+.challenge-status-badge-v10 { border: 1px solid var(--df-line); background: var(--df-panel-soft) !important; color: var(--df-soft) !important; }
+.challenge-status-badge-v10.status-approved { background: var(--df-success-soft) !important; color: var(--df-success) !important; }
+.challenge-status-badge-v10.status-rejected { background: var(--df-danger-soft) !important; color: var(--df-danger) !important; }
+.challenge-warning-v10,.challenge-muted-box-v10 { border-color: var(--df-line) !important; border-radius: 12px !important; background: var(--df-panel-soft) !important; color: var(--df-soft) !important; }
+.challenge-modal-v10 { border-radius: 20px !important; background: var(--df-panel) !important; color: var(--df-text) !important; border: 1px solid var(--df-line) !important; }
+.challenge-modal-backdrop-v10 { backdrop-filter: blur(5px); }
+
+/* =========================================================
+   SQUADS
+   ========================================================= */
+.squads-layout-v11 { gap: 16px !important; align-items: start; }
+.squads-main-v11,.squads-sidebar-v11 { gap: 14px !important; }
+.squads-hero-stats-v11 { border-color: var(--df-line) !important; background: var(--df-panel-soft) !important; border-radius: 14px !important; }
+.squad-list-v11,.squad-battles-v11,.squad-review-queue-v11 { gap: 12px !important; }
+.squad-battle-card-v11,.squad-review-card-v11 { padding: 18px !important; }
+.squad-avatar-v11,.squad-mini-mark-v11,.squad-big-mark-v11 { background: var(--df-panel-soft) !important; color: var(--df-text) !important; border: 1px solid var(--df-line); }
+.squad-battle-status-v11,.squad-member-status-v11 { border: 1px solid var(--df-line); background: var(--df-panel-soft) !important; color: var(--df-soft) !important; }
+.squad-battle-reward-v11,.squad-scoreboard-v11 { border-color: var(--df-line) !important; background: var(--df-panel-soft) !important; border-radius: 13px !important; }
+.squad-versus-v11 { color: var(--df-muted) !important; }
+.squad-create-v11,.squad-challenge-form-v11 { border-radius: 18px !important; }
+.squad-create-v11 input,.squad-create-v11 textarea,.squad-challenge-form-v11 input,.squad-challenge-form-v11 select,.squad-review-notes-v11 textarea { border-color: var(--df-line) !important; background: var(--df-panel) !important; color: var(--df-text) !important; border-radius: 10px !important; }
+.squad-empty-v11,.squad-waiting-v11,.squad-muted-v11 { color: var(--df-soft) !important; }
+
+/* =========================================================
+   ORGANIZATIONS / TEAM
+   ========================================================= */
+.organizations-layout-v12 { gap: 16px !important; align-items: start; }
+.organizations-list-v12 { gap: 14px !important; }
+.organizations-section-heading-v12 { margin-bottom: 10px; }
+.organizations-section-heading-v12 h2 { margin: 2px 0 0; font-size: 23px; letter-spacing: -.03em; }
+.organization-section-links-v121 { display: flex; gap: 7px; flex-wrap: wrap; }
+.organization-section-links-v121 a,.organization-links-v12 a {
+  border: 1px solid var(--df-line) !important;
+  border-radius: 10px !important;
+  background: var(--df-panel) !important;
+  color: var(--df-text) !important;
+  text-decoration: none;
+}
+.organization-card-v12 { padding: 20px !important; }
+.organization-card-v12 > header { padding-bottom: 14px; border-bottom: 1px solid var(--df-line); }
+.organization-logo-v12 { border-radius: 13px !important; background: var(--df-panel-soft) !important; color: var(--df-text) !important; border: 1px solid var(--df-line); }
+.organization-role-v12 { border: 1px solid color-mix(in srgb,var(--df-primary) 45%,var(--df-line)); background: var(--df-primary-soft) !important; color: var(--df-text) !important; }
+.organization-stats-v12 { gap: 9px !important; margin: 15px 0 !important; }
+.organization-stats-v12 > div { border: 1px solid var(--df-line); border-radius: 12px; background: var(--df-panel-soft); }
+.organization-members-v12 { margin-top: 16px; border-top: 1px solid var(--df-line); padding-top: 14px; }
+.organization-member-row-v12 { border-color: var(--df-line) !important; }
+.organization-member-avatar-v12 { background: var(--df-panel-soft) !important; color: var(--df-text) !important; border: 1px solid var(--df-line); }
+.organization-member-actions-v12 select { border-color: var(--df-line) !important; border-radius: 9px !important; background: var(--df-panel) !important; color: var(--df-text) !important; }
+.organization-invite-gymbros-v12 { margin-top: 15px; padding: 14px; border: 1px solid var(--df-line); border-radius: 13px; background: var(--df-panel-soft); }
+.organization-invite-gymbros-v12 button { border-color: var(--df-line) !important; border-radius: 9px !important; background: var(--df-panel) !important; color: var(--df-text) !important; }
+.organization-invites-v12 { border-color: color-mix(in srgb,var(--df-primary) 50%,var(--df-line)) !important; background: var(--df-primary-soft) !important; }
+.organization-create-v12 { position: sticky; top: 92px; border-radius: 18px !important; }
+.organization-create-v12 input,.organization-create-v12 select,.organization-create-v12 textarea { border-color: var(--df-line) !important; background: var(--df-panel) !important; color: var(--df-text) !important; border-radius: 10px !important; }
+
+/* =========================================================
+   ORGANIZATION CHALLENGES
+   ========================================================= */
+.organization-challenge-list-v12 { gap: 12px !important; }
+.organization-challenge-card-v12 { padding: 18px !important; }
+.organization-status-v12 { border: 1px solid var(--df-line); background: var(--df-panel-soft) !important; color: var(--df-soft) !important; }
+.organization-reward-v12,.organization-challenge-rewards-v12,.organization-policy-note-v12 { border-color: var(--df-line) !important; border-radius: 12px !important; background: var(--df-panel-soft) !important; color: var(--df-soft) !important; }
+.organization-approved-v12 { color: var(--df-success) !important; }
+.organization-challenge-modal-v12 { border: 1px solid var(--df-line) !important; border-radius: 20px !important; background: var(--df-panel) !important; color: var(--df-text) !important; }
+.organization-evidence-v12,.organization-review-v12 { border-color: var(--df-line) !important; border-radius: 14px !important; }
+
+/* =========================================================
+   GYM VS GYM
+   ========================================================= */
+.gym-battles-hero-stats-v121 { border-color: var(--df-line) !important; border-radius: 14px !important; background: var(--df-panel-soft) !important; }
+.gym-battle-list-v121,.gym-battle-reviews-v121 { gap: 12px !important; }
+.gym-battle-card-v121 { padding: 19px !important; }
+.gym-battle-card-head-v121 { gap: 12px; }
+.gym-battle-logo-v121 { background: var(--df-panel-soft) !important; color: var(--df-text) !important; border: 1px solid var(--df-line); border-radius: 12px !important; }
+.gym-battle-status-v121 { border: 1px solid var(--df-line); background: var(--df-panel-soft) !important; color: var(--df-soft) !important; }
+.gym-battle-status-v121.status-completed { background: var(--df-success-soft) !important; color: var(--df-success) !important; }
+.gym-battle-score-v121,.gym-battle-meta-v121,.gym-battle-reward-v121,.gym-battle-info-v121 { border-color: var(--df-line) !important; border-radius: 12px !important; background: var(--df-panel-soft) !important; }
+.gym-battle-versus-v121 { color: var(--df-muted) !important; }
+.gym-battle-picker-v121,.gym-battle-review-card-v121 { border-radius: 18px !important; }
+.gym-battle-picker-v121 select,.gym-battle-review-v121 textarea { border-color: var(--df-line) !important; background: var(--df-panel) !important; color: var(--df-text) !important; }
+.gym-battle-modal-v121 { border: 1px solid var(--df-line) !important; border-radius: 20px !important; background: var(--df-panel) !important; }
+
+/* =========================================================
+   SPONSORED CHALLENGES — PERSONAL
+   ========================================================= */
+.sponsored-page-v13 { width: min(1120px,calc(100% - 40px)) !important; }
+.sponsored-hero-v13 { margin-top: 0 !important; }
+.sponsored-grid-v13 { gap: 14px !important; }
+.sponsored-card-v13 { padding: 20px !important; }
+.sponsored-brand-mark-v13 { border-radius: 13px !important; background: var(--df-primary-soft) !important; color: var(--df-text) !important; border: 1px solid color-mix(in srgb,var(--df-primary) 35%,var(--df-line)); }
+.sponsored-verified-v13 { color: var(--df-success) !important; }
+.sponsored-exercise-v13 { font-size: 19px !important; letter-spacing: -.025em; }
+.sponsored-meta-v13 { color: var(--df-soft) !important; }
+.sponsored-policy-v13,.sponsored-progress-v13,.sponsored-muted-v13 { border-color: var(--df-line) !important; border-radius: 12px !important; background: var(--df-panel-soft) !important; color: var(--df-soft) !important; }
+.sponsored-evidence-v13 { border-color: var(--df-line) !important; border-radius: 14px !important; }
+.sponsored-evidence-list-v13 article { border-color: var(--df-line) !important; border-radius: 12px !important; background: var(--df-panel-soft) !important; }
+.sponsored-approved-v13 { background: var(--df-success-soft) !important; color: var(--df-success) !important; border-color: color-mix(in srgb,var(--df-success) 28%,var(--df-line)) !important; }
+
+/* =========================================================
+   NOTIFICATIONS
+   ========================================================= */
+.notifications-toolbar-v113 { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.notifications-state-v113 { border-color: var(--df-line) !important; background: var(--df-panel-soft) !important; color: var(--df-soft) !important; }
+.notifications-list-card-v113 { overflow: hidden; padding: 0 !important; }
+.notifications-list-heading-v113 { padding: 17px 20px; border-bottom: 1px solid var(--df-line); }
+.notifications-list-v113 { display: grid; }
+.notifications-list-v113 > * { border-color: var(--df-line) !important; }
+.notifications-list-v113 a,.notifications-list-v113 article { color: var(--df-text) !important; background: transparent !important; }
+.notifications-list-v113 .unread { background: var(--df-primary-soft) !important; }
+.notifications-unread-v113 { color: var(--df-primary-text) !important; background: var(--df-primary) !important; }
+.notifications-load-more-v113 { border: 1px solid var(--df-line) !important; border-radius: 10px !important; background: var(--df-panel) !important; color: var(--df-text) !important; }
+.notifications-empty-v113 { min-height: 220px; display: grid; place-items: center; text-align: center; color: var(--df-soft); }
+
+/* ---------- Forms & focus ---------- */
+.profile-shell-v9 :is(input,select,textarea):focus {
+  outline: none !important;
+  border-color: color-mix(in srgb,var(--df-primary) 62%,var(--df-line)) !important;
+  box-shadow: 0 0 0 3px var(--df-primary-soft) !important;
+}
+.profile-shell-v9 :is(input,select,textarea)::placeholder { color: var(--df-muted); }
+
+/* ---------- Empty states ---------- */
+.profile-shell-v9 :is(
+  .challenge-empty-page-v10,
+  .squad-empty-v11,
+  .organization-empty-v12,
+  .gym-battle-empty-v121,
+  .notifications-empty-v113
+) {
+  border: 1px dashed var(--df-line-strong) !important;
+  border-radius: 16px !important;
+  background: var(--df-panel-soft) !important;
+  color: var(--df-soft) !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1000px) {
+  .organizations-layout-v12 { grid-template-columns: 1fr !important; }
+  .organization-create-v12 { position: static; }
+  .squads-layout-v11 { grid-template-columns: 1fr !important; }
+  .sponsored-grid-v13 { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+}
+
+@media (max-width: 760px) {
+  .profile-shell-v9 :is(
+    .gymbros-page-v9,
+    .challenges-page-v10,
+    .squads-page-v11,
+    .organizations-page-v12,
+    .organization-challenges-page-v12,
+    .gym-battles-page-v121,
+    .sponsored-page-v13,
+    .notifications-page-v113
+  ) { width: min(100% - 22px,1120px) !important; padding-top: 10px; }
+
+  .profile-shell-v9 :is(
+    .gymbros-hero-v9,
+    .challenges-hero-v10,
+    .squads-hero-v11,
+    .organizations-hero-v12,
+    .gym-battles-hero-v121,
+    .sponsored-hero-v13,
+    .notifications-hero-v113
+  ) { min-height: 0; padding: 18px !important; align-items: flex-start; flex-wrap: wrap; }
+
+  .gymbros-grid-v9,.sponsored-grid-v13 { grid-template-columns: 1fr !important; }
+  .challenge-card-head-v10,.squad-battle-head-v11,.gym-battle-card-head-v121 { align-items: flex-start !important; }
+  .organization-card-v12,.challenge-card-v10,.squad-battle-card-v11,.gym-battle-card-v121,.sponsored-card-v13 { padding: 16px !important; }
+  .organization-stats-v12 { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+  .organization-links-v12 { display: flex; overflow-x: auto; padding-bottom: 4px; }
+  .organization-links-v12 a { flex: 0 0 auto; }
+  .notifications-toolbar-v113 { align-items: stretch; flex-direction: column; }
+}
+
+@media (max-width: 520px) {
+  .profile-shell-v9 :is(
+    .gymbros-topline-v9,
+    .challenges-topline-v10,
+    .squads-topline-v11,
+    .organizations-topline-v12,
+    .gym-battles-topline-v121,
+    .notifications-topline-v113
+  ) { align-items: stretch; flex-direction: column; }
+  .profile-shell-v9 :is(
+    .gymbros-topline-v9,
+    .challenges-topline-v10,
+    .squads-topline-v11,
+    .organizations-topline-v12,
+    .gym-battles-topline-v121,
+    .notifications-topline-v113
+  ) > button { width: 100%; }
+  .organization-stats-v12 { grid-template-columns: 1fr !important; }
+  .organization-member-row-v12 { align-items: flex-start !important; }
+  .organization-member-actions-v12 { margin-left: auto; }
+  .gymbro-row-v9 { align-items: flex-start !important; }
+  .gymbro-row-actions-v9 { justify-content: flex-end; }
+  .challenge-summary-v10 { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* =========================================================
+   DadoFit V13.4.1 — Final polish hotfix
+   Small visual fixes found during integrated RC2 validation.
+   ========================================================= */
+
+/* Squads: the hero has exactly two metrics. Do not paint an empty third zone. */
+.squads-hero-stats-v11 {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(92px, 1fr)) !important;
+  gap: 9px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+.squads-hero-stats-v11 > div {
+  min-width: 92px;
+  padding: 11px 14px !important;
+  border: 1px solid var(--df-line) !important;
+  border-radius: 13px !important;
+  background: var(--df-panel-soft) !important;
+}
+
+/* Organizations: finish the Spanish localization without changing domain behavior. */
+.organizations-hero-v12 .eyebrow {
+  font-size: 0 !important;
+}
+.organizations-hero-v12 .eyebrow::after {
+  content: "DADOFIT · ORGANIZACIONES";
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+.organizations-hero-v12 h1 {
+  font-size: 0 !important;
+}
+.organizations-hero-v12 h1::after {
+  content: "Organizaciones";
+  font-size: clamp(24px, 3vw, 31px);
+  line-height: 1.05;
+  letter-spacing: -.035em;
+}
+
+/* The legacy link destination is preserved; use a neutral label in every workspace. */
+.organizations-topline-v12 .profile-back-v9 {
+  font-size: 0 !important;
+}
+.organizations-topline-v12 .profile-back-v9::after {
+  content: "Volver";
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* Organization challenges: finish localization. */
+.organization-challenges-page-v12 .profile-back-v9 {
+  font-size: 0 !important;
+}
+.organization-challenges-page-v12 .profile-back-v9::after {
+  content: "Organizaciones";
+  font-size: 12px;
+  font-weight: 800;
+}
+.organization-challenges-page-v12 .profile-hero-v9 .eyebrow {
+  font-size: 0 !important;
+}
+.organization-challenges-page-v12 .profile-hero-v9 .eyebrow::after {
+  content: "RETOS DEL GYM";
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+
+/* Keep hero metric groups compact on smaller widths. */
+@media (max-width: 760px) {
+  .squads-hero-stats-v11 {
+    width: 100%;
+    margin-left: 0 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
