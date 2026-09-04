@@ -1,0 +1,646 @@
+/* =========================================================
+   DadoFit V14.2 — Global personal monetization network
+   ---------------------------------------------------------
+   - Reuses the 6 desktop placements already managed by V14.
+   - Extends them from /app to the personal product ecosystem.
+   - Gym/Brand operational workspaces remain ad-free.
+   - Live desktop creatives become true full-bleed ad units.
+   ========================================================= */
+
+/* Secondary personal pages use the exact same center/rail geometry as /app. */
+.monetized-network-shell-v142 {
+  width: 100%;
+  min-width: 0;
+  background: transparent !important;
+}
+
+.monetized-network-shell-v142 .monetized-network-page-v142 {
+  min-height: 100vh;
+}
+
+.monetized-network-shell-v142 .monetized-network-center-v142 {
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+.monetized-network-shell-v142 .monetized-network-center-v142 > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* The page components already own their own header/top spacing. Keep the rail
+   aligned with the first meaningful viewport area instead of adding a second
+   large top offset. */
+@media (min-width: 1600px) {
+  .monetized-network-shell-v142 .ad-rail-v1351 {
+    padding-top: 96px;
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 850px) {
+  .monetized-network-shell-v142 .ad-rail-v1351 {
+    padding-top: 104px;
+  }
+}
+
+/* ---------------------------------------------------------
+   LIVE CREATIVE CONTRACT
+   A paid creative owns 100% of the sellable rectangle.
+   No half-empty white card below the image.
+
+   Desktop contract:
+   - 1600–1899px viewport: 160 × 600
+   - >=1900px viewport:    300 × 600
+   Mobile contract remains 320 × 50 on /app.
+   --------------------------------------------------------- */
+.workout-layout .ad-slot-v8.ad-live-v14 {
+  position: relative !important;
+  display: block !important;
+  min-height: 600px !important;
+  height: 600px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #111722 !important;
+  border-style: solid !important;
+  text-align: left !important;
+  isolation: isolate;
+}
+
+.workout-layout .ad-slot-v8.ad-live-v14::before,
+.workout-layout .ad-slot-v8.ad-live-v14::after {
+  display: none !important;
+}
+
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-image-v14 {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  transition: transform .28s ease;
+}
+
+.workout-layout a.ad-slot-v8.ad-live-v14:hover .ad-live-image-v14 {
+  transform: scale(1.015);
+}
+
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-fallback-v14 {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(227,253,99,.32), transparent 34%),
+    linear-gradient(155deg, #1a2331, #101722) !important;
+  color: #e3fd63 !important;
+}
+
+/* Persistent legal/UX ad label above the creative. */
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-slot-badge-v8 {
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 4 !important;
+  border-color: rgba(255,255,255,.42) !important;
+  background: rgba(255,255,255,.90) !important;
+  color: #152032 !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Brand/campaign information is an overlay, not a second empty panel. */
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 3 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 5px !important;
+  margin: 0 !important;
+  padding: 96px 16px 18px !important;
+  text-align: left !important;
+  color: #fff !important;
+  background: linear-gradient(180deg, transparent 0%, rgba(8,13,22,.52) 32%, rgba(8,13,22,.94) 100%);
+  box-sizing: border-box;
+}
+
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 span,
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 strong,
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 small {
+  color: #fff !important;
+  max-width: 100%;
+}
+
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 span {
+  font-size: 9px !important;
+  letter-spacing: .10em !important;
+  opacity: .82;
+}
+
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 strong {
+  font-size: 16px !important;
+  line-height: 1.14 !important;
+}
+
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 small {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  margin-top: 2px;
+  font-size: 10px !important;
+  opacity: .9;
+}
+
+/* 160px skyscraper needs a tighter overlay. */
+@media (min-width: 1600px) and (max-width: 1899px) {
+  .workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 {
+    padding: 82px 10px 14px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 strong {
+    font-size: 13px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14 .ad-live-copy-v14 small {
+    font-size: 9px !important;
+  }
+}
+
+/* These rails are intentionally desktop-only on secondary pages. */
+@media (max-width: 1599px) {
+  .monetized-network-shell-v142 .ad-rail-v8 {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workout-layout a.ad-slot-v8.ad-live-v14 .ad-live-image-v14 {
+    transition: none !important;
+  }
+}
+
+/* Small Backoffice credibility pass uncovered during V14 review. */
+.admin-empty-v142 {
+  margin: 0 0 14px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 10px;
+  align-items: center;
+  padding: 16px 18px;
+  border: 1px dashed #cfd6dd;
+  border-radius: 13px;
+  background: #fbfcf8;
+  color: #172033;
+}
+.admin-empty-v142 svg { grid-row: 1 / 3; color: #7b8700; }
+.admin-empty-v142 strong { font-size: 13px; }
+.admin-empty-v142 span { color: #747f8d; font-size: 11px; }
+.admin-ad-creative-guide-v142 {
+  margin: 0 0 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 15px;
+  border: 1px solid #dbe2c6;
+  border-radius: 12px;
+  background: #f7fbe8;
+  color: #273345;
+}
+.admin-ad-creative-guide-v142 svg { flex: 0 0 auto; color: #6a7600; margin-top: 1px; }
+.admin-ad-creative-guide-v142 div { display: flex; flex-direction: column; gap: 3px; }
+.admin-ad-creative-guide-v142 strong { font-size: 11px; }
+.admin-ad-creative-guide-v142 span { color: #667085; font-size: 10px; line-height: 1.45; }
+
+/* =========================================================
+   DadoFit V14.2.1 — Monetization visual hotfix
+   ---------------------------------------------------------
+   1. Keep secondary Personal pages on the selected DadoFit
+      theme instead of exposing the browser/body background.
+   2. Preserve the 1180px product center at sellable desktop
+      breakpoints without adding a dark rail canvas.
+   3. Render arbitrary advertiser artwork safely: exact
+      160x600/300x600 art fills naturally; other aspect ratios
+      use a blurred full-bleed backdrop + contained foreground
+      instead of destructive cropping.
+   ========================================================= */
+
+/* V14.2 used transparent here. Because the shell itself owns the V7 theme
+   tokens, transparency can expose the document/body background between the
+   center and ad cards. Paint the rails with the active DadoFit theme instead. */
+.workout-layout.monetized-network-shell-v142 {
+  background:
+    radial-gradient(circle at 8% 0%, var(--bg-glow), transparent 28rem),
+    var(--bg) !important;
+}
+
+.monetized-network-shell-v142 .monetized-network-page-v142 {
+  background: transparent !important;
+}
+
+/* Make rail spacing feel intentional without changing the sold format. */
+@media (min-width: 1600px) and (max-width: 1899px) {
+  .monetized-network-shell-v142 .monetized-page-v8 {
+    width: min(1540px, calc(100% - 24px));
+    grid-template-columns: 160px minmax(0, 1180px) 160px;
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1900px) {
+  .monetized-network-shell-v142 .monetized-page-v8 {
+    width: min(1840px, calc(100% - 40px));
+    grid-template-columns: 300px minmax(0, 1180px) 300px;
+    gap: 30px;
+  }
+}
+
+/* Artwork layer: the blurred image is only a visual backdrop. */
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-backdrop-v1421 {
+  position: absolute !important;
+  inset: -22px !important;
+  z-index: 0 !important;
+  width: calc(100% + 44px) !important;
+  height: calc(100% + 44px) !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  filter: blur(18px) saturate(.9) brightness(.55);
+  transform: scale(1.06);
+  opacity: .9;
+  pointer-events: none;
+}
+
+/* Foreground creative is never destructively cropped. Exact-format artwork
+   still occupies the whole placement; square/landscape assets remain legible. */
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-image-v14 {
+  z-index: 1 !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  background: transparent !important;
+  transform: none !important;
+}
+
+.workout-layout a.ad-slot-v8.ad-live-v14:hover .ad-live-image-v14 {
+  transform: scale(1.006) !important;
+}
+
+/* A subtle frame separates the sellable unit from the page without creating
+   the previous half-empty card effect. */
+.workout-layout .ad-slot-v8.ad-live-v14 {
+  border-color: color-mix(in srgb, var(--line-strong) 78%, transparent) !important;
+  box-shadow: 0 10px 28px rgba(20, 28, 40, .10) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .ad-slot-v8.ad-live-v14 {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .30) !important;
+}
+
+/* =========================================================
+   DadoFit V14.3 — Rotating billboard inventory
+   ========================================================= */
+.workout-layout .ad-slot-v8.ad-live-v14 .ad-live-creative-v143 {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  animation: dadofit-ad-enter-v143 .48s ease both;
+}
+
+.workout-layout .ad-rotation-status-v143 {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 6;
+  min-width: 42px;
+  height: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.42);
+  border-radius: 999px;
+  background: rgba(15,23,36,.74);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,.16);
+  backdrop-filter: blur(8px);
+}
+
+.workout-layout .ad-rotation-status-v143 span {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0 8px;
+  font: 800 9px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .04em;
+}
+
+.workout-layout .ad-rotation-status-v143 i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 100%;
+  height: 2px;
+  background: #e3fd63;
+  transform-origin: left center;
+  animation-name: dadofit-ad-progress-v143;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+.admin-ad-rotation-v143 {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e8ecef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admin-ad-rotation-v143 span {
+  color: #697586;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.admin-ad-rotation-v143 select {
+  width: auto;
+  min-width: 74px;
+  padding: 6px 7px;
+  border: 1px solid #d9e0e6;
+  border-radius: 8px;
+  background: #fff;
+  color: #172033;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.admin-ad-rotation-list-v143 {
+  display: grid;
+  gap: 2px;
+  margin-top: 5px;
+}
+
+.admin-ad-rotation-list-v143 small {
+  display: block;
+  overflow: hidden;
+  color: #7a8493;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes dadofit-ad-enter-v143 {
+  from { opacity: .15; transform: scale(1.008); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes dadofit-ad-progress-v143 {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workout-layout .ad-slot-v8.ad-live-v14 .ad-live-creative-v143,
+  .workout-layout .ad-rotation-status-v143 i {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   DadoFit V14.4 — Advertising analytics
+   ========================================================= */
+.admin-ad-analytics-v144 {
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid #dfe5ea;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(20, 28, 40, .045);
+}
+
+.admin-ad-analytics-head-v144 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.admin-ad-analytics-head-v144 h2,
+.admin-ad-card-title-v144 h3 {
+  margin: 4px 0 0;
+  color: #172033;
+  letter-spacing: -.035em;
+}
+
+.admin-ad-analytics-head-v144 h2 { font-size: 22px; }
+.admin-ad-card-title-v144 h3 { font-size: 16px; }
+.admin-ad-analytics-head-v144 p {
+  margin: 5px 0 0;
+  color: #717d8c;
+  font-size: 11px;
+}
+
+.admin-ad-analytics-head-v144 > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-ad-analytics-head-v144 select,
+.admin-ad-analytics-head-v144 button {
+  min-height: 36px;
+  border: 1px solid #d9e0e6;
+  border-radius: 9px;
+  background: #fff;
+  color: #172033;
+  font-size: 10px;
+  font-weight: 750;
+}
+.admin-ad-analytics-head-v144 select { padding: 0 10px; }
+.admin-ad-analytics-head-v144 button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+}
+
+.admin-ad-kpis-v144 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.admin-ad-kpis-v144 article {
+  min-height: 86px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 4px 9px;
+  align-content: center;
+  padding: 14px;
+  border: 1px solid #e1e6eb;
+  border-radius: 12px;
+  background: #fafbf8;
+}
+.admin-ad-kpis-v144 article svg {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: #758300;
+}
+.admin-ad-kpis-v144 article span {
+  color: #778292;
+  font-size: 10px;
+  font-weight: 750;
+}
+.admin-ad-kpis-v144 article strong {
+  color: #172033;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.admin-ad-analytics-grid-v144 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr);
+  gap: 12px;
+}
+.admin-ad-metrics-card-v144,
+.admin-ad-clicks-card-v144 { min-width: 0; }
+
+.admin-ad-card-title-v144 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.admin-ad-card-title-v144 > small {
+  color: #85909f;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.admin-ad-metrics-table-v144 { overflow-x: auto; }
+.admin-ad-metrics-table-v144 table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+.admin-ad-metrics-table-v144 th {
+  padding: 8px 7px;
+  border-bottom: 1px solid #e7ebef;
+  color: #84909f;
+  text-align: left;
+  font-size: 8px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.admin-ad-metrics-table-v144 td {
+  padding: 10px 7px;
+  border-bottom: 1px solid #edf0f2;
+  color: #334054;
+}
+.admin-ad-metrics-table-v144 td:first-child { min-width: 150px; }
+.admin-ad-metrics-table-v144 td strong,
+.admin-ad-metrics-table-v144 td small { display: block; }
+.admin-ad-metrics-table-v144 td strong { color: #172033; }
+.admin-ad-metrics-table-v144 td small { margin-top: 2px; color: #7b8795; }
+
+.admin-ad-click-list-v144 {
+  max-height: 370px;
+  overflow: auto;
+  padding-right: 3px;
+}
+.admin-ad-click-list-v144 > article {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #edf0f2;
+}
+.admin-ad-click-user-v144 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.admin-ad-click-user-v144 > span {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #eef4d5;
+  color: #6d7900;
+}
+.admin-ad-click-user-v144 div,
+.admin-ad-click-meta-v144 { min-width: 0; }
+.admin-ad-click-user-v144 strong,
+.admin-ad-click-user-v144 small,
+.admin-ad-click-meta-v144 strong,
+.admin-ad-click-meta-v144 span,
+.admin-ad-click-meta-v144 small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-ad-click-user-v144 strong,
+.admin-ad-click-meta-v144 strong { color: #172033; font-size: 10px; }
+.admin-ad-click-user-v144 small,
+.admin-ad-click-meta-v144 span,
+.admin-ad-click-meta-v144 small { color: #7a8593; font-size: 8.5px; }
+.admin-ad-click-meta-v144 span { margin-top: 2px; }
+.admin-ad-click-meta-v144 small { margin-top: 3px; }
+
+.admin-ad-analytics-empty-v144 {
+  min-height: 90px;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  border: 1px dashed #d7dde3;
+  border-radius: 10px;
+  color: #818c9a;
+  background: #fbfcfa;
+  text-align: center;
+  font-size: 10px;
+}
+.admin-ad-privacy-note-v144 {
+  margin: 11px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7a8492;
+  font-size: 9px;
+  line-height: 1.45;
+}
+.admin-ad-privacy-note-v144 svg { color: #718000; flex: 0 0 auto; }
+
+@media (max-width: 1100px) {
+  .admin-ad-kpis-v144 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-ad-analytics-grid-v144 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .admin-ad-analytics-v144 { padding: 13px; border-radius: 12px; }
+  .admin-ad-analytics-head-v144 { flex-direction: column; }
+  .admin-ad-analytics-head-v144 > div:last-child { width: 100%; }
+  .admin-ad-analytics-head-v144 select { flex: 1; min-width: 0; }
+  .admin-ad-kpis-v144 { grid-template-columns: 1fr 1fr; }
+  .admin-ad-click-list-v144 > article { grid-template-columns: 1fr; }
+}

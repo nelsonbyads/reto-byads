@@ -1,0 +1,14 @@
+/* DadoFit V14.5 — Advertising campaign management */
+.admin-ad-editor-v145{scroll-margin-top:24px;transition:border-color .18s ease,box-shadow .18s ease}
+.admin-ad-editor-v145.is-editing{border-color:#c5df43;box-shadow:0 12px 32px rgba(115,137,11,.10)}
+.admin-ad-editor-note-v145{display:flex;align-items:flex-start;gap:9px;padding:10px 11px;border:1px solid #dce9a7;border-radius:10px;background:#f7fbe8;color:#53620d}
+.admin-ad-editor-note-v145 svg{flex:0 0 auto;margin-top:1px}
+.admin-ad-editor-note-v145 div{display:flex;flex-direction:column;gap:2px}
+.admin-ad-editor-note-v145 strong{font-size:10px}
+.admin-ad-editor-note-v145 span{font-size:9px;line-height:1.45;color:#6c7650}
+.admin-ad-editor-actions-v145{display:flex;gap:8px;flex-wrap:wrap}
+.admin-ad-editor-actions-v145>button:first-child{flex:1 1 180px}
+.admin-ad-secondary-v145{background:#fff!important;color:#334154!important;border:1px solid #d8dde3!important}
+.admin-ad-campaign-actions-v145{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.admin-ad-campaign-list-v14 article.is-editing{margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:9px;background:#f8fbe9}
+@media(max-width:900px){.admin-ad-campaign-list-v14 article{align-items:flex-start;flex-direction:column}.admin-ad-campaign-actions-v145{justify-content:flex-start}}

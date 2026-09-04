@@ -1,0 +1,162 @@
+/* =========================================================
+   DadoFit V15.3 — Gym Challenge Economy + Gym Monetization
+   ========================================================= */
+
+.organization-challenge-modal-v153 {
+  width: min(680px, calc(100vw - 32px));
+}
+
+.gym-reward-config-v153 {
+  margin: 14px 0;
+  padding: 16px;
+  border: 1px solid var(--line, #dfe4e7);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--panel-soft, #f7f8f6) 92%, transparent);
+}
+
+.gym-reward-config-head-v153 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.gym-reward-config-head-v153 h3 {
+  margin: 4px 0 0;
+  color: var(--text, #111827);
+  font-size: 1rem;
+}
+
+.gym-reward-config-head-v153 > small {
+  max-width: 180px;
+  color: var(--muted, #6b7280);
+  font-size: .68rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.gym-reward-fields-v153 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.gym-reward-fields-v153 label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line, #dfe4e7);
+  border-radius: 13px;
+  background: var(--panel, #fff);
+}
+
+.gym-reward-fields-v153 label > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text, #111827);
+  font-size: .74rem;
+  font-weight: 800;
+}
+
+.gym-reward-fields-v153 input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong, #cbd3d8);
+  border-radius: 10px;
+  background: var(--panel, #fff);
+  color: var(--text, #111827);
+  font-weight: 900;
+}
+
+.gym-reward-fields-v153 small {
+  color: var(--muted, #6b7280);
+  font-size: .66rem;
+}
+
+.gym-reward-preview-v153 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 11px 12px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--primary, #c8f323) 14%, var(--panel, #fff));
+}
+
+.gym-reward-preview-v153 span {
+  color: var(--muted, #6b7280);
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.gym-reward-preview-v153 strong {
+  color: var(--text, #111827);
+  font-size: .82rem;
+}
+
+.gym-reward-help-v153 {
+  margin: 9px 2px 0;
+  color: var(--muted, #6b7280);
+  font-size: .67rem;
+  line-height: 1.45;
+}
+
+.organization-reward-state-v153 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 10px 0 6px;
+}
+
+.organization-reward-state-v153 strong {
+  color: var(--text, #111827);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.organization-reward-state-v153 span {
+  color: var(--muted, #6b7280);
+  font-size: .68rem;
+  text-align: right;
+}
+
+.organization-reward-state-v153.final strong {
+  color: #27813c;
+}
+
+.organization-approved-v12.reward-blocked-v153 {
+  border-color: color-mix(in srgb, #d89d34 36%, transparent);
+  background: color-mix(in srgb, #f8d88d 22%, var(--panel, #fff));
+}
+
+.organization-approved-v12.reward-blocked-v153 > svg,
+.organization-approved-v12.reward-blocked-v153 strong {
+  color: #8a5a09;
+}
+
+@media (max-width: 760px) {
+  .gym-reward-fields-v153 {
+    grid-template-columns: 1fr;
+  }
+
+  .gym-reward-config-head-v153,
+  .gym-reward-preview-v153,
+  .organization-reward-state-v153 {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .gym-reward-config-head-v153 > small,
+  .organization-reward-state-v153 span {
+    max-width: none;
+    text-align: left;
+  }
+}

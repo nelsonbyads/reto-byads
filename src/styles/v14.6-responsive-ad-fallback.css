@@ -1,0 +1,378 @@
+/* =========================================================
+   DadoFit V14.6 — Responsive Ad Fallback
+   ---------------------------------------------------------
+   Commercial continuity across every useful viewport:
+   >=1600px   existing 6 vertical rails
+   768-1599px adaptive two-unit commercial dock
+   <=767px    mobile paid slot, with desktop-campaign fallback
+
+   No new inventory keys are required. The same campaigns, rotation,
+   impressions, clicks and CTR continue to use their original placement.
+   ========================================================= */
+
+.responsive-ad-dock-wrap-v146 {
+  display: none;
+}
+
+/* ---------------- Compact desktop / tablet landscape ---------------- */
+@media (min-width: 768px) and (max-width: 1599px) {
+  .workout-layout .responsive-ad-dock-wrap-v146 {
+    display: block;
+  }
+
+  .workout-layout .responsive-ad-dock-spacer-v146 {
+    height: 108px;
+  }
+
+  .workout-layout .responsive-ad-dock-v146 {
+    position: fixed;
+    left: 50%;
+    bottom: 10px;
+    z-index: 46;
+    width: min(1180px, calc(100vw - 24px));
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .workout-layout .responsive-ad-dock-panel-v146 {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 32px;
+    gap: 7px;
+    align-items: stretch;
+    padding: 7px;
+    border: 1px solid color-mix(in srgb, var(--line-strong) 82%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+    box-shadow: 0 16px 44px rgba(18, 26, 38, .18);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    pointer-events: auto;
+  }
+
+  html[data-dadofit-theme="dark"] .workout-layout .responsive-ad-dock-panel-v146 {
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .34);
+  }
+
+  .workout-layout .responsive-ad-pair-v146 {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    animation: dadofit-responsive-ad-enter-v146 .28s ease both;
+  }
+
+  .workout-layout .responsive-ad-mobile-v146 {
+    display: none;
+  }
+
+  .workout-layout .responsive-ad-close-v146 {
+    width: 32px;
+    min-width: 32px;
+    border: 0;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    background: color-mix(in srgb, var(--panel-soft) 88%, transparent);
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .workout-layout .responsive-ad-close-v146:hover {
+    color: var(--text);
+    background: color-mix(in srgb, var(--line) 55%, var(--panel));
+  }
+
+  .workout-layout .responsive-ad-pages-v146 {
+    position: absolute;
+    left: 50%;
+    bottom: -7px;
+    z-index: 5;
+    display: flex;
+    gap: 4px;
+    transform: translateX(-50%);
+  }
+
+  .workout-layout .responsive-ad-pages-v146 i {
+    width: 14px;
+    height: 3px;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--muted) 28%, transparent);
+  }
+
+  .workout-layout .responsive-ad-pages-v146 i.active {
+    background: var(--primary);
+  }
+
+  /* A normal 600px vertical creative becomes a compact, legible billboard.
+     The original art is preserved at left; copy remains readable at right. */
+  .workout-layout .ad-slot-v8.ad-slot-compact-v146 {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 76px !important;
+    height: 76px !important;
+    max-height: 76px !important;
+    margin: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 {
+    min-height: 76px !important;
+    height: 76px !important;
+    padding: 0 !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-live-backdrop-v1421 {
+    inset: -12px !important;
+    width: calc(100% + 24px) !important;
+    height: calc(100% + 24px) !important;
+    filter: blur(14px) saturate(.92) brightness(.46) !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-live-image-v14 {
+    inset: 0 auto 0 0 !important;
+    width: 42% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-live-copy-v14 {
+    inset: 0 0 0 36% !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    padding: 10px 58px 10px 18px !important;
+    background: linear-gradient(90deg, rgba(10,15,24,.28) 0%, rgba(10,15,24,.86) 26%, rgba(10,15,24,.96) 100%) !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-live-copy-v14 span {
+    font-size: 7px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-live-copy-v14 strong {
+    overflow: hidden;
+    font-size: 12px !important;
+    line-height: 1.08 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-live-copy-v14 small {
+    margin-top: 1px !important;
+    font-size: 8px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-slot-badge-v8 {
+    top: 6px !important;
+    right: 6px !important;
+    padding: 3px 5px !important;
+    font-size: 6px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-rotation-status-v143 {
+    top: 6px !important;
+    left: 6px !important;
+    min-width: 34px;
+    height: 18px;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-compact-v146 .ad-rotation-status-v143 span {
+    padding: 0 6px;
+    font-size: 7px;
+  }
+
+  .workout-layout .ad-slot-empty-responsive-v146.ad-slot-compact-v146 {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 10px 48px 10px 14px !important;
+    background:
+      linear-gradient(110deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent 48%),
+      var(--panel) !important;
+  }
+}
+
+/* ---------------- Mobile ---------------- */
+@media (max-width: 767px) {
+  .workout-layout .responsive-ad-dock-wrap-v146:not(.responsive-ad-no-mobile-v146) {
+    display: block;
+  }
+
+  .workout-layout .responsive-ad-dock-spacer-v146 {
+    height: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .workout-layout .responsive-ad-dock-v146 {
+    position: fixed;
+    left: 50%;
+    bottom: max(7px, env(safe-area-inset-bottom, 0px));
+    z-index: 48;
+    width: min(440px, calc(100vw - 16px));
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .workout-layout .responsive-ad-dock-panel-v146 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 30px;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid color-mix(in srgb, var(--line-strong) 82%, transparent);
+    border-radius: 15px;
+    background: color-mix(in srgb, var(--panel) 95%, transparent);
+    box-shadow: 0 14px 38px rgba(14, 21, 31, .22);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    pointer-events: auto;
+  }
+
+  .workout-layout .responsive-ad-pair-v146,
+  .workout-layout .responsive-ad-pages-v146 {
+    display: none;
+  }
+
+  .workout-layout .responsive-ad-mobile-v146 {
+    min-width: 0;
+    display: block;
+  }
+
+  .workout-layout .responsive-ad-close-v146 {
+    width: 30px;
+    min-width: 30px;
+    border: 0;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--panel-soft) 88%, transparent);
+    color: var(--muted);
+  }
+
+  .workout-layout .ad-slot-v8.ad-slot-mobile-v146 {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 58px !important;
+    height: 58px !important;
+    max-height: 58px !important;
+    margin: 0 !important;
+    border-radius: 11px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 {
+    min-height: 58px !important;
+    height: 58px !important;
+    padding: 0 !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 .ad-live-backdrop-v1421 {
+    inset: -10px !important;
+    width: calc(100% + 20px) !important;
+    height: calc(100% + 20px) !important;
+    filter: blur(12px) saturate(.9) brightness(.46) !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 .ad-live-image-v14 {
+    inset: 0 auto 0 0 !important;
+    width: 36% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 .ad-live-copy-v14 {
+    inset: 0 0 0 31% !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    padding: 7px 52px 7px 14px !important;
+    background: linear-gradient(90deg, rgba(10,15,24,.26), rgba(10,15,24,.92) 30%, rgba(10,15,24,.97)) !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 .ad-live-copy-v14 span {
+    font-size: 6px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 .ad-live-copy-v14 strong {
+    overflow: hidden;
+    font-size: 10px !important;
+    line-height: 1.05 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 .ad-live-copy-v14 small {
+    font-size: 7px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 .ad-slot-badge-v8 {
+    top: 5px !important;
+    right: 5px !important;
+    padding: 2px 4px !important;
+    font-size: 5.5px !important;
+  }
+
+  .workout-layout .ad-slot-v8.ad-live-v14.ad-slot-mobile-v146 .ad-rotation-status-v143 {
+    display: none !important;
+  }
+
+  .workout-layout .ad-slot-empty-responsive-v146.ad-slot-mobile-v146 {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 8px 46px 8px 11px !important;
+    background:
+      linear-gradient(110deg, color-mix(in srgb, var(--primary) 9%, transparent), transparent 52%),
+      var(--panel) !important;
+  }
+}
+
+/* Shared compact placeholder. */
+.workout-layout .ad-compact-placeholder-v146 {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-soft);
+  text-align: left;
+}
+
+.workout-layout .ad-compact-placeholder-v146 > svg {
+  flex: 0 0 auto;
+  color: var(--secondary);
+}
+
+.workout-layout .ad-compact-placeholder-v146 > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.workout-layout .ad-compact-placeholder-v146 span {
+  color: var(--muted);
+  font: 800 6px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .10em;
+}
+
+.workout-layout .ad-compact-placeholder-v146 strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 10px;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workout-layout .ad-compact-placeholder-v146 small {
+  color: var(--muted);
+  font-size: 7px;
+}
+
+@keyframes dadofit-responsive-ad-enter-v146 {
+  from { opacity: .25; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workout-layout .responsive-ad-pair-v146 {
+    animation: none !important;
+  }
+}

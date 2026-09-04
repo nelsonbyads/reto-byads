@@ -1,5 +1,5 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-import { useMemo, useState, type MouseEvent } from 'react';
+import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { bodyPartLabel, equipmentLabel } from '../lib/translations';
 import type { ExerciseFilters } from '../types/exercise';
 
@@ -34,14 +34,27 @@ interface GroupProps {
 }
 
 function FilterGroup({ title, filterKey, values, selected, label, filters, onChange, search }: GroupProps) {
-  const visible = useMemo(() => values.filter((value) => label(value).toLowerCase().includes(search.toLowerCase())), [label, search, values]);
+  const visible = useMemo(
+    () => values.filter((value) => label(value).toLowerCase().includes(search.toLowerCase())),
+    [label, search, values],
+  );
+
   return (
     <fieldset className="filter-group">
       <legend><span>{title}</span>{selected.length > 0 && <b>{selected.length}</b>}</legend>
       <div className="filter-options">
         {visible.map((value) => {
           const checked = selected.includes(value);
-          return <button key={value} type="button" className={`filter-chip ${checked ? 'selected' : ''}`} onClick={() => onChange(toggleValue(filters, filterKey, value))}>{checked && <span>✓</span>}{label(value)}</button>;
+          return (
+            <button
+              key={value}
+              type="button"
+              className={`filter-chip ${checked ? 'selected' : ''}`}
+              onClick={() => onChange(toggleValue(filters, filterKey, value))}
+            >
+              {checked && <span>✓</span>}{label(value)}
+            </button>
+          );
         })}
       </div>
     </fieldset>
@@ -50,11 +63,37 @@ function FilterGroup({ title, filterKey, values, selected, label, filters, onCha
 
 export function FilterPanel({ open, onClose, filters, onChange, equipment, bodyParts, targets, count }: Props) {
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
+
   return (
-    <div className="filter-backdrop" role="presentation" onMouseDown={(e: MouseEvent<HTMLDivElement>) => e.target === e.currentTarget && onClose()}>
-      <aside className="filter-panel" role="dialog" aria-modal="true" aria-label="Filtros de ejercicios">
-        <div className="filter-heading"><div><SlidersHorizontal size={18}/><div><strong>Filtros</strong><span>{count} ejercicios disponibles</span></div></div><button className="icon-btn" onClick={onClose} aria-label="Cerrar filtros"><X /></button></div>
+    <div
+      className="filter-backdrop filter-backdrop-v1521"
+      role="presentation"
+      onMouseDown={(e: MouseEvent<HTMLDivElement>) => e.target === e.currentTarget && onClose()}
+    >
+      <aside className="filter-panel filter-panel-v1521" role="dialog" aria-modal="true" aria-label="Filtros de ejercicios">
+        <div className="filter-heading">
+          <div><SlidersHorizontal size={18}/><div><strong>Filtros</strong><span>{count} ejercicios disponibles</span></div></div>
+          <button className="icon-btn" onClick={onClose} aria-label="Cerrar filtros"><X /></button>
+        </div>
         <label className="filter-search"><Search size={17}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar opción..." /></label>
         <div className="filter-scroll">
           <FilterGroup title="Equipo" filterKey="equipment" values={equipment} selected={filters.equipment} label={equipmentLabel} filters={filters} onChange={onChange} search={search}/>

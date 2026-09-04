@@ -20,6 +20,7 @@ import './styles/v13.1-exercise-catalog.css';
 import './styles/v13.2-sponsored-goals.css';
 import './styles/v13.3-ui-governance.css';
 import './styles/v13.4-final-polish.css';
+import './styles/v13.5-monetization.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

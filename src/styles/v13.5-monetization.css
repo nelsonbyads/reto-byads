@@ -1,0 +1,230 @@
+/* =========================================================
+   DadoFit V13.5 — Responsive monetization UX
+   ---------------------------------------------------------
+   - Keeps the workout center and business logic untouched.
+   - 160x600 desktop rails remain the baseline from V8.
+   - Very wide desktops upgrade the inventory to 300x600.
+   - Mobile gets one dismissible sticky 320x50-style banner.
+   - Operational pages, audits and forms remain ad-free.
+   ========================================================= */
+
+/* Make the existing rail feel like real sellable sports inventory. */
+.workout-layout .ad-slot-v135 {
+  justify-content: flex-start;
+  padding-top: 58px;
+  padding-bottom: 22px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent 36%),
+    radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--secondary) 11%, transparent), transparent 9rem),
+    color-mix(in srgb, var(--panel) 88%, transparent);
+}
+
+.workout-layout .ad-slot-v135 .ad-slot-art-v8 {
+  margin-top: auto;
+}
+
+.workout-layout .ad-slot-copy-v135 strong {
+  max-width: 132px;
+  font-size: .92rem;
+  line-height: 1.14;
+}
+
+.workout-layout .ad-slot-copy-v135 small {
+  color: var(--muted);
+}
+
+.workout-layout .ad-slot-availability-v135 {
+  margin-top: auto;
+  width: 100%;
+  padding: 9px 8px;
+  border: 1px solid color-mix(in srgb, var(--primary) 42%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 12%, var(--panel));
+  color: var(--text);
+  font: 850 .55rem/1.15 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .08em;
+}
+
+/* Very wide desktops: use the otherwise empty horizontal real estate with
+   standard 300x600 half-page inventory while the workout stays at 1180px. */
+@media (min-width: 1900px) {
+  .workout-layout .monetized-page-v8 {
+    width: min(1840px, calc(100% - 40px));
+    grid-template-columns: 300px minmax(0, 1180px) 300px;
+    gap: 30px;
+  }
+
+  .workout-layout .ad-slot-v8 {
+    width: 300px;
+  }
+
+  .workout-layout .ad-slot-copy-v135 strong {
+    max-width: 220px;
+    font-size: 1.08rem;
+  }
+
+  .workout-layout .ad-slot-v8 p {
+    max-width: 220px;
+  }
+}
+
+/* Mobile monetization stays isolated to /app because MobileStickyAd is
+   mounted from WorkoutPage's existing left AdRail only. */
+.mobile-ad-wrap-v135 {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-ad-wrap-v135 {
+    display: block;
+  }
+
+  .mobile-ad-spacer-v135 {
+    height: calc(78px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-sticky-ad-v135 {
+    position: fixed;
+    left: 50%;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    z-index: 48;
+    width: min(430px, calc(100vw - 18px));
+    min-height: 58px;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 34px minmax(0,1fr) auto 30px;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 8px 8px 10px;
+    border: 1px solid color-mix(in srgb, var(--line-strong) 82%, transparent);
+    border-radius: 15px;
+    background: color-mix(in srgb, var(--panel) 96%, transparent);
+    color: var(--text);
+    box-shadow: 0 14px 38px rgba(14, 21, 31, .22);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .mobile-ad-icon-v135 {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #111722;
+  }
+
+  .mobile-ad-copy-v135 {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .mobile-ad-copy-v135 > span {
+    color: var(--muted);
+    font: 850 .5rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: .11em;
+  }
+
+  .mobile-ad-copy-v135 strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .72rem;
+    line-height: 1.15;
+  }
+
+  .mobile-ad-copy-v135 small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--muted);
+    font-size: .57rem;
+  }
+
+  .mobile-ad-format-v135 {
+    padding: 5px 6px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 12%, var(--panel-soft));
+    color: var(--text-soft);
+    font: 800 .5rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    white-space: nowrap;
+  }
+
+  .mobile-ad-close-v135 {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .mobile-ad-close-v135:hover {
+    background: color-mix(in srgb, var(--line) 35%, transparent);
+    color: var(--text);
+  }
+}
+
+@media (max-width: 370px) {
+  .mobile-sticky-ad-v135 {
+    grid-template-columns: 32px minmax(0,1fr) 28px;
+  }
+
+  .mobile-ad-format-v135 {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-sticky-ad-v135,
+  .mobile-sticky-ad-v135 * {
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   V13.5.1 — Multi-slot desktop inventory
+   ---------------------------------------------------------
+   Three independent placements per side follow the workout scroll.
+   This replaces V8's single sticky creative with a sellable stack while
+   keeping mobile behavior unchanged.
+   ========================================================= */
+@media (min-width: 1600px) {
+  .workout-layout .ad-rail-v1351 {
+    padding-top: 88px;
+  }
+
+  .workout-layout .ad-rail-stack-v1351 {
+    display: flex;
+    flex-direction: column;
+    gap: 54px;
+  }
+
+  .workout-layout .ad-rail-slot-wrap-v1351 {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .workout-layout .ad-rail-slot-wrap-v1351 .ad-slot-v8 {
+    box-sizing: border-box;
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 850px) {
+  .workout-layout .ad-rail-v1351 {
+    padding-top: 104px;
+  }
+}
+
+@media (min-width: 1900px) {
+  .workout-layout .ad-rail-stack-v1351 {
+    gap: 64px;
+  }
+}

@@ -1,0 +1,79 @@
+/* DadoFit V15.2.1 - Filter overlay stacking + exercise instruction legibility */
+
+/*
+ * The filter drawer must be the highest interactive layer while open.
+ * V15.1 introduced compact header menus with their own stacking context;
+ * the old drawer z-index (40) allowed header controls to render above it.
+ */
+.workout-layout .filter-backdrop.filter-backdrop-v1521 {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  background: rgba(17, 24, 39, 0.44) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+
+.workout-layout .filter-panel.filter-panel-v1521 {
+  position: relative !important;
+  z-index: 1 !important;
+  width: min(390px, 100%) !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden;
+  box-shadow: -24px 0 64px rgba(17, 24, 39, 0.18) !important;
+}
+
+/* Keep the content area independently scrollable inside the fixed drawer. */
+.workout-layout .filter-panel-v1521 .filter-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* On small phones retain the bottom-sheet behavior, but above every header/popover. */
+@media (max-width: 640px) {
+  .workout-layout .filter-backdrop.filter-backdrop-v1521 {
+    align-items: flex-end !important;
+  }
+
+  .workout-layout .filter-panel.filter-panel-v1521 {
+    width: 100% !important;
+    height: min(88dvh, 760px) !important;
+    max-height: 88dvh !important;
+    margin-top: auto !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+}
+
+/*
+ * Instruction copy was inheriting an overly muted tone after the later polish layers.
+ * Use the active theme's primary text variable, while preserving a small hierarchy
+ * between body copy and ordered-list markers.
+ */
+.workout-layout .instructions.instructions-v7 ol,
+.workout-layout .instructions.instructions-v7 li {
+  color: color-mix(in srgb, var(--df-text, #172033) 88%, transparent) !important;
+  opacity: 1 !important;
+}
+
+.workout-layout .instructions.instructions-v7 li::marker {
+  color: color-mix(in srgb, var(--df-text, #172033) 64%, transparent) !important;
+  font-weight: 800;
+}
+
+.workout-layout .instructions.instructions-v7 .instructions-toggle strong {
+  color: var(--df-text, #172033) !important;
+}
+
+.workout-layout .instructions.instructions-v7 .instructions-toggle small {
+  color: color-mix(in srgb, var(--df-text, #172033) 64%, transparent) !important;
+  opacity: 1 !important;
+}
