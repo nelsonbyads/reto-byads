@@ -5,14 +5,17 @@ import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { supabase } from '../lib/supabase';
 
+interface SponsorPointBalance { sponsor_organization_id: string; sponsor_name: string; balance: number; }
+
 interface DashboardSummary {
   xp: number; level: number; coins: number; challenges_completed: number;
   squad_contribution_points: number; organization_contribution_points: number;
   direct_pending: number; squad_pending: number; organization_pending: number; gym_battle_pending: number;
   unread_notifications: number; active_squads: number; active_organizations: number;
   sponsored_pending: number;
+  sponsor_point_balances: SponsorPointBalance[]; sponsor_point_sponsor_count: number;
 }
-const EMPTY: DashboardSummary = { xp: 0, level: 1, coins: 0, challenges_completed: 0, squad_contribution_points: 0, organization_contribution_points: 0, direct_pending: 0, squad_pending: 0, organization_pending: 0, gym_battle_pending: 0, unread_notifications: 0, active_squads: 0, active_organizations: 0, sponsored_pending: 0 };
+const EMPTY: DashboardSummary = { xp: 0, level: 1, coins: 0, challenges_completed: 0, squad_contribution_points: 0, organization_contribution_points: 0, direct_pending: 0, squad_pending: 0, organization_pending: 0, gym_battle_pending: 0, unread_notifications: 0, active_squads: 0, active_organizations: 0, sponsored_pending: 0, sponsor_point_balances: [], sponsor_point_sponsor_count: 0 };
 
 export function SocialSummaryBar() {
   const { user } = useAuth();
@@ -42,6 +45,8 @@ export function SocialSummaryBar() {
   if (!cloudReady) return null;
   const pending = summary.direct_pending + summary.squad_pending + summary.organization_pending + summary.gym_battle_pending + summary.sponsored_pending;
   const pendingTarget = summary.direct_pending > 0 ? '/challenges' : summary.squad_pending > 0 ? '/squads' : summary.sponsored_pending > 0 ? '/sponsored-challenges' : '/organization-challenges';
+  const sponsorBalances = Array.isArray(summary.sponsor_point_balances) ? summary.sponsor_point_balances : [];
+  const sponsorPointDisplay = sponsorBalances.length === 0 ? '0 SP' : sponsorBalances.length === 1 ? `${Number(sponsorBalances[0].balance ?? 0).toLocaleString()} SP` : `${sponsorBalances.length} saldos`;
 
-  return <section className="social-summary-v112 social-summary-v12" aria-label="Resumen social DadoFit"><div className="social-summary-stats-v112"><Link to="/profile"><Trophy size={16}/><span>XP</span><strong>{summary.xp.toLocaleString()}</strong></Link><Link to="/profile"><Coins size={16}/><span>DadoCoins</span><strong>{summary.coins.toLocaleString()}</strong></Link><Link to="/squads"><Shield size={16}/><span>Mi aporte Squad</span><strong>{summary.squad_contribution_points.toLocaleString()} TP</strong></Link><Link to="/profile"><Building2 size={16}/><span>Mi aporte Gym</span><strong>{summary.organization_contribution_points.toLocaleString()} GP</strong></Link><Link to={pendingTarget} className={pending > 0 ? 'has-pending' : ''}><BellRing size={16}/><span>Pendientes</span><strong>{pending}</strong></Link></div>{pending > 0 && <div className="social-pending-v112"><div><BellRing size={16}/><span>Tienes actividad pendiente</span></div><div>{summary.direct_pending > 0 && <Link to="/challenges"><Swords size={14}/> {summary.direct_pending} reto(s) 1v1</Link>}{summary.squad_pending > 0 && <Link to="/squads"><Shield size={14}/> {summary.squad_pending} batalla(s) Squad</Link>}{summary.organization_pending > 0 && <Link to="/organization-challenges"><Building2 size={14}/> {summary.organization_pending} reto(s) de Gym</Link>}{summary.sponsored_pending > 0 && <Link to="/sponsored-challenges"><Sparkles size={14}/> {summary.sponsored_pending} Branded Challenge(s)</Link>}</div></div>}</section>;
+  return <section className="social-summary-v112 social-summary-v12" aria-label="Resumen social DadoFit"><div className="social-summary-stats-v112"><Link to="/profile"><Trophy size={16}/><span>XP</span><strong>{summary.xp.toLocaleString()}</strong></Link><Link to="/profile"><Coins size={16}/><span>DadoCoins</span><strong>{summary.coins.toLocaleString()}</strong></Link><Link to="/squads"><Shield size={16}/><span>Mi aporte Squad</span><strong>{summary.squad_contribution_points.toLocaleString()} TP</strong></Link><Link to="/profile"><Building2 size={16}/><span>Mi aporte Gym</span><strong>{summary.organization_contribution_points.toLocaleString()} GP</strong></Link><Link to="/profile#sponsor-points" title="Los SP no se combinan entre marcas"><Sparkles size={16}/><span>Sponsor Points</span><strong>{sponsorPointDisplay}</strong></Link><Link to={pendingTarget} className={pending > 0 ? 'has-pending' : ''}><BellRing size={16}/><span>Pendientes</span><strong>{pending}</strong></Link></div>{pending > 0 && <div className="social-pending-v112"><div><BellRing size={16}/><span>Tienes actividad pendiente</span></div><div>{summary.direct_pending > 0 && <Link to="/challenges"><Swords size={14}/> {summary.direct_pending} reto(s) 1v1</Link>}{summary.squad_pending > 0 && <Link to="/squads"><Shield size={14}/> {summary.squad_pending} batalla(s) Squad</Link>}{summary.organization_pending > 0 && <Link to="/organization-challenges"><Building2 size={14}/> {summary.organization_pending} reto(s) de Gym</Link>}{summary.sponsored_pending > 0 && <Link to="/sponsored-challenges"><Sparkles size={14}/> {summary.sponsored_pending} Branded Challenge(s)</Link>}</div></div>}</section>;
 }

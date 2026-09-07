@@ -2,7 +2,9 @@ import { ArrowLeft, Building2, Check, ExternalLink, RefreshCw, ShieldCheck, User
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
+import { WorkspaceActionLink } from '../components/WorkspaceActionLink';
 import { useAuth } from '../auth/AuthContext';
+import { useWorkspace } from '../context/WorkspaceContext';
 import { supabase } from '../lib/supabase';
 
 interface OrganizationRow {
@@ -60,6 +62,7 @@ function initials(profile: ProfileRow | null) {
 
 export function OrganizationsPage() {
   const { user } = useAuth();
+  const { activeWorkspace, capabilities, refresh } = useWorkspace();
   const [views, setViews] = useState<OrganizationView[]>([]);
   const [invitations, setInvitations] = useState<Array<{ organization: OrganizationRow; membership: MemberRow }>>([]);
   const [profiles, setProfiles] = useState<Map<string, ProfileRow>>(new Map());
@@ -76,6 +79,16 @@ export function OrganizationsPage() {
   const [country, setCountry] = useState('CO');
 
   const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+  const allowedCreationTypes = useMemo<OrganizationRow['organization_type'][]>(() => {
+    const next: OrganizationRow['organization_type'][] = [];
+    if (capabilities.canCreateGym) next.push('gym');
+    if (capabilities.canCreateBrand) next.push('brand', 'sponsor', 'company');
+    return next;
+  }, [capabilities.canCreateBrand, capabilities.canCreateGym]);
+
+  useEffect(() => {
+    if (allowedCreationTypes.length > 0 && !allowedCreationTypes.includes(type)) setType(allowedCreationTypes[0]);
+  }, [allowedCreationTypes, type]);
 
   const load = useCallback(async () => {
     if (!user || user.provider !== 'supabase' || !supabase) {
@@ -183,9 +196,10 @@ export function OrganizationsPage() {
     event.preventDefault();
     if (!supabase || !cloudReady) return;
     const client = supabase;
-    setCreating(true);
     setError('');
     setMessage('');
+    if (!allowedCreationTypes.includes(type)) { setError('Tu cuenta no tiene permiso para crear este tipo de workspace.'); return; }
+    setCreating(true);
     const { error: rpcError } = await client.rpc('create_organization', {
       p_name: name.trim(),
       p_organization_type: type,
@@ -201,8 +215,8 @@ export function OrganizationsPage() {
     setName('');
     setDescription('');
     setWebsite('');
-    setMessage('Organización creada. Ya puedes invitar Gymbros.');
-    await load();
+    setMessage('Workspace creado. Ya puedes invitar Gymbros y administrarlo desde el selector superior.');
+    await Promise.all([load(), refresh()]);
   };
 
   const respondInvite = async (organizationId: string, accept: boolean) => {
@@ -212,7 +226,7 @@ export function OrganizationsPage() {
     const { error: rpcError } = await supabase.rpc('respond_organization_invite', { p_organization_id: organizationId, p_accept: accept });
     setActing(null);
     if (rpcError) setError(rpcError.message);
-    else await load();
+    else await Promise.all([load(), refresh()]);
   };
 
   const invite = async (organizationId: string, userId: string) => {
@@ -240,7 +254,7 @@ export function OrganizationsPage() {
     const { error: rpcError } = await supabase.rpc('leave_organization', { p_organization_id: organizationId });
     setActing(null);
     if (rpcError) setError(rpcError.message);
-    else await load();
+    else await Promise.all([load(), refresh()]);
   };
 
   const setRole = async (organizationId: string, userId: string, role: string) => {
@@ -252,18 +266,21 @@ export function OrganizationsPage() {
     else await load();
   };
 
+  const backTo = activeWorkspace.kind === 'personal' ? '/app' : '/workspace';
+  const backLabel = activeWorkspace.kind === 'personal' ? 'Volver a entrenar' : activeWorkspace.kind === 'gym' ? 'Dashboard del Gym' : 'Dashboard de Marca';
+
   return (
     <div className="profile-shell-v9 organizations-shell-v12">
       <AppHeader/>
       <main className="profile-page-v9 organizations-page-v12">
         <div className="organizations-topline-v12">
-          <Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link>
+          <Link className="profile-back-v9" to={backTo}><ArrowLeft size={16}/> {backLabel}</Link>
           {cloudReady && <button type="button" onClick={() => { void load(); }} disabled={loading}><RefreshCw size={15}/> Actualizar</button>}
         </div>
 
         <section className="profile-hero-v9 organizations-hero-v12">
           <div className="profile-avatar-v9"><Building2 size={31}/></div>
-          <div><span className="eyebrow">DADOFIT ORGANIZATIONS</span><h1>Gyms & Organizations</h1><p>Crea tu organización, suma miembros y convierte retos aprobados en Gym Points.</p></div>
+          <div><span className="eyebrow">DADOFIT ORGANIZATIONS</span><h1>Gyms & Organizations</h1><p>{allowedCreationTypes.length > 0 ? 'Crea o administra workspaces, suma miembros y convierte retos aprobados en Gym Points.' : 'Consulta tus organizaciones, invitaciones, miembros y actividad desde un solo lugar.'}</p></div>
           {cloudReady && <div className="organizations-hero-stats-v12"><span><strong>{views.length}</strong> activas</span><span><strong>{totalSponsorPoints.toLocaleString()}</strong> GP</span></div>}
         </section>
 
@@ -288,10 +305,10 @@ export function OrganizationsPage() {
 
             <section className="organizations-layout-v12">
               <div className="organizations-list-v12">
-                <div className="organizations-section-heading-v12"><div><span className="eyebrow">MIS ORGANIZACIONES</span><h2>{loading ? 'Cargando…' : `${views.length} activas`}</h2></div><div className="organization-section-links-v121"><Link to="/organization-challenges">Ver retos</Link><Link to="/gym-battles">Gym vs Gym</Link></div></div>
+                <div className="organizations-section-heading-v12"><div><span className="eyebrow">MIS ORGANIZACIONES</span><h2>{loading ? 'Cargando…' : `${views.length} activas`}</h2></div><div className="organization-section-links-v121">{activeWorkspace.kind !== 'brand' && <Link to="/organization-challenges">Ver retos</Link>}{activeWorkspace.kind === 'gym' && <Link to="/gym-battles">Gym vs Gym</Link>}</div></div>
 
                 {!loading && views.length === 0 ? (
-                  <section className="profile-card-v9 organization-empty-v12"><Building2 size={32}/><h3>Aún no perteneces a una organización</h3><p>Crea un Gym, empresa o marca y empieza a construir su comunidad.</p></section>
+                  <section className="profile-card-v9 organization-empty-v12"><Building2 size={32}/><h3>Aún no perteneces a una organización</h3><p>{allowedCreationTypes.length > 0 ? 'Crea uno de los workspaces habilitados para tu cuenta o acepta una invitación.' : 'Cuando aceptes una invitación a un Gym o Marca aparecerá aquí.'}</p></section>
                 ) : views.map((view) => {
                   const isOwner = view.membership.role === 'owner';
                   const canAdmin = ['owner', 'admin'].includes(view.membership.role);
@@ -314,8 +331,8 @@ export function OrganizationsPage() {
 
                       <div className="organization-links-v12">
                         {view.organization.website_url && <a href={view.organization.website_url} target="_blank" rel="noreferrer"><ExternalLink size={14}/> Sitio web</a>}
-                        {canManageChallenges && <Link to="/app"><ShieldCheck size={14}/> Publicar desde una tirada</Link>}
-                        <Link to="/organization-challenges">Retos de la organización</Link>
+                        {canManageChallenges && view.organization.organization_type === 'gym' && <WorkspaceActionLink to="/app" workspaceId={`org:${view.organization.id}`}><ShieldCheck size={14}/> Publicar desde una tirada</WorkspaceActionLink>}
+                        {view.organization.organization_type === 'gym' && <WorkspaceActionLink to="/organization-challenges" workspaceId={`org:${view.organization.id}`}>Retos del Gym</WorkspaceActionLink>}
                       </div>
 
                       <div className="organization-members-v12">
@@ -352,16 +369,16 @@ export function OrganizationsPage() {
                 })}
               </div>
 
-              <form className="profile-card-v9 organization-create-v12" onSubmit={createOrganization}>
-                <span className="eyebrow">NUEVA ORGANIZACIÓN</span><h2>Crear comunidad</h2>
+              {allowedCreationTypes.length > 0 ? <form className="profile-card-v9 organization-create-v12" onSubmit={createOrganization}>
+                <span className="eyebrow">NUEVO WORKSPACE</span><h2>Crear organización</h2>
                 <label>Nombre<input value={name} onChange={(event) => setName(event.target.value)} minLength={3} maxLength={80} placeholder="Ej: DadoFit Gym Medellín" required/></label>
-                <label>Tipo<select value={type} onChange={(event) => setType(event.target.value as OrganizationRow['organization_type'])}><option value="gym">Gym</option><option value="company">Empresa</option><option value="brand">Marca</option><option value="sponsor">Sponsor</option><option value="other">Otra</option></select></label>
+                <label>Tipo<select value={type} onChange={(event) => setType(event.target.value as OrganizationRow['organization_type'])}>{allowedCreationTypes.map((item) => <option key={item} value={item}>{TYPE_LABEL[item]}</option>)}</select></label>
                 <label>Descripción<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} maxLength={500} placeholder="Qué representa esta comunidad"/></label>
                 <label>Website<input value={website} onChange={(event) => setWebsite(event.target.value)} maxLength={300} placeholder="https://..."/></label>
                 <label>País<input value={country} onChange={(event) => setCountry(event.target.value.toUpperCase().slice(0, 2))} maxLength={2}/></label>
-                <button className="profile-primary-v9" type="submit" disabled={creating}><Building2 size={16}/>{creating ? 'Creando…' : 'Crear organización'}</button>
-                <p className="organization-create-note-v12"><UsersRound size={14}/> Tú quedas como owner. Después puedes invitar Gymbros y asignar Coaches o Admins.</p>
-              </form>
+                <button className="profile-primary-v9" type="submit" disabled={creating}><Building2 size={16}/>{creating ? 'Creando…' : 'Crear workspace'}</button>
+                <p className="organization-create-note-v12"><UsersRound size={14}/> Solo aparecen los tipos habilitados para tu cuenta. Tú quedas como Owner.</p>
+              </form> : <section className="profile-card-v9 organization-create-v12"><span className="eyebrow">CREACIÓN DE WORKSPACES</span><h2>Sin permisos de creación</h2><p>Tu cuenta puede participar en organizaciones existentes, pero no tiene habilitada la creación de nuevos Gyms o Marcas.</p></section>}
             </section>
           </>
         )}

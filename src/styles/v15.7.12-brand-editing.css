@@ -1,0 +1,95 @@
+/* DadoFit V15.7.12 - Brand campaign + Branded Challenge editing */
+
+.brand-form-v13.is-editing-v15712 {
+  outline: 2px solid rgba(15, 23, 42, 0.10);
+  outline-offset: -1px;
+}
+
+.brand-edit-notice-v15712 {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.035);
+  color: #0f172a;
+}
+
+.brand-edit-notice-v15712 > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.brand-edit-notice-v15712 > span {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.brand-edit-notice-v15712 strong,
+.brand-edit-notice-v15712 small {
+  color: #0f172a;
+}
+
+.brand-edit-notice-v15712 small {
+  line-height: 1.45;
+  opacity: 0.75;
+}
+
+.brand-edit-actions-v15712,
+.brand-challenge-actions-v15712 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.brand-edit-actions-v15712 > button,
+.brand-edit-button-v15712,
+.brand-challenge-actions-v15712 > button {
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+/* Explicit colors: never depend on inherited admin/brand button text colors. */
+.brand-edit-button-v15712,
+.brand-edit-actions-v15712 .secondary {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.16) !important;
+}
+
+.brand-edit-button-v15712 svg,
+.brand-edit-actions-v15712 .secondary svg {
+  color: currentColor !important;
+}
+
+.brand-edit-button-v15712:hover:not(:disabled),
+.brand-edit-actions-v15712 .secondary:hover:not(:disabled) {
+  background: #f8fafc !important;
+}
+
+.brand-form-v13 fieldset:disabled {
+  opacity: 0.62;
+}
+
+.brand-form-v13 input:disabled,
+.brand-form-v13 select:disabled,
+.brand-form-v13 textarea:disabled {
+  cursor: not-allowed;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+@media (max-width: 720px) {
+  .brand-edit-actions-v15712,
+  .brand-challenge-actions-v15712 {
+    align-items: stretch;
+  }
+
+  .brand-edit-actions-v15712 > button,
+  .brand-challenge-actions-v15712 > button {
+    flex: 1 1 160px;
+  }
+}

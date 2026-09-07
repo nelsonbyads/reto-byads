@@ -135,7 +135,7 @@ export function BrandAuditPage() {
     const row = (result ?? {}) as Record<string, unknown>;
     if (decision === 'rejected') setMessage('Auditoría rechazada. El participante podrá corregir y reenviar evidencia.');
     else if (row.reward_blocked) setMessage('Auditoría aprobada. El reto quedó completado sin recompensa adicional por política anti-farming.');
-    else setMessage(`Auditoría aprobada: +${Number(row.coins_granted ?? 0)} DC · +${Number(row.xp_granted ?? 0)} XP.`);
+    else setMessage(`Auditoría aprobada: +${Number(row.coins_granted ?? 0)} DC · +${Number(row.xp_granted ?? 0)} XP · +${Number(row.sp_granted ?? 0)} SP.`);
     setNotes((current) => ({ ...current, [participantId]: '' }));
     await load();
   };

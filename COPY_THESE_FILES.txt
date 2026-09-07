@@ -1,16 +1,19 @@
-DadoFit V15.7.2 - Pre-Release QA Hotfix
+DadoFit V15.7.12 — copiar sobre V15.7.11
 
-Copiar sobre la raiz del proyecto:
-- src/pages/ChallengesPage.tsx
-- src/pages/AdminPage.tsx
-- src/pages/BrandCompetitionsPage.tsx
-- src/styles/v15.7-pre-release.css
-- supabase/migrations/20260905004500_v1572_pre_release_qa_fixes.sql
-- docs/V15.7.2-QA-HOTFIX.md
+src/App.tsx
+src/pages/BrandCampaignsPage.tsx
+src/lib/sponsoredRules.ts
+src/lib/sponsoredRules.test.ts
+src/styles/v15.7.12-brand-editing.css
+supabase/migrations/20260907234500_v15712_brand_campaign_challenge_editing.sql
+docs/V15.7.12-BRAND-CAMPAIGN-CHALLENGE-EDITING.md
 
-Requiere V15.7 + V15.7.1 ya aplicados.
 Luego ejecutar:
+  npx supabase migration list
   npx supabase db push
   npm test
   npm run build
   npm run dev
+
+Schema esperado:
+  v15.7.12-brand-campaign-challenge-editing

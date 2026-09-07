@@ -1,5 +1,5 @@
 import { Building2, Check, Tag } from 'lucide-react';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { useAuth } from '../auth/AuthContext';
@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
 
 export function BusinessSetupPage() {
   const { user } = useAuth();
-  const { capabilities, workspaces, refresh } = useWorkspace();
+  const { capabilities, workspaces, refresh, selectWorkspace } = useWorkspace();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const requested = params.get('type') === 'brand' ? 'brand' : 'gym';
@@ -21,8 +21,14 @@ export function BusinessSetupPage() {
   const allowed = requested === 'gym' ? capabilities.canCreateGym : capabilities.canCreateBrand;
   const existing = useMemo(() => workspaces.find((item) => item.kind === requested), [requested, workspaces]);
 
+  useEffect(() => {
+    if (!existing) return;
+    selectWorkspace(existing.id);
+    navigate('/workspace', { replace: true });
+  }, [existing, navigate, selectWorkspace]);
+
   if (!user || user.provider !== 'supabase') return <Navigate to="/app" replace/>;
-  if (existing) return <Navigate to="/workspace" replace/>;
+  if (existing) return <main className="auth-loading">Abriendo tu workspace…</main>;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();

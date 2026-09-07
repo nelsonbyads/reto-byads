@@ -3,31 +3,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { notificationTarget, notificationWorkspaceId } from '../lib/notificationRouting';
 import { supabase } from '../lib/supabase';
 
 interface NotificationRow { id: string; notification_type: string; title: string; body: string | null; data: Record<string, unknown> | null; read_at: string | null; created_at: string; }
-
-function notificationTarget(item: NotificationRow): string {
-  const type = item.notification_type;
-  if (type === 'sponsored_audit_required') return '/brand-audit';
-  if (type === 'sponsored_evidence_submitted') return '/brand-campaigns';
-  if (type === 'sponsored_gym_competition_invited') return '/seasons';
-  if (type === 'sponsored_gym_competition_response') return '/brand-competitions';
-  if (type.startsWith('sponsored_')) return '/sponsored-challenges';
-  if (type.startsWith('gym_battle_') || item.data?.organization_battle_id) return '/gym-battles';
-  if (type.startsWith('organization_challenge_')) return '/organization-challenges';
-  if (type.startsWith('organization_') || item.data?.organization_id) return '/organizations';
-  if (type.startsWith('squad_') || item.data?.battle_id || item.data?.group_id) return '/squads';
-  if (type.startsWith('challenge_') || item.data?.challenge_id) return '/challenges';
-  if (type.startsWith('friend')) return '/gymbros';
-  return '/profile';
-}
 
 function formatWhen(value: string): string { try { return new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(value)); } catch { return ''; } }
 
 export function NotificationBell() {
   const { user } = useAuth();
-  const { selectWorkspace } = useWorkspace();
+  const { selectWorkspace, workspaces } = useWorkspace();
   const [open, setOpen] = useState(false); const [items, setItems] = useState<NotificationRow[]>([]); const [unreadCount, setUnreadCount] = useState(0); const [loading, setLoading] = useState(false); const [markingAll, setMarkingAll] = useState(false); const [error, setError] = useState('');
   const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
 
@@ -49,22 +34,8 @@ export function NotificationBell() {
   const markAllRead = async () => { if (!supabase || unreadCount === 0) return; setMarkingAll(true); setError(''); const { error: rpcError } = await supabase.rpc('mark_all_notifications_read'); setMarkingAll(false); if (rpcError) { setError(rpcError.message); return; } const now = new Date().toISOString(); setItems((current) => current.map((item) => item.read_at ? item : { ...item, read_at: now })); setUnreadCount(0); };
 
   const prepareWorkspace = (item: NotificationRow) => {
-    if (item.notification_type === 'sponsored_evidence_submitted' || item.notification_type === 'sponsored_audit_required') {
-      const organizationId = typeof item.data?.organization_id === 'string' ? item.data.organization_id : null;
-      if (organizationId) selectWorkspace(`org:${organizationId}`);
-      return;
-    }
-    if (item.notification_type === 'sponsored_gym_competition_invited') {
-      const organizationId = typeof item.data?.organization_id === 'string' ? item.data.organization_id : null;
-      if (organizationId) selectWorkspace(`org:${organizationId}`);
-      return;
-    }
-    if (item.notification_type === 'sponsored_gym_competition_response') {
-      const organizationId = typeof item.data?.sponsor_organization_id === 'string' ? item.data.sponsor_organization_id : null;
-      if (organizationId) selectWorkspace(`org:${organizationId}`);
-      return;
-    }
-    if (item.notification_type.startsWith('sponsored_')) selectWorkspace('personal');
+    const workspaceId = notificationWorkspaceId(item, workspaces);
+    if (workspaceId) selectWorkspace(workspaceId);
   };
 
   if (!cloudReady) return null;

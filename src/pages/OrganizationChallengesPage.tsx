@@ -2,8 +2,10 @@ import { ArrowLeft, Building2, Check, Clock3, Coins, FileVideo2, Image as ImageI
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
+import { WorkspaceActionLink } from '../components/WorkspaceActionLink';
 import { ChallengeCenterNav } from '../components/ChallengeCenterNav';
 import { useAuth } from '../auth/AuthContext';
+import { useWorkspace } from '../context/WorkspaceContext';
 import { supabase } from '../lib/supabase';
 
 interface ChallengeRow {
@@ -169,6 +171,7 @@ function EvidencePanel({ participant, mode, onChanged }: { participant: Particip
 
 export function OrganizationChallengesPage() {
   const { user } = useAuth();
+  const { activeWorkspace } = useWorkspace();
   const [memberships, setMemberships] = useState<MembershipRow[]>([]);
   const [organizations, setOrganizations] = useState<Map<string, OrganizationRow>>(new Map());
   const [challenges, setChallenges] = useState<Map<string, ChallengeRow>>(new Map());
@@ -255,6 +258,11 @@ export function OrganizationChallengesPage() {
   };
 
   const submittedForReview = useMemo(() => managedParticipants.filter((item) => item.status === 'submitted'), [managedParticipants]);
+  const managedGyms = useMemo(() => memberships
+    .filter((membership) => ['owner', 'admin', 'coach'].includes(membership.role))
+    .map((membership) => organizations.get(membership.organization_id))
+    .filter((organization): organization is OrganizationRow => organization?.organization_type === 'gym'), [memberships, organizations]);
+  const activeGymCanPublish = activeWorkspace.kind === 'gym' && ['owner', 'admin', 'coach'].includes(activeWorkspace.role ?? '');
   const published = useMemo(() => [...challenges.values()].filter((item) => memberships.some((membership) => membership.organization_id === item.creator_organization_id && ['owner', 'admin', 'coach'].includes(membership.role))).sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime()), [challenges, memberships]);
 
   return (
@@ -281,7 +289,7 @@ export function OrganizationChallengesPage() {
               return <article key={participant.id} className="profile-card-v9 organization-challenge-card-v12"><header><div><span className="eyebrow">REVISIÓN · {org?.name || 'ORGANIZACIÓN'}</span><h2>{profile?.display_name || profile?.username || 'Miembro'}</h2><p>{challenge.reps}× {challenge.exercise_name}</p></div><span className="organization-status-v12 status-submitted">En revisión</span></header><EvidencePanel participant={participant} mode="reviewer" onChanged={load}/></article>;
             })}</section>
           ) : (
-            <section className="organization-challenge-list-v12">{published.length === 0 ? <div className="profile-card-v9 organization-empty-v12"><Building2 size={30}/><h3>Aún no has publicado retos</h3><Link className="profile-primary-v9" to="/app">Lanzar dados</Link></div> : published.map((challenge) => {
+            <section className="organization-challenge-list-v12">{published.length === 0 ? <div className="profile-card-v9 organization-empty-v12"><Building2 size={30}/><h3>Aún no has publicado retos</h3>{activeGymCanPublish ? <Link className="profile-primary-v9" to="/app">Lanzar dados como {activeWorkspace.label}</Link> : managedGyms.length > 0 ? <><p>Elige el Gym desde el que quieres crear el reto institucional.</p><div className="organization-section-links-v121">{managedGyms.map((gym) => <WorkspaceActionLink key={gym.id} className="profile-primary-v9" to="/app" workspaceId={`org:${gym.id}`}>Abrir {gym.name}</WorkspaceActionLink>)}</div></> : <p>Necesitas ser Owner, Admin o Coach de un Gym para publicar retos institucionales.</p>}</div> : published.map((challenge) => {
               const participants = managedParticipants.filter((item) => item.challenge_id === challenge.id); const approved = participants.filter((item) => item.status === 'approved').length; const submitted = participants.filter((item) => item.status === 'submitted').length; const org = challenge.creator_organization_id ? organizations.get(challenge.creator_organization_id) : null;
               return <article key={challenge.id} className="profile-card-v9 organization-published-v12"><header><div><span className="eyebrow">{org?.name || 'ORGANIZACIÓN'}</span><h2>{challenge.reps}× {challenge.exercise_name}</h2><p><Clock3 size={13}/> {formatDate(challenge.starts_at)} → {formatDate(challenge.expires_at)}</p></div><span className={`organization-status-v12 status-${challenge.status}`}>{challenge.status}</span></header><div className="organization-published-stats-v12"><div><span>Participantes</span><strong>{participants.length}</strong></div><div><span>Aprobados</span><strong>{approved}</strong></div><div><span>Por revisar</span><strong>{submitted}</strong></div><div><span>Gym Points</span><strong>{participants.reduce((sum, item) => sum + Number(item.sponsor_points_granted ?? 0), 0)} GP</strong></div></div><button type="button" className="organization-finalize-v12" onClick={() => { void finalize(challenge.id); }} disabled={Boolean(acting)}>Actualizar / cerrar si corresponde</button></article>;
             })}</section>

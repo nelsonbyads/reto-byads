@@ -1,9 +1,12 @@
-import { ArrowLeft, Building2, Coins, Save, Trophy, UserRound, UsersRound } from 'lucide-react';
+import { ArrowLeft, Building2, Coins, Save, Sparkles, Trophy, UserRound, UsersRound } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { WorkspaceActionLink } from '../components/WorkspaceActionLink';
 import { AppHeader } from '../components/AppHeader';
 import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabase';
+
+interface SponsorPointBalance { sponsor_organization_id: string; sponsor_name: string; logo_url: string | null; balance: number; lifetime_earned: number; lifetime_spent: number; }
 
 interface ProfileStats {
   xp: number;
@@ -26,6 +29,7 @@ export function ProfilePage() {
   const [displayName, setDisplayName] = useState(user?.name ?? '');
   const [username, setUsername] = useState(user?.username ?? '');
   const [stats, setStats] = useState<ProfileStats>(EMPTY_STATS);
+  const [sponsorBalances, setSponsorBalances] = useState<SponsorPointBalance[]>([]);
   const [loading, setLoading] = useState(user?.provider === 'supabase');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -36,7 +40,7 @@ export function ProfilePage() {
     const client = supabase;
     let active = true;
     const load = async () => {
-      const [profileResult, progressResult, walletResult, sentGymbros, receivedGymbros, squadsResult, organizationsResult, dashboardResult] = await Promise.all([
+      const [profileResult, progressResult, walletResult, sentGymbros, receivedGymbros, squadsResult, organizationsResult, dashboardResult, sponsorPointsResult] = await Promise.all([
         client.from('profiles').select('display_name, username').eq('id', user.id).single(),
         client.from('user_progress').select('xp, level, current_streak, challenges_completed').eq('user_id', user.id).single(),
         client.from('wallets').select('balance').eq('user_id', user.id).single(),
@@ -45,6 +49,7 @@ export function ProfilePage() {
         client.from('group_members').select('group_id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active'),
         client.from('organization_members').select('organization_id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active'),
         client.rpc('get_dadofit_dashboard_summary'),
+        client.rpc('get_my_sponsor_point_balances'),
       ]);
 
       if (!active) return;
@@ -54,6 +59,7 @@ export function ProfilePage() {
         xp: Number(progressResult.data?.xp ?? 0), level: Number(progressResult.data?.level ?? 1), currentStreak: Number(progressResult.data?.current_streak ?? 0), challengesCompleted: Number(progressResult.data?.challenges_completed ?? 0), coins: Number(walletResult.data?.balance ?? 0),
         gymbros: Number(sentGymbros.count ?? 0) + Number(receivedGymbros.count ?? 0), squads: Number(squadsResult.count ?? 0), squadPoints: Number(dashboard.squad_contribution_points ?? 0), organizations: Number(organizationsResult.count ?? 0), organizationPoints: Number(dashboard.organization_contribution_points ?? 0), pendingChallenges: Number(dashboard.direct_pending ?? 0) + Number(dashboard.squad_pending ?? 0) + Number(dashboard.organization_pending ?? 0) + Number(dashboard.gym_battle_pending ?? 0),
       });
+      setSponsorBalances(sponsorPointsResult.error ? [] : ((sponsorPointsResult.data ?? []) as SponsorPointBalance[]));
       setLoading(false);
     };
     void load();
@@ -74,7 +80,7 @@ export function ProfilePage() {
 
   return (
     <div className="profile-shell-v9 profile-shell-v133"><AppHeader/><main className="profile-page-v9 profile-page-v133">
-      <Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link>
+      <WorkspaceActionLink className="profile-back-v9" to="/app" workspaceId="personal"><ArrowLeft size={16}/> Volver a entrenar</WorkspaceActionLink>
       <section className="profile-hero-v9 profile-hero-v133">
         <div className="profile-avatar-v9 profile-avatar-v133"><UserRound size={34}/></div>
         <div className="profile-hero-copy-v133">
@@ -93,6 +99,11 @@ export function ProfilePage() {
           <article><span className="profile-fire-v9">🔥</span><span>Racha</span><strong>{stats.currentStreak} días</strong></article>
         </section>
 
+        <section id="sponsor-points" className="profile-card-v9 sponsor-wallet-eco1">
+          <div className="sponsor-wallet-head-eco1"><div><span className="eyebrow">SPONSOR POINTS</span><h2>Tus saldos por Marca</h2><p>Los SP son exclusivos de cada patrocinador: SP Nike no se pueden usar en Adidas, Gyms ni otros sponsors.</p></div><Sparkles size={24}/></div>
+          {sponsorBalances.length === 0 ? <div className="sponsor-wallet-empty-eco1"><strong>0 SP</strong><span>Aún no has ganado Sponsor Points. Participa en Branded Challenges para obtenerlos.</span></div> : <div className="sponsor-wallet-grid-eco1">{sponsorBalances.map((item) => <article key={item.sponsor_organization_id}><div className="sponsor-wallet-logo-eco1">{item.logo_url ? <img src={item.logo_url} alt=""/> : <Sparkles size={18}/>}</div><div><span>{item.sponsor_name}</span><strong>{Number(item.balance ?? 0).toLocaleString()} SP</strong><small>Ganados {Number(item.lifetime_earned ?? 0).toLocaleString()} · usados {Number(item.lifetime_spent ?? 0).toLocaleString()}</small></div></article>)}</div>}
+        </section>
+
         <section className="profile-grid-v9 profile-grid-v133">
           <section className="profile-card-v9 profile-community-v133">
             <div><span className="eyebrow">ACTIVIDAD SOCIAL</span><h2>Tu ecosistema DadoFit</h2><p className="profile-section-copy-v133">Tu progreso social, participación y actividad competitiva.</p></div>
@@ -105,9 +116,9 @@ export function ProfilePage() {
               <div><span>Aporte a Gym</span><strong>{stats.organizationPoints.toLocaleString()} GP</strong></div>
             </div>
             <div className="profile-action-links-v133">
-              <Link to="/gymbros"><UsersRound size={16}/> Gymbros</Link>
-              <Link to="/squads"><Trophy size={16}/> Squads</Link>
-              <Link to="/organizations"><Building2 size={16}/> Organizaciones ({stats.organizations})</Link>
+              <WorkspaceActionLink to="/gymbros" workspaceId="personal"><UsersRound size={16}/> Gymbros</WorkspaceActionLink>
+              <WorkspaceActionLink to="/squads" workspaceId="personal"><Trophy size={16}/> Squads</WorkspaceActionLink>
+              <WorkspaceActionLink to="/organizations" workspaceId="personal"><Building2 size={16}/> Organizaciones ({stats.organizations})</WorkspaceActionLink>
             </div>
           </section>
 

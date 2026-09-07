@@ -4,12 +4,12 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { usePlatformAdminStatus } from '../hooks/usePlatformAdminStatus';
-import { canManageBrandRole } from '../lib/sponsoredRules';
 import { NotificationBell } from './NotificationBell';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
+import { WorkspaceActionLink } from './WorkspaceActionLink';
+import { getWorkspaceNavigation, type WorkspaceNavIcon } from '../lib/workspaceNavigation';
 
 type DadoFitTheme = 'pastel' | 'light' | 'dark';
-type NavItem = { to: string; label: string; icon: typeof Palette; compact?: 'primary' | 'secondary' };
 
 const THEME_KEY = 'dadofit:theme:v7';
 const THEME_OPTIONS: Array<{ id: DadoFitTheme; label: string; icon: typeof Palette }> = [
@@ -46,34 +46,22 @@ export function AppHeader() {
   const cloud = user?.provider === 'supabase';
   const personal = activeWorkspace.kind === 'personal';
   const gym = activeWorkspace.kind === 'gym';
-  const brandManager = canManageBrandRole(activeWorkspace.role);
   const ThemeIcon = theme === 'dark' ? Moon : theme === 'pastel' ? Palette : Sun;
+  const iconMap: Record<WorkspaceNavIcon, typeof Palette> = {
+    building: Building2,
+    dice: Dice5,
+    gift: Gift,
+    shield: Shield,
+    sparkles: Sparkles,
+    swords: Swords,
+    tag: Tag,
+    trophy: Trophy,
+    users: UsersRound,
+  };
 
-  const navItems = useMemo<NavItem[]>(() => personal ? [
-    { to: '/app', label: 'Entrenar', icon: Dice5, compact: 'primary' },
-    { to: '/challenges', label: 'Retos', icon: Swords, compact: 'primary' },
-    { to: '/rewards', label: 'Premios', icon: Gift, compact: 'primary' },
-    { to: '/gymbros', label: 'Gymbros', icon: UsersRound, compact: 'secondary' },
-    { to: '/squads', label: 'Squads', icon: Shield, compact: 'secondary' },
-    { to: '/organizations', label: 'Organizaciones', icon: Building2, compact: 'secondary' },
-    { to: '/sponsored-challenges', label: 'Patrocinados', icon: Sparkles, compact: 'secondary' },
-    { to: '/seasons', label: 'Temporadas', icon: Trophy, compact: 'secondary' },
-  ] : gym ? [
-    { to: '/workspace', label: 'Dashboard', icon: Trophy },
-    { to: '/rewards/manage', label: 'Ofertas', icon: Gift },
-    { to: '/organization-challenges', label: 'Retos', icon: Swords },
-    { to: '/gym-battles', label: 'Gym vs Gym', icon: Trophy },
-    { to: '/organizations', label: 'Equipo', icon: Building2 },
-  ] : [
-    { to: '/workspace', label: 'Dashboard', icon: Tag },
-    { to: '/rewards/manage', label: 'Ofertas', icon: Gift },
-    { to: '/brand-campaigns', label: 'Campañas', icon: Sparkles },
-    ...(brandManager ? [{ to: '/brand-audit', label: 'Control', icon: Shield } as NavItem] : []),
-    { to: '/organizations', label: 'Equipo', icon: Building2 },
-  ], [brandManager, gym, personal]);
-
-  const directItems = personal ? navItems.filter((item) => item.compact === 'primary') : navItems;
-  const secondaryItems = personal ? navItems.filter((item) => item.compact === 'secondary') : [];
+  const navItems = useMemo(() => getWorkspaceNavigation(activeWorkspace.kind, activeWorkspace.role), [activeWorkspace.kind, activeWorkspace.role]);
+  const directItems = navItems.filter((item) => item.tier === 'primary');
+  const secondaryItems = navItems.filter((item) => item.tier === 'secondary');
   const secondaryActive = secondaryItems.some((item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`));
 
   return <header className="topbar topbar-v7 topbar-v122 topbar-v133 topbar-v151" data-workspace-kind={activeWorkspace.kind}>
@@ -86,12 +74,12 @@ export function AppHeader() {
 
     <nav className="app-nav-v133 app-nav-v151" aria-label="Navegación principal">
       {cloud && directItems.map((item) => {
-        const Icon = item.icon;
-        return <NavLink key={item.to} to={item.to} className={({ isActive }) => `${isActive ? 'active ' : ''}${item.compact === 'secondary' ? 'nav-secondary-v151' : 'nav-primary-v151'}`.trim()}><Icon size={15}/><span>{item.label}</span></NavLink>;
+        const Icon = iconMap[item.icon];
+        return <NavLink key={item.to} to={item.to} className={({ isActive }) => `${isActive ? 'active ' : ''}nav-primary-v151`.trim()}><Icon size={15}/><span>{item.label}</span></NavLink>;
       })}
-      {cloud && personal && secondaryItems.length > 0 && <div className="nav-more-wrap-v151">
+      {cloud && secondaryItems.length > 0 && <div className="nav-more-wrap-v151">
         <button type="button" className={`nav-more-trigger-v151 ${secondaryActive ? 'active' : ''}`} onClick={() => { setMoreOpen((value) => !value); setThemeOpen(false); setUserOpen(false); }} aria-expanded={moreOpen}><MoreHorizontal size={16}/><span>Más</span><ChevronDown size={12}/></button>
-        {moreOpen && <div className="nav-more-menu-v151">{secondaryItems.map((item) => { const Icon = item.icon; return <NavLink key={item.to} to={item.to} onClick={() => setMoreOpen(false)}><Icon size={16}/><span>{item.label}</span></NavLink>; })}</div>}
+        {moreOpen && <div className="nav-more-menu-v151">{secondaryItems.map((item) => { const Icon = iconMap[item.icon]; return <NavLink key={item.to} to={item.to} onClick={() => setMoreOpen(false)}><Icon size={16}/><span>{item.label}</span></NavLink>; })}</div>}
       </div>}
     </nav>
 
@@ -104,7 +92,7 @@ export function AppHeader() {
       </div>
       <div className="header-popover-v133">
         <button type="button" className="user-trigger-v133" onClick={() => { setUserOpen((v) => !v); setThemeOpen(false); setMoreOpen(false); }} aria-expanded={userOpen}><span className="user-avatar-v133"><UserRound size={16}/></span><span className="user-trigger-copy-v133"><strong>{user?.name ?? 'Invitado'}</strong><small>{personal ? 'Perfil personal' : activeWorkspace.label}</small></span>{cloud && <i className="cloud-dot-v9" title="Cuenta cloud"/>}</button>
-        {userOpen && <div className="header-menu-v133 user-menu-v133"><div className="user-menu-head-v133"><strong>{user?.name ?? 'Invitado'}</strong><span>{personal ? 'Perfil personal' : `${activeWorkspace.label} · ${activeWorkspace.role ?? 'member'}`}</span></div>{isPlatformAdmin && <Link to="/admin" onClick={() => setUserOpen(false)}><ShieldCheck size={16}/><span>Administración DadoFit</span></Link>}<Link to="/profile" onClick={() => setUserOpen(false)}><UserRound size={16}/><span>Mi perfil</span></Link><Link to="/contact" onClick={() => setUserOpen(false)}><LifeBuoy size={16}/><span>Soporte / Contáctanos</span></Link><button type="button" className="logout-v133" onClick={() => { setUserOpen(false); void logout(); }}><LogOut size={16}/><span>Cerrar sesión</span></button></div>}
+        {userOpen && <div className="header-menu-v133 user-menu-v133"><div className="user-menu-head-v133"><strong>{user?.name ?? 'Invitado'}</strong><span>{personal ? 'Perfil personal' : `${activeWorkspace.label} · ${activeWorkspace.role ?? 'member'}`}</span></div>{isPlatformAdmin && <Link to="/admin" onClick={() => setUserOpen(false)}><ShieldCheck size={16}/><span>Administración DadoFit</span></Link>}<WorkspaceActionLink to="/profile" workspaceId="personal" onClick={() => setUserOpen(false)}><UserRound size={16}/><span>Mi perfil</span></WorkspaceActionLink><Link to="/contact" onClick={() => setUserOpen(false)}><LifeBuoy size={16}/><span>Soporte / Contáctanos</span></Link><button type="button" className="logout-v133" onClick={() => { setUserOpen(false); void logout(); }}><LogOut size={16}/><span>Cerrar sesión</span></button></div>}
       </div>
     </div>
   </header>;

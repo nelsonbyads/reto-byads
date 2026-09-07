@@ -1,5 +1,7 @@
 import { Building2, Cookie, Dice5, Dumbbell, HeartHandshake, LifeBuoy, Megaphone, ShieldCheck, Sparkles, UsersRound } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useWorkspace } from '../context/WorkspaceContext';
+import { WorkspaceActionLink } from './WorkspaceActionLink';
 import '../styles/v14.1-footer-legal.css';
 
 const PRODUCT_LINKS = [
@@ -58,6 +60,7 @@ function AuthLegalFooter() {
 
 export function SiteFooter() {
   const location = useLocation();
+  const { activeWorkspace } = useWorkspace();
   const isAuth = location.pathname === '/login' || location.pathname === '/register';
   const hidden = location.pathname === '/' || location.pathname === '/business-setup' || location.pathname.startsWith('/admin');
 
@@ -83,7 +86,7 @@ export function SiteFooter() {
 
         <nav className="site-footer-nav-v141" aria-label="Producto">
           <h2><Dumbbell size={15}/> Producto</h2>
-          {PRODUCT_LINKS.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
+          {PRODUCT_LINKS.map((item) => { const workspaceId = item.to === '/app' && activeWorkspace.kind === 'gym' ? null : activeWorkspace.kind === 'personal' ? null : 'personal'; return <WorkspaceActionLink key={item.to} to={item.to} workspaceId={workspaceId}>{item.label}</WorkspaceActionLink>; })}
         </nav>
 
         <nav className="site-footer-nav-v141" aria-label="Empresas">
