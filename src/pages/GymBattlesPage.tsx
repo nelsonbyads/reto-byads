@@ -268,7 +268,7 @@ function GymBattleEvidence({
     const result = data as { reward_blocked?: boolean; coins_granted?: number; xp_granted?: number; sponsor_points?: number } | null;
     if (decision === 'rejected') setMessage('Evidencia rechazada. El participante deberá subir una nueva.');
     else if (result?.reward_blocked) setMessage('Aporte aprobado sin recompensa adicional por política anti-farming.');
-    else setMessage(`Aprobado: +${result?.coins_granted ?? 25} DC · +${result?.xp_granted ?? 50} XP · +${result?.sponsor_points ?? 100} SP.`);
+    else setMessage(`Aprobado: +${result?.coins_granted ?? 25} DC · +${result?.xp_granted ?? 50} XP · +${result?.sponsor_points ?? 100} GP.`);
     await onChanged();
   };
 
@@ -302,7 +302,7 @@ function GymBattleEvidence({
           <label>Comentario opcional<textarea rows={2} maxLength={500} value={notes} onChange={(event) => setNotes(event.target.value)}/></label>
           <div>
             <button type="button" className="reject" onClick={() => { void review('rejected'); }} disabled={acting}><X size={15}/> Pedir otra evidencia</button>
-            <button type="button" onClick={() => { void review('approved'); }} disabled={acting}><Check size={15}/> Aprobar +100 SP</button>
+            <button type="button" onClick={() => { void review('approved'); }} disabled={acting}><Check size={15}/> Aprobar +100 GP</button>
           </div>
         </div>
       )}
@@ -421,7 +421,7 @@ export function GymBattlesPage() {
 
         <section className="profile-hero-v9 gym-battles-hero-v121">
           <div className="profile-avatar-v9"><Trophy size={31}/></div>
-          <div><span className="eyebrow">DADOFIT GYM LEAGUE</span><h1>Gym vs Gym</h1><p>Los miembros compiten, los managers rivales validan y cada aporte aprobado suma Sponsor Points.</p></div>
+          <div><span className="eyebrow">DADOFIT GYM LEAGUE</span><h1>Gym vs Gym</h1><p>Los miembros compiten, los managers rivales validan y cada aporte aprobado suma Gym Points (GP).</p></div>
           {cloudReady && <div className="gym-battles-hero-stats-v121"><span><strong>{activeBattles.length}</strong> activas</span><span><strong>{historyBattles.length}</strong> historial</span></div>}
         </section>
 
@@ -473,11 +473,11 @@ export function GymBattlesPage() {
                         <div className="gym-battle-team-v121">
                           <div className="gym-battle-logo-v121">{challenger?.logo_url ? <img src={challenger.logo_url} alt=""/> : <Building2 size={22}/>}</div>
                           <span><strong>{challenger?.name ?? 'Gym retador'}</strong><small>{challengerParticipants.length} participantes</small></span>
-                          <b>{challengerPoints} SP</b>
+                          <b>{challengerPoints} GP</b>
                         </div>
                         <div className="gym-battle-versus-v121"><Swords size={18}/><span>VS</span></div>
                         <div className="gym-battle-team-v121 right">
-                          <b>{challengedPoints} SP</b>
+                          <b>{challengedPoints} GP</b>
                           <span><strong>{challenged?.name ?? 'Gym rival'}</strong><small>{challengedParticipants.length} participantes</small></span>
                           <div className="gym-battle-logo-v121">{challenged?.logo_url ? <img src={challenged.logo_url} alt=""/> : <Building2 size={22}/>}</div>
                         </div>
@@ -487,7 +487,7 @@ export function GymBattlesPage() {
                         {battle.status === 'pending' && <span><Clock3 size={14}/> Responder antes de {formatDate(battle.response_expires_at)}</span>}
                         {battle.status === 'active' && <span><Clock3 size={14}/> Finaliza {formatDate(battle.expires_at)}</span>}
                         <span><Coins size={14}/> Hasta 25 DC por aporte</span>
-                        <span><Trophy size={14}/> Hasta 50 XP + 100 SP</span>
+                        <span><Trophy size={14}/> Hasta 50 XP + 100 GP</span>
                       </div>
 
                       {canRespond && (
@@ -503,7 +503,7 @@ export function GymBattlesPage() {
                         <section className="gym-battle-own-v121">
                           <div className="gym-battle-subheading-v121"><div><ShieldCheck size={16}/><span><strong>Tu aporte</strong><small>{participantStatusLabel(ownParticipant.status)}</small></span></div>{['accepted', 'rejected'].includes(ownParticipant.status) && <button type="button" className="gym-battle-skip-v121" onClick={() => { void declineContribution(ownParticipant.id); }} disabled={Boolean(acting)}>No participar</button>}</div>
                           {['accepted', 'rejected', 'submitted', 'approved'].includes(ownParticipant.status) && <GymBattleEvidence participant={ownParticipant} canUpload={['accepted', 'rejected'].includes(ownParticipant.status)} canReview={false} onChanged={load}/>} 
-                          {ownParticipant.status === 'approved' && <div className="gym-battle-approved-v121"><Check size={18}/><span><strong>Aporte aprobado</strong><small>+{ownParticipant.reward_coins_granted} DC · +{ownParticipant.reward_xp_granted} XP · +{ownParticipant.sponsor_points_granted} SP{ownParticipant.reward_block_reason ? ' · anti-farming aplicado' : ''}</small></span></div>}
+                          {ownParticipant.status === 'approved' && <div className="gym-battle-approved-v121"><Check size={18}/><span><strong>Aporte aprobado</strong><small>+{ownParticipant.reward_coins_granted} DC · +{ownParticipant.reward_xp_granted} XP · +{ownParticipant.sponsor_points_granted} GP{ownParticipant.reward_block_reason ? ' · anti-farming aplicado' : ''}</small></span></div>}
                         </section>
                       )}
 
@@ -525,7 +525,7 @@ export function GymBattlesPage() {
                       {battle.status === 'active' && canFinalize && <button className="gym-battle-finalize-v121" type="button" onClick={() => { void finalize(battle.id); }} disabled={Boolean(acting)}><RefreshCw size={15}/> Actualizar cierre</button>}
 
                       {battle.status === 'completed' && (
-                        <div className="gym-battle-result-v121"><Trophy size={21}/><div><strong>{winner ? `${winner.name} gana` : 'Empate entre Gyms'}</strong><span>{challenger?.name ?? 'Gym A'} {challengerPoints} SP · {challenged?.name ?? 'Gym B'} {challengedPoints} SP</span></div></div>
+                        <div className="gym-battle-result-v121"><Trophy size={21}/><div><strong>{winner ? `${winner.name} gana` : 'Empate entre Gyms'}</strong><span>{challenger?.name ?? 'Gym A'} {challengerPoints} GP · {challenged?.name ?? 'Gym B'} {challengedPoints} GP</span></div></div>
                       )}
                       {battle.status === 'declined' && <div className="gym-battle-info-v121">El Gym rival rechazó esta batalla.</div>}
                       {battle.status === 'expired' && <div className="gym-battle-info-v121">La batalla expiró.</div>}

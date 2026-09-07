@@ -126,11 +126,12 @@ export function WorkspaceHomePage() {
     {error && <div className="auth-error">{error}</div>}
 
     {gym ? <>
-      <section className="workspace-stats-v122 workspace-stats-v133"><article><UsersRound size={20}/><span>Miembros</span><strong>{loading ? '…' : stats.members}</strong></article><article><Trophy size={20}/><span>Sponsor Points</span><strong>{loading ? '…' : `${stats.sponsorPoints.toLocaleString()} SP`}</strong></article><article><Swords size={20}/><span>Retos activos</span><strong>{loading ? '…' : stats.activeChallenges}</strong></article><article><Building2 size={20}/><span>Batallas activas</span><strong>{loading ? '…' : stats.activeBattles}</strong></article></section>
+      <section className="workspace-stats-v122 workspace-stats-v133"><article><UsersRound size={20}/><span>Miembros</span><strong>{loading ? '…' : stats.members}</strong></article><article><Trophy size={20}/><span>Gym Points</span><strong>{loading ? '…' : `${stats.sponsorPoints.toLocaleString()} GP`}</strong></article><article><Swords size={20}/><span>Retos activos</span><strong>{loading ? '…' : stats.activeChallenges}</strong></article><article><Building2 size={20}/><span>Batallas activas</span><strong>{loading ? '…' : stats.activeBattles}</strong></article></section>
       <section className="workspace-section-v133"><div className="workspace-section-title-v133"><div><span className="eyebrow">OPERACIÓN</span><h2>Gestiona tu Gym</h2></div></div><div className="workspace-action-grid-v122 workspace-action-grid-v133">
         {gymManager && <Link to="/app"><Dice5 size={24}/><span><strong>Generar reto</strong><small>Usa los dados como creador institucional.</small></span></Link>}
         <Link to="/organization-challenges"><Swords size={24}/><span><strong>Retos del Gym</strong><small>{gymManager ? 'Publica, revisa y controla evidencias.' : 'Participa en los retos de tu Gym.'}</small></span></Link>
         <Link to="/gym-battles"><Trophy size={24}/><span><strong>Gym vs Gym</strong><small>Competencias entre organizaciones verificadas.</small></span></Link>
+        <Link to="/seasons"><Trophy size={24}/><span><strong>Temporadas & rankings</strong><small>Consulta GP, ranking de Gyms e invitaciones patrocinadas.</small></span></Link>
         <Link to="/organizations"><UsersRound size={24}/><span><strong>Miembros y roles</strong><small>Owner, Admin, Coach y Member.</small></span></Link>
       </div></section>
     </> : <>
@@ -147,6 +148,7 @@ export function WorkspaceHomePage() {
 
       <section className="workspace-section-v133"><div className="workspace-section-title-v133"><div><span className="eyebrow">OPERACIÓN</span><h2>Centro de Marca</h2><p>Campañas, control de calidad, equipo y trazabilidad.</p></div></div><div className="workspace-action-grid-v122 workspace-action-grid-v133 brand-actions-v133">
         <Link to="/brand-campaigns"><Megaphone size={24}/><span><strong>Campañas & Branded Challenges</strong><small>{brandManager ? 'Crea campañas, publica retos y realiza la revisión inicial.' : 'Consulta campañas y resultados de la Marca.'}</small></span></Link>
+        <Link to="/brand-competitions"><Trophy size={24}/><span><strong>Competencias Gym</strong><small>{brandManager ? 'Invita Gyms verificados y activa rankings patrocinados por GP.' : 'Consulta competencias patrocinadas de la Marca.'}</small></span></Link>
         {brandManager && <Link to="/brand-audit" className="governance-action-v133"><ShieldCheck size={24}/><span><strong>Control & Auditoría</strong><small>Histórico, doble validación y segunda revisión independiente.</small></span>{stats.pendingAudit > 0 && <b>{stats.pendingAudit}</b>}</Link>}
         <Link to="/organizations"><UsersRound size={24}/><span><strong>Equipo de Marca</strong><small>Administra miembros y permisos del workspace.</small></span></Link>
       </div></section>

@@ -23,6 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, ty
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
+import { ChallengeCenterNav } from '../components/ChallengeCenterNav';
 import { supabase } from '../lib/supabase';
 
 interface SquadRow {
@@ -691,7 +692,8 @@ export function SquadsPage() {
   return (
     <div className="profile-shell-v9">
       <AppHeader/>
-      <main className="profile-page-v9 squads-page-v11">
+      <div className="challenge-center-shell-v1577"><ChallengeCenterNav/></div>
+      <main className="profile-page-v9 squads-page-v11 challenge-center-main-v1577">
         <div className="squads-topline-v11">
           <Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link>
           <button type="button" onClick={() => { void refreshAll(); }} disabled={refreshing}><RefreshCw size={15}/>{refreshing ? 'Actualizando…' : 'Actualizar'}</button>

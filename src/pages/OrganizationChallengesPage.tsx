@@ -2,6 +2,7 @@ import { ArrowLeft, Building2, Check, Clock3, Coins, FileVideo2, Image as ImageI
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
+import { ChallengeCenterNav } from '../components/ChallengeCenterNav';
 import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -259,7 +260,8 @@ export function OrganizationChallengesPage() {
   return (
     <div className="profile-shell-v9 organization-challenges-shell-v12">
       <AppHeader/>
-      <main className="profile-page-v9 organization-challenges-page-v12">
+      <div className="challenge-center-shell-v1577"><ChallengeCenterNav/></div>
+      <main className="profile-page-v9 organization-challenges-page-v12 challenge-center-main-v1577">
         <div className="organizations-topline-v12"><Link className="profile-back-v9" to="/organizations"><ArrowLeft size={16}/> Organizations</Link>{cloudReady && <button type="button" onClick={() => { void load(); }} disabled={loading}><RefreshCw size={15}/> Actualizar</button>}</div>
         <section className="profile-hero-v9 organizations-hero-v12"><div className="profile-avatar-v9"><ShieldCheck size={31}/></div><div><span className="eyebrow">GYM CHALLENGES</span><h1>Retos de organizaciones</h1><p>Miembros entrenan, managers revisan y cada aprobación puede sumar DadoCoins, XP y Gym Points (GP).</p></div></section>
 

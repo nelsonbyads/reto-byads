@@ -1,26 +1,16 @@
-DadoFit UI/UX V2
+DadoFit V15.7.2 - Pre-Release QA Hotfix
 
-REEMPLAZAR:
-- src/
-- .gitignore
+Copiar sobre la raiz del proyecto:
+- src/pages/ChallengesPage.tsx
+- src/pages/AdminPage.tsx
+- src/pages/BrandCompetitionsPage.tsx
+- src/styles/v15.7-pre-release.css
+- supabase/migrations/20260905004500_v1572_pre_release_qa_fixes.sql
+- docs/V15.7.2-QA-HOTFIX.md
 
-AGREGAR:
-- Dockerfile
-- docker-compose.yml
-- .dockerignore
-- docker/nginx.conf
-- DOCKER.md
-
-NO BORRAR / NO REEMPLAZAR:
-- .git/
-- data/
-- images/
-- videos/
-- public/
-- scripts/
-- package.json
-- package-lock.json
-- LICENSE
-- NOTICE.md
-- vite.config.ts
-- tsconfig*.json
+Requiere V15.7 + V15.7.1 ya aplicados.
+Luego ejecutar:
+  npx supabase db push
+  npm test
+  npm run build
+  npm run dev

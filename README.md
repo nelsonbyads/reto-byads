@@ -4,7 +4,7 @@ DadoFit es una SPA de fitness gamificado construida con React, TypeScript y Vite
 
 ## Estado de entrega
 
-**Release Candidate: RC1**
+**Pre-Release Feature Pack: V15.7 · Feature Freeze Candidate**
 
 Alcance funcional consolidado:
 
@@ -21,6 +21,12 @@ Alcance funcional consolidado:
 - Brands, campañas y Branded Challenges.
 - Objetivos Sponsored por repeticiones, tiempo, distancia o cantidad.
 - Notificaciones.
+- Rewards Marketplace, fulfillment digital/fisico, QR y validacion presencial.
+- Rewards Analytics para Partner/Gym y SuperAdmin.
+- DadoCoins (DC), Team Points (TP) y Gym Points (GP) con anti-farming.
+- Temporadas competitivas TP/GP con historico no destructivo.
+- Competencias patrocinadas Brand → Gyms por GP.
+- Navegacion unificada de retos 1v1, Gym, Squad y patrocinados.
 - Anti-farming e idempotencia de recompensas.
 - Docker para build de produccion local.
 
@@ -68,13 +74,15 @@ AUTH USER
    |    +-- Miembros y roles
    |    +-- Retos del Gym
    |    +-- Gym vs Gym
-   |    +-- Sponsor Points
+   |    +-- Gym Points (GP)
+   |    +-- Temporadas / rankings
    |
    +-- Brand workspace
         +-- Campanas
         +-- Branded Challenges
         +-- Participantes
         +-- Revision de evidencias
+        +-- Competencias patrocinadas de Gyms
 ```
 
 Un usuario personal puede crear un Squad. Crear un Gym o una Brand requiere la capacidad empresarial correspondiente.
@@ -149,10 +157,10 @@ Comprobar conectividad/esquema:
 node scripts/check-supabase.mjs
 ```
 
-Para RC1, el `schema_version` esperado despues de aplicar todos los hotfixes es:
+El `schema_version` esperado despues de aplicar el Pre-Release Feature Pack es:
 
 ```text
-v13.2.1-sponsored-review-history-hotfix
+v15.7-pre-release-feature-pack
 ```
 
 ## Desarrollo local
@@ -181,7 +189,15 @@ Rutas principales:
 /workspace
 /brand-campaigns
 /sponsored-challenges
+/seasons
 /notifications
+/rewards
+/rewards/manage
+/rewards/validate
+/rewards/analytics
+/brand-competitions
+/admin/rewards
+/admin/seasons
 ```
 
 ## Tests
@@ -275,6 +291,7 @@ Git checkpoint + push
 ## Checklist minimo RC1
 
 - [ ] `npx supabase migration list` sin pendientes inesperados.
+- [ ] `select public.get_dadofit_schema_version()` = `v15.7-pre-release-feature-pack`.
 - [ ] `node scripts/check-supabase.mjs` responde OK.
 - [ ] `npm test` sin fallos.
 - [ ] `npm run build` sin errores.
@@ -283,8 +300,16 @@ Git checkpoint + push
 - [ ] Gymbros y Squads cargan.
 - [ ] Workspace Gym funciona.
 - [ ] Gym vs Gym carga.
+- [ ] Retos muestra navegacion unificada: 1v1 / Gym / Squads / Patrocinados / Temporadas.
+- [ ] Temporada Squad acumula TP y conserva historico.
+- [ ] Temporada Gym acumula GP y conserva historico.
 - [ ] Workspace Brand funciona.
 - [ ] Branded Challenge se publica, acepta evidencia y puede aprobarse.
+- [ ] Brand crea Sponsored Gym Competition con al menos 2 Gyms.
+- [ ] Gym Owner/Admin recibe invitacion y puede aceptar/rechazar.
+- [ ] Leaderboard patrocinado usa GP de la ventana configurada.
+- [ ] Reward fisico genera QR, valida entrega y cambia ISSUED → REDEEMED.
+- [ ] Rewards Analytics refleja canjes/entregas.
 - [ ] Recompensa Sponsored no se duplica.
 - [ ] Docker queda `Up` / `healthy`.
 - [ ] Refresh directo de rutas SPA no devuelve 404.

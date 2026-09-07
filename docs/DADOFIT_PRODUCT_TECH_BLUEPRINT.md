@@ -26,7 +26,7 @@ Roll -> Send challenge -> Accept -> Submit evidence -> Review -> Reward -> Retur
 1. Gymbros: real user relationships.
 2. Challenges: user vs user, user vs many, group vs group, gym vs gym and sponsored challenges.
 3. Evidence: image/video proof with review states.
-4. Competition: XP, seasons, Team Points and Sponsor Points.
+4. Competition: XP, seasons, Team Points and Gym Points.
 5. Economy: DadoCoins as a closed loyalty currency.
 6. Rewards: gym subscriptions, supplements, sports brands, products, discounts and experiences.
 7. Monetization: ads, sponsored challenges, DadoFit Gym SaaS, marketplace commissions and DadoFit Pro.
@@ -42,8 +42,8 @@ Closed loyalty currency for users. It is not cryptocurrency, is not cash, has no
 ### Team Points
 Competitive score for squads/groups.
 
-### Sponsor Points
-Competitive score for gyms, brands and sponsors. The first MVP rule is simple: an approved sponsored completion can award Sponsor Points.
+### Gym Points (GP)
+Competitive score for Gyms. The database keeps the historical column name `sponsor_points` for compatibility, but product UI must show GP. GP powers Gym rankings, Gym vs Gym and sponsored Gym competitions.
 
 ## 4. Challenge actors
 
@@ -82,7 +82,7 @@ REJECTED
 EXPIRED
 ```
 
-DadoCoins, XP, Team Points and Sponsor Points are not awarded merely for uploading evidence. Rewards must be generated after a trusted approval operation.
+DadoCoins, XP, Team Points and Gym Points are not awarded merely for uploading evidence. Rewards must be generated after a trusted approval operation.
 
 ## 6. Economy integrity
 
@@ -117,7 +117,7 @@ Gym 2 -> challenge all active members
 
 Approved completions
   -> user DadoCoins / XP
-  -> organization Sponsor Points
+  -> organization Gym Points (GP)
   -> seasonal leaderboard
 ```
 
@@ -127,6 +127,17 @@ Users can belong to squads through `groups` and `group_members`.
 
 A group challenge can award Team Points. Seasonal totals live in `group_scores`, while organization competition is represented by `organization_scores`.
 
+## 8.1 Seasons and rankings
+
+DadoFit uses the existing `seasons` + `score_events` foundation for competitive windows.
+
+```text
+Squad season -> TP leaderboard
+Gym season   -> GP leaderboard
+```
+
+Season close is non-destructive: `score_events` remains the source of truth and historical points are never zeroed out. New challenges are associated with the appropriate global season. Sponsored Gym competitions use their own date window over GP, allowing a commercial activation to coexist with the global Gym season.
+
 ## 9. Sponsors and campaigns
 
 A sponsor is modeled as an organization and can own `sponsor_campaigns`.
@@ -135,7 +146,10 @@ A sponsored challenge can define:
 
 - reward DadoCoins;
 - reward XP;
-- Sponsor Points;
+- reward DC / XP;
+- campaign metadata;
+- start/end dates;
+- sponsored Gym competitions may rank participating Gyms by GP within their own time window;
 - season;
 - start/end dates;
 - campaign metadata.
@@ -144,16 +158,17 @@ The long-term commercial goal is to make sponsorship part of gameplay rather tha
 
 ## 10. Rewards marketplace
 
-`rewards` can represent:
+The Rewards system is implemented and supports:
 
-- discounts;
-- products;
-- gym passes;
-- subscriptions;
-- experiences;
-- other partner benefits.
+- discounts, products, gym passes, subscriptions and experiences;
+- DadoCoins balance and transactional redemption;
+- stock and per-user limits;
+- shared codes, unique coupon pools, URLs and instructions;
+- physical/in-person fulfillment with QR validation;
+- `ISSUED -> REDEEMED` delivery lifecycle;
+- Partner/Gym analytics and SuperAdmin analytics.
 
-`reward_redemptions` records redemptions. Coin deduction will be implemented as a trusted atomic server operation in a later delivery.
+`reward_redemptions` preserves the redemption history. The browser never subtracts coins directly; trusted RPCs enforce balance, stock, dates, limits and rollback semantics.
 
 ## 11. Technical architecture
 
@@ -197,7 +212,7 @@ Production must use a separate production environment before real users/rewards 
 - Wallet/progression/score writes are server-owned.
 - Evidence bucket is private.
 - Evidence rewards are idempotent.
-- Browser clients must not be able to arbitrarily award coins, XP or Sponsor Points.
+- Browser clients must not be able to arbitrarily award coins, XP or Gym Points.
 
 ## 14. Storage
 
@@ -208,34 +223,38 @@ Initial buckets:
 
 Cross-user evidence review will use trusted signed URLs/service logic rather than making the evidence bucket public.
 
-## 15. Roadmap
+## 15. Roadmap status
 
-### V8 - Individual MVP
-Complete: workout dice, filters, evidence, history, themes, Docker and advertising placements.
+Completed milestones:
 
-### V9 - Social Foundation
-Supabase project, schema, RLS, Storage, profiles, Gymbros foundation, groups, organizations, challenge model, wallet, XP and scores.
+```text
+V8      Individual MVP
+V9-V10  Social/Auth + 1v1 Challenges
+V11     Squads + TP
+V12     Organizations / Gyms + Gym vs Gym
+V13     Brands / Sponsored Challenges
+V14     SuperAdmin + Ads + analytics
+V15.0   Rewards Marketplace
+V15.1   Reward Fulfillment / Coupon Inventory
+V15.2   QR / Physical Reward Fulfillment
+V15.3   Gym Challenge Economy + configurable DC/XP/GP
+V15.4   Rewards Analytics Partner/Gym + SuperAdmin
+V15.4.1 Responsive Header Hotfix
+V15.7   Unified Challenges + TP/GP Seasons + Sponsored Gym Competitions
+```
 
-### V9.1 - Real Auth & Profiles
-Migrate local auth to Supabase Auth, profile creation, username/avatar and session migration strategy.
+Next stage:
 
-### V10 - Challenge 1 vs 1
-Send, accept, submit evidence, review, rewards and return challenge.
+```text
+FEATURE FREEZE
+-> QA FINAL
+-> LEGAL / DOCUMENTATION FINAL
+-> DOCKER FINAL
+-> GIT RELEASE
+-> PRODUCTION
+```
 
-### V11 - Squads
-Create groups, invitations, roles, group battles and Team Points.
-
-### V12 - Gyms / Organizations
-Organization membership, mass gym challenges and Gym vs Gym leaderboards.
-
-### V13 - Sponsors
-Sponsored challenges, campaign dashboard, Sponsor Points and sponsor rankings.
-
-### V14 - DadoCoins Rewards
-Marketplace, redemptions, partner offers and trusted coin spending.
-
-### V15 - Seasons
-Seasonal XP, group rankings, organization rankings and season rewards.
+No additional roadmap feature should be opened before the V15.7 QA pass is complete.
 
 ## 16. V9.0 scope boundary
 

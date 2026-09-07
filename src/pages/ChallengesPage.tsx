@@ -18,6 +18,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } f
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
+import { ChallengeCenterNav } from '../components/ChallengeCenterNav';
 import { supabase } from '../lib/supabase';
 
 interface ChallengeRow {
@@ -523,7 +524,8 @@ export function ChallengesPage() {
   return (
     <div className="profile-shell-v9 challenges-shell-v10">
       <AppHeader/>
-      <main className="profile-page-v9 challenges-page-v10">
+      <div className="challenge-center-shell-v1577"><ChallengeCenterNav/></div>
+      <main className="profile-page-v9 challenges-page-v10 challenge-center-main-v1577">
         <div className="challenges-topline-v10">
           <Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link>
           {cloudReady && <button type="button" onClick={() => { void load(); }} disabled={loading}><RefreshCw size={15}/> Actualizar</button>}
@@ -532,7 +534,7 @@ export function ChallengesPage() {
         <section className="profile-hero-v9 challenges-hero-v10">
           <div className="profile-avatar-v9"><Swords size={31}/></div>
           <div><span className="eyebrow">DADOFIT SOCIAL</span><h1>Retos 1 vs 1</h1><p>Tus tiradas ahora pueden viajar directo a un Gymbro.</p></div>
-          {cloudReady && <div className="challenge-pending-total-v10"><strong>{pendingCount}</strong><span>por completar</span></div>}
+          {cloudReady && <div className="challenge-hero-actions-v157"><div className="challenge-pending-total-v10"><strong>{pendingCount}</strong><span>por completar</span></div><Link className="challenge-create-v157" to="/app"><Swords size={15}/> Crear reto 1 vs 1</Link><small>Primero lanza los dados y luego elige “Retar a un Gymbro”.</small></div>}
         </section>
 
         {!cloudReady ? (

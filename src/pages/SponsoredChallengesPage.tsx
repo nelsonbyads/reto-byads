@@ -2,6 +2,7 @@ import { ArrowLeft, Check, Clock3, Coins, FileVideo2, Image as ImageIcon, Refres
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
+import { ChallengeCenterNav } from '../components/ChallengeCenterNav';
 import { ExerciseMedia } from '../components/ExerciseMedia';
 import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
@@ -171,7 +172,7 @@ export function SponsoredChallengesPage() {
     await load();
   };
 
-  return <div className="profile-shell-v9 sponsored-shell-v13"><AppHeader/><main className="profile-page-v9 sponsored-page-v13">
+  return <div className="profile-shell-v9 sponsored-shell-v13"><AppHeader/><div className="challenge-center-shell-v1577"><ChallengeCenterNav/></div><main className="profile-page-v9 sponsored-page-v13 challenge-center-main-v1577">
     <div className="brand-topline-v13"><Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link><button type="button" onClick={() => { void load(); }} disabled={loading}><RefreshCw size={15}/> Actualizar</button></div>
     <section className="sponsored-hero-v13"><div><Sparkles size={32}/></div><span><span className="eyebrow">BRANDED CHALLENGES</span><h1>Retos patrocinados</h1><p>Participa en activaciones de Marcas verificadas, demuestra tu reto y gana recompensas dentro de DadoFit.</p></span><div><strong>{joinedCount}</strong><small>retos unidos</small></div></section>
     {error && <div className="auth-error">{error}</div>}{message && <div className="auth-success">{message}</div>}

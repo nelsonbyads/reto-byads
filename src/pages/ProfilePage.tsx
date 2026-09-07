@@ -102,7 +102,7 @@ export function ProfilePage() {
               <div><span>Squads</span><strong>{stats.squads}</strong></div>
               <div><span>Retos pendientes</span><strong>{stats.pendingChallenges}</strong></div>
               <div><span>Aporte a Squads</span><strong>{stats.squadPoints.toLocaleString()} TP</strong></div>
-              <div><span>Aporte a organizaciones</span><strong>{stats.organizationPoints.toLocaleString()} SP</strong></div>
+              <div><span>Aporte a Gym</span><strong>{stats.organizationPoints.toLocaleString()} GP</strong></div>
             </div>
             <div className="profile-action-links-v133">
               <Link to="/gymbros"><UsersRound size={16}/> Gymbros</Link>

@@ -1,0 +1,125 @@
+/* DadoFit V15.7 — Pre-Release Feature Pack
+   Unified Challenges + TP/GP Seasons + Sponsored Gym Competitions */
+
+.challenge-center-nav-v157{display:flex;align-items:center;gap:7px;margin:0 0 16px;padding:6px;border:1px solid var(--df-line,var(--line,#dfe3e8));border-radius:14px;background:var(--df-panel,var(--panel,#fff));overflow-x:auto;scrollbar-width:none}.challenge-center-nav-v157::-webkit-scrollbar{display:none}.challenge-center-nav-v157 a{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 11px;border-radius:9px;color:var(--df-soft,var(--text-soft,#526073));text-decoration:none;font-size:11px;font-weight:900;white-space:nowrap}.challenge-center-nav-v157 a:hover{background:var(--df-panel-soft,var(--panel-soft,#f8f8f5));color:var(--df-text,var(--text,#172033))}.challenge-center-nav-v157 a.active{background:var(--df-text,var(--text,#172033));color:var(--df-panel,var(--panel,#fff))}
+
+.season-page-v157,.brand-competition-page-v157{width:min(1120px,calc(100% - 40px));padding-top:18px}.season-hero-v157,.brand-competition-hero-v157{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:14px;padding:24px 26px;border:1px solid var(--df-line,var(--line,#dfe3e8));border-radius:20px;background:var(--df-panel,var(--panel,#fff));box-shadow:var(--df-shadow,0 8px 24px rgba(34,42,54,.055))}.season-hero-v157 h1,.brand-competition-hero-v157 h1{margin:5px 0 4px;font-size:30px;letter-spacing:-.035em}.season-hero-v157 p,.brand-competition-hero-v157 p{max-width:760px;margin:0;color:var(--df-soft,var(--text-soft,#526073));font-size:12px;line-height:1.55}.season-hero-v157>button{display:inline-flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid var(--df-line,var(--line,#dfe3e8));border-radius:10px;background:var(--df-panel-soft,var(--panel-soft,#f8f8f5));color:var(--df-text,var(--text,#172033));font-weight:900;cursor:pointer}.brand-competition-hero-v157>div:last-child{min-width:110px;padding:14px;border:1px solid color-mix(in srgb,var(--df-primary,#c7eb34) 48%,var(--df-line,#dfe3e8));border-radius:14px;background:color-mix(in srgb,var(--df-primary,#c7eb34) 13%,var(--df-panel,#fff));text-align:center}.brand-competition-hero-v157>div:last-child span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--df-soft,#526073)}.brand-competition-hero-v157>div:last-child strong{display:block;margin-top:4px;font-size:26px}
+
+.season-grid-v157{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.season-card-v157{padding:20px!important;border-radius:18px!important}.season-card-v157>header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-bottom:15px}.season-card-v157 h2{margin:3px 0 2px;font-size:18px}.season-card-v157 p{margin:0;color:var(--df-soft,#526073);font-size:10px}.season-icon-v157{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--df-primary,#c7eb34) 18%,var(--df-panel-soft,#f8f8f5));color:var(--df-text,#172033)}.season-status-v157{display:inline-flex;align-items:center;justify-content:center;width:max-content;padding:6px 8px;border:1px solid var(--df-line,#dfe3e8);border-radius:999px;background:var(--df-panel-soft,#f8f8f5);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.season-status-v157.active{background:color-mix(in srgb,var(--df-primary,#c7eb34) 25%,var(--df-panel,#fff));border-color:color-mix(in srgb,var(--df-primary,#c7eb34) 60%,var(--df-line,#dfe3e8))}.season-ranking-v157{display:grid;gap:7px}.season-ranking-v157 article{display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--df-line,#dfe3e8);border-radius:11px;background:var(--df-panel-soft,#f8f8f5)}.season-rank-v157{font-size:10px;font-weight:900;color:var(--df-muted,#7a8493)}.season-ranking-v157 article>div{display:grid;gap:2px;min-width:0}.season-ranking-v157 strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.season-ranking-v157 small{font-size:9px;color:var(--df-muted,#7a8493)}.season-ranking-v157 b{font-size:12px;white-space:nowrap}.season-empty-v157{min-height:80px;display:flex;align-items:center;justify-content:center;gap:8px;padding:18px;border:1px dashed var(--df-line,#dfe3e8);border-radius:12px;color:var(--df-soft,#526073);font-size:11px;text-align:center}
+
+.season-invites-v157{margin:14px 0;padding:18px;border:1px solid color-mix(in srgb,var(--df-primary,#c7eb34) 48%,var(--df-line,#dfe3e8));border-radius:17px;background:color-mix(in srgb,var(--df-primary,#c7eb34) 7%,var(--df-panel,#fff))}.season-section-title-v157{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.season-section-title-v157 h2{margin:3px 0 2px;font-size:18px}.season-section-title-v157 p{margin:0;color:var(--df-soft,#526073);font-size:11px}.season-section-title-v157>b{min-width:28px;height:28px;display:grid;place-items:center;border-radius:999px;background:var(--df-primary,#c7eb34);color:var(--df-primary-text,#172033)}.season-invites-v157>article{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--df-line,#dfe3e8)}.season-invites-v157>article>div{display:flex;align-items:flex-start;gap:10px}.season-invites-v157>article span{display:grid;gap:2px}.season-invites-v157>article strong{font-size:13px}.season-invites-v157>article small,.season-invites-v157>article p{margin:0;color:var(--df-soft,#526073);font-size:10px}.season-invites-v157 footer{display:flex;gap:7px}.season-invites-v157 button{display:inline-flex;align-items:center;gap:5px;padding:8px 9px;border:1px solid var(--df-text,#172033);border-radius:9px;background:var(--df-text,#172033);color:var(--df-panel,#fff);font-size:10px;font-weight:900;cursor:pointer}.season-invites-v157 button.decline{border-color:var(--df-line,#dfe3e8);background:var(--df-panel,#fff);color:var(--df-text,#172033)}
+
+.sponsored-seasons-v157{padding:20px!important;border-radius:18px!important}.sponsored-season-list-v157{display:grid;gap:12px}.sponsored-season-list-v157>article{padding:15px;border:1px solid var(--df-line,#dfe3e8);border-radius:14px;background:var(--df-panel-soft,#f8f8f5)}.sponsored-season-list-v157>article>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.sponsored-season-list-v157 header>div{display:grid;gap:3px}.sponsored-season-list-v157 header strong{font-size:15px}.sponsored-season-list-v157 header span{font-size:10px;color:var(--df-soft,#526073)}.sponsored-season-list-v157>article>p{margin:9px 0;color:var(--df-soft,#526073);font-size:11px;line-height:1.5}.sponsored-season-meta-v157{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.sponsored-season-meta-v157 span{display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border:1px solid var(--df-line,#dfe3e8);border-radius:999px;background:var(--df-panel,#fff);font-size:9px;color:var(--df-soft,#526073)}
+
+.brand-competition-grid-v157{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:14px}.brand-competition-form-v157,.brand-competition-list-v157{padding:20px!important;border-radius:18px!important}.brand-competition-form-v157 h2,.brand-competition-list-v157 h2{margin:4px 0 14px;font-size:19px}.brand-competition-form-v157 label{display:grid;gap:6px;margin-bottom:11px;font-size:10px;font-weight:900}.brand-competition-form-v157 input,.brand-competition-form-v157 textarea{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid var(--df-line,#dfe3e8);border-radius:10px;background:var(--df-panel,#fff);color:var(--df-text,#172033);font:inherit}.brand-competition-dates-v157{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.brand-competition-form-v157 fieldset{margin:4px 0 12px;padding:12px;border:1px solid var(--df-line,#dfe3e8);border-radius:12px}.brand-competition-form-v157 legend{padding:0 5px;font-size:10px;font-weight:900}.brand-competition-form-v157 legend small{margin-left:5px;color:var(--df-muted,#7a8493);font-weight:700}.brand-gym-picker-v157{display:grid;gap:6px;max-height:260px;overflow:auto}.brand-gym-picker-v157 label{grid-template-columns:auto auto 1fr auto;align-items:center;gap:7px;margin:0;padding:8px;border:1px solid var(--df-line,#dfe3e8);border-radius:9px;background:var(--df-panel-soft,#f8f8f5);cursor:pointer}.brand-gym-picker-v157 label.selected{border-color:color-mix(in srgb,var(--df-primary,#c7eb34) 70%,var(--df-line,#dfe3e8));background:color-mix(in srgb,var(--df-primary,#c7eb34) 12%,var(--df-panel,#fff))}.brand-gym-picker-v157 input{width:auto;padding:0}.brand-competition-form-v157>button{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border:0;border-radius:10px;background:var(--df-primary,#c7eb34);color:var(--df-primary-text,#172033);font-weight:900;cursor:pointer}.brand-competition-form-v157>small{display:block;margin-top:7px;color:var(--df-muted,#7a8493);font-size:9px}.brand-competition-list-v157>header,.admin-season-head-v157{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand-competition-list-v157>header button{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--df-line,#dfe3e8);border-radius:9px;background:var(--df-panel,#fff);color:inherit}.brand-competition-list-v157>div>article{padding:13px 0;border-top:1px solid var(--df-line,#dfe3e8)}.brand-competition-list-v157 article>header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.brand-competition-list-v157 article>header>div{display:grid;gap:2px}.brand-competition-list-v157 article>header strong{font-size:13px}.brand-competition-list-v157 article>header span,.brand-competition-list-v157 article>p{font-size:10px;color:var(--df-soft,#526073)}.brand-competition-list-v157 article>p{line-height:1.45}.brand-competition-meta-v157{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}.brand-competition-meta-v157 span{display:inline-flex;align-items:center;gap:5px;font-size:9px;color:var(--df-muted,#7a8493)}.brand-competition-entries-v157{display:grid;gap:5px}.brand-competition-entries-v157>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 8px;border-radius:8px;background:var(--df-panel-soft,#f8f8f5)}.brand-competition-entries-v157>div>span{display:flex;align-items:center;gap:6px;min-width:0}.brand-competition-entries-v157 strong{font-size:10px}.brand-competition-entries-v157 small{font-size:8px;text-transform:uppercase;color:var(--df-muted,#7a8493)}.brand-competition-entries-v157 b{font-size:10px;white-space:nowrap}
+
+.admin-season-grid-v157{display:grid;grid-template-columns:minmax(300px,.72fr) minmax(0,1.28fr);gap:16px}.admin-season-form-v157 label{display:grid;gap:6px;margin-bottom:10px;font-size:11px;font-weight:800}.admin-season-form-v157 input,.admin-season-form-v157 select{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line,#dfe3e8);border-radius:9px;background:#fff}.admin-season-form-v157>button{width:100%;padding:10px;border:0;border-radius:9px;background:#172033;color:#fff;font-weight:900}.admin-season-form-v157>small{display:block;margin-top:8px;color:#667080;font-size:10px}.admin-season-list-v157{display:grid}.admin-season-list-v157>article{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #e4e7eb}.admin-season-list-v157>article>div{display:flex;align-items:center;gap:9px;min-width:0}.admin-season-list-v157>article>div>div{display:grid;gap:2px;min-width:0}.admin-season-list-v157 strong{font-size:12px}.admin-season-list-v157 small{font-size:9px;color:#667080}.admin-season-icon-v157{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:#f3f5f1}.admin-season-list-v157 footer{display:flex;align-items:center;gap:7px}.admin-season-list-v157 footer button{padding:7px 8px;border:1px solid #dfe3e8;border-radius:8px;background:#fff;font-size:9px;font-weight:900}
+
+@media(max-width:900px){.season-grid-v157,.brand-competition-grid-v157,.admin-season-grid-v157{grid-template-columns:1fr}.season-page-v157,.brand-competition-page-v157{width:min(100% - 24px,1120px)}.season-hero-v157,.brand-competition-hero-v157{padding:19px}.season-hero-v157 h1,.brand-competition-hero-v157 h1{font-size:25px}.brand-competition-grid-v157{gap:12px}}
+@media(max-width:640px){.challenge-center-nav-v157{margin-bottom:11px}.challenge-center-nav-v157 a{padding:0 9px;font-size:10px}.season-hero-v157,.brand-competition-hero-v157{align-items:flex-start;flex-direction:column}.season-hero-v157>button{width:100%;justify-content:center}.season-card-v157>header{grid-template-columns:auto 1fr}.season-card-v157>header>.season-status-v157{grid-column:1/-1}.season-invites-v157>article{align-items:flex-start;flex-direction:column}.season-invites-v157 footer{width:100%}.season-invites-v157 footer button{flex:1;justify-content:center}.brand-competition-dates-v157{grid-template-columns:1fr}.brand-competition-hero-v157>div:last-child{width:100%;box-sizing:border-box}.sponsored-season-meta-v157{align-items:flex-start;flex-direction:column}.admin-season-list-v157>article{align-items:flex-start;flex-direction:column}.admin-season-list-v157 footer{width:100%;justify-content:flex-end}}
+
+.season-history-v157{margin:14px 0;padding:20px!important;border-radius:18px!important}.season-history-v157>div:last-child{display:grid}.season-history-v157>div:last-child>article{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--df-line,#dfe3e8)}.season-history-icon-v157{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--df-panel-soft,#f8f8f5)}.season-history-v157 article>div{display:grid;gap:2px}.season-history-v157 article strong{font-size:11px}.season-history-v157 article small{font-size:9px;color:var(--df-muted,#7a8493)}
+@media(max-width:640px){.season-history-v157>div:last-child>article{grid-template-columns:auto 1fr}.season-history-v157>div:last-child>article>.season-status-v157{grid-column:1/-1}}
+
+/* V15.7.2 — QA hotfix: stable Challenge Center, explicit season actions, clearer Brand competition form */
+.challenge-center-nav-v157{width:min(1120px,calc(100vw - 40px));box-sizing:border-box;margin-left:50%;margin-right:0;transform:translateX(-50%)}
+.challenge-hero-actions-v157{margin-left:auto;display:grid;grid-template-columns:auto auto;align-items:center;justify-items:end;gap:7px 9px}.challenge-hero-actions-v157>small{grid-column:1/-1;max-width:210px;color:var(--df-muted,var(--muted,#7a8493));font-size:9px;line-height:1.35;text-align:right}.challenge-create-v157{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 10px;border-radius:10px;background:var(--df-primary,var(--primary,#c7eb34));color:var(--df-primary-text,var(--primary-text,#172033));text-decoration:none;font-size:10px;font-weight:900;white-space:nowrap}
+.admin-season-list-v157 footer{flex-wrap:wrap;justify-content:flex-end}.admin-season-list-v157 footer button.admin-season-close-v157{min-width:108px;background:#fff!important;color:#172033!important;border-color:#dfe3e8!important;opacity:1!important}.admin-season-auto-v157{max-width:150px;color:#667080!important;font-size:8px!important;line-height:1.25;text-align:right}
+.brand-competition-dates-v157{grid-template-columns:1fr}.brand-competition-dates-v157 input[type="datetime-local"]{min-width:0}.brand-competition-requirement-v157{margin:-2px 0 10px;padding:9px 10px;border:1px solid color-mix(in srgb,#f1b63f 45%,var(--df-line,#dfe3e8));border-radius:9px;background:color-mix(in srgb,#f1b63f 9%,var(--df-panel,#fff));color:var(--df-soft,#526073);font-size:9px;line-height:1.45}.brand-competition-form-v157>button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:760px){.challenge-center-nav-v157{width:min(100vw - 22px,1120px)}.challenge-hero-actions-v157{grid-template-columns:1fr;justify-items:stretch;width:100%;margin-left:0}.challenge-hero-actions-v157>small{grid-column:auto;max-width:none;text-align:left}.challenge-create-v157{width:100%;box-sizing:border-box}.admin-season-list-v157 footer{justify-content:flex-start}.admin-season-auto-v157{text-align:left}}
+
+/* V15.7.3 — season scope/editing + stable Challenge Center alignment */
+html{scrollbar-gutter:stable}
+.challenge-center-nav-v157{will-change:auto}
+.admin-season-picker-v1573{margin:4px 0 12px;padding:11px;border:1px solid #dfe3e8;border-radius:11px;background:#fafbf8}.admin-season-picker-v1573 legend{padding:0 5px;font-size:10px;font-weight:900}.admin-season-picker-v1573 legend small{margin-left:6px;color:#667080;font-weight:700}.admin-season-picker-actions-v1573{display:flex;gap:6px;margin-bottom:8px}.admin-season-picker-actions-v1573 button{padding:5px 7px;border:1px solid #dfe3e8;border-radius:7px;background:#fff;color:#172033;font-size:8px;font-weight:900;cursor:pointer}.admin-season-picker-list-v1573{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:210px;overflow:auto}.admin-season-picker-list-v1573>label{display:flex;align-items:center;gap:7px;margin:0!important;padding:8px;border:1px solid #e1e5e9;border-radius:8px;background:#fff;cursor:pointer}.admin-season-picker-list-v1573>label.selected{border-color:#b6d926;background:#f5fbdc}.admin-season-picker-list-v1573 input{width:auto!important;padding:0!important}.admin-season-picker-list-v1573 span{display:grid;gap:2px;min-width:0}.admin-season-picker-list-v1573 strong{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.admin-season-picker-list-v1573 small{font-size:7px;color:#667080;text-transform:uppercase}.admin-season-picker-empty-v1573{padding:12px;text-align:center;color:#667080;font-size:9px}.admin-season-form-actions-v1573{display:grid;grid-template-columns:1fr auto;gap:7px}.admin-season-form-actions-v1573 button{padding:10px;border-radius:9px;font-weight:900;cursor:pointer}.admin-season-save-v1573{border:0;background:#172033;color:#fff}.admin-season-save-v1573:disabled{opacity:.55;cursor:not-allowed}.admin-season-cancel-v1573{border:1px solid #dfe3e8;background:#fff;color:#172033}.admin-season-participants-v1573{display:block!important;max-width:520px;margin-top:2px;color:#536071!important;white-space:normal!important;line-height:1.35}.admin-season-list-v157 footer button{display:inline-flex;align-items:center;gap:4px}
+@media(max-width:720px){.admin-season-picker-list-v1573{grid-template-columns:1fr}.admin-season-form-actions-v1573{grid-template-columns:1fr}}
+
+/* V15.7.4 - explicit admin season action colors; never inherit invisible text */
+.admin-season-list-v157 footer button{color:#172033!important;background:#fff!important;border-color:#dfe3e8!important;opacity:1!important}
+.admin-season-list-v157 footer button svg{color:currentColor!important;stroke:currentColor!important}
+.admin-season-list-v157 footer button.admin-season-edit-v1574{min-width:76px}
+.admin-season-list-v157 footer button.admin-season-close-v157{min-width:108px}
+
+/* V15.7.5 - Challenge Center vertical alignment hotfix
+   SeasonHub used 18px top padding while the other personal challenge pages inherit 22px.
+   Keep the shared navigation at the exact same vertical position on desktop and mobile. */
+@media (min-width:761px){
+  .season-page-v157{padding-top:22px!important}
+}
+@media (max-width:760px){
+  .season-page-v157{padding-top:12px!important}
+}
+
+/* V15.7.6 - lock Challenge Center navigation geometry.
+   Video QA confirmed the top edge stays fixed while the bar's computed height
+   changes by a few pixels between routes. Use explicit geometry so route-level
+   inherited typography/layout cannot change the bar height. */
+.challenge-center-nav-v157{
+  height:50px!important;
+  min-height:50px!important;
+  max-height:50px!important;
+  box-sizing:border-box!important;
+  padding:6px!important;
+  align-items:center!important;
+  overflow-x:auto;
+  overflow-y:hidden!important;
+}
+.challenge-center-nav-v157 a{
+  height:36px!important;
+  min-height:36px!important;
+  max-height:36px!important;
+  box-sizing:border-box!important;
+  line-height:1!important;
+  flex:0 0 auto;
+}
+@media(max-width:640px){
+  .challenge-center-nav-v157{
+    height:48px!important;
+    min-height:48px!important;
+    max-height:48px!important;
+    padding:5px 6px!important;
+  }
+  .challenge-center-nav-v157 a{
+    height:36px!important;
+    min-height:36px!important;
+    max-height:36px!important;
+  }
+}
+
+/* V15.7.7 - Challenge Center shared shell.
+   Root cause: the shared nav lived INSIDE route-specific <main> containers
+   with different widths/layout modes (e.g. sponsored-page-v13 is flex+gap,
+   season-page-v157 has its own width/padding). Previous nav-only overrides
+   could not fully eliminate sub-pixel/layout-context shifts.
+   The nav now sits in a dedicated sibling shell directly below AppHeader. */
+.challenge-center-shell-v1577{
+  width:min(1120px,calc(100% - 40px));
+  margin:0 auto;
+  padding-top:22px;
+  box-sizing:border-box;
+}
+.challenge-center-shell-v1577 .challenge-center-nav-v157{
+  width:100%!important;
+  margin:0!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  transform:none!important;
+  position:relative;
+  left:auto;
+  right:auto;
+}
+.challenge-center-main-v1577{
+  padding-top:16px!important;
+}
+@media(max-width:760px){
+  .challenge-center-shell-v1577{
+    width:min(100% - 22px,1120px);
+    padding-top:12px;
+  }
+  .challenge-center-main-v1577{
+    padding-top:11px!important;
+  }
+}
+
+/* V15.7.9 - Sponsored Gym Competition editing */
+.brand-competition-edit-note-v157{margin:-4px 0 12px;padding:9px 10px;border:1px solid color-mix(in srgb,var(--df-primary,#c7eb34) 48%,var(--df-line,#dfe3e8));border-radius:9px;background:color-mix(in srgb,var(--df-primary,#c7eb34) 10%,var(--df-panel,#fff));color:var(--df-soft,#526073);font-size:9px;line-height:1.45}.brand-competition-form-actions-v157{display:flex;gap:8px;align-items:center}.brand-competition-form-actions-v157>button{flex:1;min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 12px;border-radius:10px;font-weight:900;cursor:pointer;box-sizing:border-box}.brand-competition-form-actions-v157>button[type="submit"]{border:0;background:var(--df-primary,#c7eb34);color:var(--df-primary-text,#172033)}.brand-competition-form-actions-v157>button.secondary{border:1px solid var(--df-line,#dfe3e8);background:var(--df-panel,#fff);color:var(--df-text,#172033)}.brand-competition-form-actions-v157>button svg{color:currentColor;stroke:currentColor}.brand-competition-form-actions-v157>button:disabled{opacity:.55;cursor:not-allowed}.brand-competition-card-actions-v157{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}.brand-competition-card-actions-v157>button{min-height:30px;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:6px 9px;border:1px solid var(--df-line,#dfe3e8);border-radius:8px;background:var(--df-panel,#fff);color:var(--df-text,#172033);font-size:9px;font-weight:900;cursor:pointer;box-sizing:border-box}.brand-competition-card-actions-v157>button svg{color:currentColor;stroke:currentColor}.brand-competition-card-actions-v157>button:hover{border-color:color-mix(in srgb,var(--df-primary,#c7eb34) 70%,var(--df-line,#dfe3e8));background:color-mix(in srgb,var(--df-primary,#c7eb34) 9%,var(--df-panel,#fff))}@media(max-width:640px){.brand-competition-form-actions-v157{flex-direction:column}.brand-competition-form-actions-v157>button{width:100%}.brand-competition-card-actions-v157{align-items:flex-end;flex-direction:column}}

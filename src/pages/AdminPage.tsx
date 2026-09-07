@@ -1,4 +1,4 @@
-import { Activity, BadgeCheck, BarChart3, Building2, ClipboardList, Coins, Copy, ExternalLink, Eye, FileSearch, LayoutDashboard, Megaphone, MousePointerClick, Pause, Pencil, Play, RefreshCw, Search, ShieldCheck, Tag, UserRound, UsersRound, X } from 'lucide-react';
+import { Activity, BadgeCheck, BarChart3, Building2, CalendarDays, ClipboardList, Coins, Copy, ExternalLink, Eye, FileSearch, Gift, LayoutDashboard, Megaphone, MousePointerClick, Pause, Pencil, Play, RefreshCw, Search, ShieldCheck, Tag, Trophy, UserRound, UsersRound, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -8,7 +8,7 @@ import '../styles/v14.5-ad-campaign-management.css';
 
 type Row = Record<string, any>;
 const SECTIONS = [
-  ['/admin','Dashboard',LayoutDashboard],['/admin/users','Usuarios',UsersRound],['/admin/organizations','Organizaciones',Building2],['/admin/brands','Marcas',BadgeCheck],['/admin/campaigns','Campañas',Tag],['/admin/requests','Solicitudes',ClipboardList],['/admin/ads','Publicidad',Megaphone],['/admin/audit','Auditoría',FileSearch],
+  ['/admin','Dashboard',LayoutDashboard],['/admin/users','Usuarios',UsersRound],['/admin/organizations','Organizaciones',Building2],['/admin/brands','Marcas',BadgeCheck],['/admin/campaigns','Campañas',Tag],['/admin/requests','Solicitudes',ClipboardList],['/admin/rewards','Rewards',Coins],['/admin/seasons','Temporadas',Trophy],['/admin/ads','Publicidad',Megaphone],['/admin/audit','Auditoría',FileSearch],
 ] as const;
 const fmt=(v:any)=>Number(v??0).toLocaleString('es-CO');
 const date=(v:any)=>v?new Intl.DateTimeFormat('es-CO',{dateStyle:'medium',timeStyle:'short'}).format(new Date(v)):'—';
@@ -21,11 +21,116 @@ function Dashboard(){const q=useRpc('admin_dashboard_stats');const s=q.data??{};
 
 function Users(){const [search,setSearch]=useState('');const [query,setQuery]=useState('');const q=useRpc('admin_list_users',{p_search:query||null});const change=async(row:Row)=>{if(!supabase)return;const next=row.platform_status==='suspended'?'active':'suspended';const reason=next==='suspended'?window.prompt('Motivo de suspensión:'):'Reactivación desde Backoffice';if(next==='suspended'&&!reason)return;const {error}=await supabase.rpc('admin_set_user_status',{p_user_id:row.user_id,p_status:next,p_reason:reason});if(error)alert(error.message);else void q.load();};return <AdminShell title="Usuarios" subtitle="Consulta identidad, progreso, DadoCoins y estado de acceso."><form className="admin-search-v14" onSubmit={(e)=>{e.preventDefault();setQuery(search)}}><Search size={16}/><input placeholder="Email, username, nombre o UUID" value={search} onChange={e=>setSearch(e.target.value)}/><button>Buscar</button></form>{q.error&&<div className="auth-error">{q.error}</div>}<div className="admin-table-wrap-v14"><table><thead><tr><th>Usuario</th><th>Estado</th><th>XP / Nivel</th><th>DadoCoins</th><th>Ecosistema</th><th>Registro</th><th/></tr></thead><tbody>{(q.data??[]).map((r:Row)=><tr key={r.user_id}><td><strong>{r.display_name||r.username||'Gymbro'}</strong><small>{r.email}<br/>@{r.username||'—'}</small></td><td><span className={`admin-status-v14 ${r.platform_status}`}>{r.platform_status}</span></td><td>{fmt(r.xp)} XP · N{r.level}</td><td>{fmt(r.dadocoins)} DC</td><td>{r.organizations} org · {r.squads} squads</td><td>{date(r.created_at)}</td><td><button className={r.platform_status==='suspended'?'admin-ok-v14':'admin-danger-v14'} onClick={()=>void change(r)}>{r.platform_status==='suspended'?'Reactivar':'Suspender'}</button></td></tr>)}</tbody></table></div></AdminShell>}
 
-function Organizations({brandsOnly=false}:{brandsOnly?:boolean}){const q=useRpc('admin_list_organizations');const rows=useMemo(()=>((q.data??[]) as Row[]).filter(r=>!brandsOnly||['brand','sponsor','company'].includes(r.organization_type)),[q.data,brandsOnly]);const verify=async(r:Row,status:string)=>{if(!supabase)return;const reason=status==='rejected'||status==='suspended'?window.prompt('Motivo:'):null;if((status==='rejected'||status==='suspended')&&!reason)return;const {error}=await supabase.rpc('admin_set_brand_verification',{p_organization_id:r.organization_id,p_status:status,p_reason:reason});if(error)alert(error.message);else void q.load();};return <AdminShell title={brandsOnly?'Marcas':'Organizaciones'} subtitle={brandsOnly?'Verificación y control de Brands, Sponsors y empresas.':'Vista global de Gyms, Marcas y organizaciones.'}><div className="admin-table-wrap-v14"><table><thead><tr><th>Organización</th><th>Tipo</th><th>Owner</th><th>Miembros</th><th>Estado</th>{brandsOnly&&<th>Acciones</th>}</tr></thead><tbody>{rows.map(r=><tr key={r.organization_id}><td><strong>{r.name}</strong><small>{date(r.created_at)}</small></td><td>{r.organization_type}</td><td>{r.owner_name}<small>{r.owner_email}</small></td><td>{r.members}</td><td><span className={`admin-status-v14 ${r.verification_status}`}>{r.verification_status}</span></td>{brandsOnly&&<td className="admin-actions-v14"><button className="admin-ok-v14" onClick={()=>void verify(r,'verified')}>Verificar</button><button onClick={()=>void verify(r,'pending_verification')}>Pendiente</button><button className="admin-danger-v14" onClick={()=>void verify(r,'suspended')}>Suspender</button></td>}</tr>)}</tbody></table></div></AdminShell>}
+function Organizations({brandsOnly=false}:{brandsOnly?:boolean}){const q=useRpc('admin_list_organizations');const rows=useMemo(()=>((q.data??[]) as Row[]).filter(r=>!brandsOnly||['brand','sponsor','company'].includes(r.organization_type)),[q.data,brandsOnly]);const verify=async(r:Row,status:string)=>{if(!supabase)return;const needsReason=status==='rejected'||status==='suspended';const reason=needsReason?window.prompt(status==='rejected'?'Motivo del rechazo:':'Motivo de suspensión:'):null;if(needsReason&&!reason)return;const {error}=await supabase.rpc('admin_set_organization_verification',{p_organization_id:r.organization_id,p_status:status,p_reason:reason});if(error)alert(error.message);else void q.load();};return <AdminShell title={brandsOnly?'Marcas':'Organizaciones'} subtitle={brandsOnly?'Verificación y control de Brands, Sponsors y empresas.':'Aprobación y control de Gyms, Marcas y organizaciones.'}><div className="admin-table-wrap-v14"><table><thead><tr><th>Organización</th><th>Tipo</th><th>Owner</th><th>Miembros</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>{rows.map(r=><tr key={r.organization_id}><td><strong>{r.name}</strong><small>{date(r.created_at)}</small></td><td>{r.organization_type}</td><td>{r.owner_name}<small>{r.owner_email}</small></td><td>{r.members}</td><td><span className={`admin-status-v14 ${r.verification_status}`}>{r.verification_status}</span></td><td className="admin-actions-v14">{r.verification_status!=='verified'&&<button className="admin-ok-v14" onClick={()=>void verify(r,'verified')}>{r.organization_type==='gym'?'Aprobar':'Verificar'}</button>}{r.verification_status!=='pending_verification'&&<button onClick={()=>void verify(r,'pending_verification')}>Pendiente</button>}{r.verification_status!=='rejected'&&<button className="admin-danger-v14" onClick={()=>void verify(r,'rejected')}>Rechazar</button>}{r.verification_status!=='suspended'&&<button className="admin-danger-v14" onClick={()=>void verify(r,'suspended')}>Suspender</button>}</td></tr>)}</tbody></table></div></AdminShell>}
 
 function Campaigns(){const q=useRpc('admin_list_campaigns');const rows=(q.data??[]) as Row[];return <AdminShell title="Campañas patrocinadas" subtitle="Histórico global de campañas, participación y recompensas.">{q.error&&<div className="auth-error">{q.error}</div>}{!q.loading&&!q.error&&rows.length===0&&<div className="admin-empty-v142"><Tag size={22}/><strong>No hay campañas disponibles</strong><span>Cuando una Marca cree una campaña patrocinada aparecerá aquí con sus métricas globales.</span></div>}<div className="admin-table-wrap-v14"><table><thead><tr><th>Marca / Campaña</th><th>Estado</th><th>Retos</th><th>Participantes</th><th>Aprobados / Rechazados</th><th>Rewards</th><th>Control</th></tr></thead><tbody>{rows.map((r:Row)=><tr key={r.campaign_id}><td><strong>{r.organization_name}</strong><small>{r.campaign_name}</small></td><td><span className={`admin-status-v14 ${r.status}`}>{r.status}</span></td><td>{r.challenges}</td><td>{r.participants}</td><td>{r.approved} / {r.rejected}</td><td>{fmt(r.coins_granted)} DC · {fmt(r.xp_granted)} XP</td><td>{r.requires_double_validation?'Doble validación':'Simple'}</td></tr>)}</tbody></table></div></AdminShell>}
 
 function Requests(){const [filter,setFilter]=useState('');const q=useRpc('admin_list_support_requests',{p_status:filter||null});const update=async(r:Row,status:string)=>{if(!supabase)return;const notes=window.prompt('Nota administrativa (opcional):')||null;const {error}=await supabase.rpc('admin_update_support_request',{p_request_id:r.id,p_status:status,p_admin_notes:notes});if(error)alert(error.message);else void q.load();};return <AdminShell title="Solicitudes" subtitle="Soporte, pauta, alianzas y requerimientos recibidos desde Contáctanos."><div className="admin-filter-v14"><select value={filter} onChange={e=>setFilter(e.target.value)}><option value="">Todos</option><option value="new">Nuevos</option><option value="reviewing">En revisión</option><option value="in_progress">En proceso</option><option value="responded">Respondidos</option><option value="closed">Cerrados</option></select></div>{q.error&&<div className="auth-error">{q.error}</div>}{!q.loading&&!q.error&&(q.data??[]).length===0&&<div className="admin-empty-v142"><ClipboardList size={22}/><strong>No hay solicitudes en este estado</strong><span>Los mensajes enviados desde Contáctanos, pauta, soporte y alianzas aparecerán aquí.</span></div>}<section className="admin-request-list-v14">{(q.data??[]).map((r:Row)=><article key={r.id}><header><div><span className="eyebrow">{r.request_type}</span><h3>{r.subject}</h3><p>{r.name} · {r.email}{r.company?` · ${r.company}`:''}</p></div><span className={`admin-status-v14 ${r.status}`}>{r.status}</span></header><p>{r.message}</p>{r.admin_notes&&<blockquote>{r.admin_notes}</blockquote>}<footer><small>{date(r.created_at)}</small><div><button onClick={()=>void update(r,'reviewing')}>Revisar</button><button onClick={()=>void update(r,'in_progress')}>En proceso</button><button onClick={()=>void update(r,'responded')}>Respondido</button><button onClick={()=>void update(r,'closed')}>Cerrar</button></div></footer></article>)}</section></AdminShell>}
+
+function RewardsAnalyticsAdmin(){
+  const [days,setDays]=useState(30);
+  const q=useRpc('admin_reward_analytics',{p_days:days});
+  const summary=q.data?.summary??{};
+  const providers=(q.data?.providers??[]) as Row[];
+  const topRewards=(q.data?.top_rewards??[]) as Row[];
+  const trend=(q.data?.trend??[]) as Row[];
+  const maxTrend=useMemo(()=>Math.max(1,...trend.map((r:Row)=>Number(r.redemptions??0))),[trend]);
+  const shortDay=(v:any)=>v?new Intl.DateTimeFormat('es-CO',{day:'2-digit',month:'short'}).format(new Date(v)):'—';
+  return <AdminShell title="Rewards Analytics" subtitle="Economía de DadoCoins, canjes, partners y salud del inventario de premios.">
+    <div className="admin-reward-toolbar-v154"><div><button className={days===7?'active':''} onClick={()=>setDays(7)}>7 días</button><button className={days===30?'active':''} onClick={()=>setDays(30)}>30 días</button><button className={days===90?'active':''} onClick={()=>setDays(90)}>90 días</button></div><button className="admin-refresh-v14" onClick={()=>void q.load()}><RefreshCw size={15}/> Actualizar</button></div>
+    {q.error&&<div className="auth-error">{q.error}</div>}
+    <div className="admin-reward-note-v154">“DC en circulación” es la suma de saldos actuales de wallets dentro del ecosistema DadoFit; no representa dinero, cash-out ni una valoración monetaria.</div>
+    <section className="admin-reward-economy-v154"><article><span>DC emitidos</span><strong>{fmt(summary.dc_issued)}</strong><small>Créditos positivos del ledger en el periodo</small></article><article><span>DC consumidos en Rewards</span><strong>{fmt(summary.dc_consumed)}</strong><small>DadoCoins usados en canjes del periodo</small></article><article><span>DC en circulación</span><strong>{fmt(summary.dc_circulation)}</strong><small>Saldo actual agregado de wallets</small></article></section>
+    <section className="admin-kpi-grid-v14 admin-reward-kpis-v154">{[
+      ['Canjes',summary.redemptions,Gift],['Gymbros únicos',summary.unique_users,UsersRound],['Entregados',summary.redeemed,BadgeCheck],['Pendientes entrega',summary.pending_delivery,Activity],['Ofertas activas',summary.active_rewards,Tag],['Partners con Rewards',summary.providers,Building2],['Stock bajo',summary.low_stock_offers,Activity],
+    ].map(([label,value,Icon]:any)=><article key={label}><Icon size={20}/><span>{label}</span><strong>{fmt(value)}</strong></article>)}</section>
+    <section className="admin-card-v14 reward-trend-card-v154"><header><div><span className="eyebrow">TENDENCIA</span><h2>Canjes diarios</h2></div><small>Últimos {days} días</small></header>{trend.every((row:Row)=>Number(row.redemptions??0)===0)?<div className="reward-analytics-empty-v154">Sin canjes en este periodo.</div>:<div className="reward-trend-v154">{trend.map((row:Row)=><div key={String(row.day)} className="reward-trend-column-v154" title={`${shortDay(row.day)} · ${fmt(row.redemptions)} canjes · ${fmt(row.dc_consumed)} DC consumidos · ${fmt(row.dc_issued)} DC emitidos`}><div className="reward-trend-bar-wrap-v154"><div className="reward-trend-bar-v154" style={{height:`${Math.max(4,(Number(row.redemptions??0)/maxTrend)*100)}%`}}/></div><span>{shortDay(row.day)}</span></div>)}</div>}</section>
+    <section className="admin-card-v14"><span className="eyebrow">PARTNERS</span><h2>Rendimiento por organización</h2>{providers.length===0?<div className="admin-empty-v142"><Coins size={22}/><strong>No hay partners con Rewards.</strong></div>:<div className="admin-table-wrap-v14"><table><thead><tr><th>Partner</th><th>Tipo</th><th>Ofertas activas</th><th>Canjes</th><th>Usuarios</th><th>DC consumidos</th><th>Stock bajo</th></tr></thead><tbody>{providers.map((r:Row)=><tr key={r.organization_id}><td><strong>{r.organization_name}</strong></td><td>{r.organization_type}</td><td>{fmt(r.active_rewards)}</td><td>{fmt(r.redemptions)}</td><td>{fmt(r.unique_users)}</td><td>{fmt(r.dc_consumed)} DC</td><td>{fmt(r.low_stock)}</td></tr>)}</tbody></table></div>}</section>
+    <section className="admin-card-v14"><span className="eyebrow">TOP REWARDS</span><h2>Premios con más actividad</h2>{topRewards.length===0?<div className="admin-empty-v142"><Gift size={22}/><strong>Sin canjes en este periodo.</strong></div>:<div className="admin-table-wrap-v14"><table><thead><tr><th>Premio</th><th>Partner</th><th>Estado</th><th>Canjes</th><th>Usuarios</th><th>DC</th><th>Stock actual</th></tr></thead><tbody>{topRewards.map((r:Row)=><tr key={r.reward_id}><td><strong>{r.title}</strong><small>{fmt(r.coin_cost)} DC por canje</small></td><td>{r.organization_name}<small>{r.organization_type}</small></td><td><span className={`admin-status-v14 ${r.status}`}>{r.status}</span></td><td>{fmt(r.redemptions)}</td><td>{fmt(r.unique_users)}</td><td>{fmt(r.dc_consumed)}</td><td>{r.remaining_stock===null?'Abierto':fmt(r.remaining_stock)}</td></tr>)}</tbody></table></div>}</section>
+  </AdminShell>;
+}
+
+function SeasonsAdmin(){
+  const q=useRpc('admin_list_competitive_seasons');
+  const [name,setName]=useState('');
+  const [type,setType]=useState<'squad'|'gym'>('gym');
+  const now=new Date();
+  const next=new Date(now.getTime()+30*24*60*60*1000);
+  const local=(d:Date)=>{const pad=(n:number)=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;};
+  const [start,setStart]=useState(local(now));
+  const [end,setEnd]=useState(local(next));
+  const [saving,setSaving]=useState(false);
+  const [error,setError]=useState('');
+  const [options,setOptions]=useState<Row[]>([]);
+  const [selected,setSelected]=useState<string[]>([]);
+  const [optionsLoading,setOptionsLoading]=useState(false);
+  const [editingId,setEditingId]=useState<string|null>(null);
+  const rows=(q.data??[]) as Row[];
+
+  const loadOptions=useCallback(async(seasonType:'squad'|'gym', keepSelected=false)=>{
+    if(!supabase)return;
+    setOptionsLoading(true);
+    const {data,error:rpcError}=await supabase.rpc('admin_competitive_season_options',{p_season_type:seasonType});
+    setOptionsLoading(false);
+    if(rpcError){setError(rpcError.message);return;}
+    const nextOptions=(data??[]) as Row[];
+    setOptions(nextOptions);
+    if(!keepSelected)setSelected([]);
+  },[]);
+
+  useEffect(()=>{void loadOptions(type,Boolean(editingId));},[type,editingId,loadOptions]);
+
+  const resetForm=()=>{setEditingId(null);setName('');setStart(local(new Date()));setEnd(local(new Date(Date.now()+30*24*60*60*1000)));setSelected([]);setError('');};
+  const toggle=(id:string)=>setSelected(current=>current.includes(id)?current.filter(value=>value!==id):[...current,id]);
+
+  const save=async(e:FormEvent)=>{
+    e.preventDefault();
+    if(!supabase)return;
+    if(selected.length===0){setError(`Selecciona al menos un ${type==='gym'?'Gym':'Squad'} para la temporada.`);return;}
+    setSaving(true);setError('');
+    const args={p_name:name.trim(),p_starts_at:new Date(start).toISOString(),p_ends_at:new Date(end).toISOString(),p_entry_ids:selected};
+    const result=editingId
+      ? await supabase.rpc('admin_update_competitive_season',{p_season_id:editingId,...args})
+      : await supabase.rpc('admin_create_competitive_season',{p_season_type:type,...args});
+    setSaving(false);
+    if(result.error){setError(result.error.message);return;}
+    resetForm();
+    await q.load();
+  };
+
+  const edit=(r:Row)=>{
+    setEditingId(r.id);
+    setType(r.season_type as 'squad'|'gym');
+    setName(r.name??'');
+    setStart(local(new Date(r.starts_at)));
+    setEnd(local(new Date(r.ends_at)));
+    setSelected(((r.participants??[]) as Row[]).map(item=>item.id));
+    setError('');
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  const setStatus=async(id:string,status:string)=>{if(!supabase)return;setError('');const {error:rpcError}=await supabase.rpc('admin_set_competitive_season_status',{p_season_id:id,p_status:status});if(rpcError){setError(rpcError.message);return;}if(editingId===id)resetForm();void q.load();};
+
+  return <AdminShell title="Temporadas TP / GP" subtitle="Define ventanas competitivas y selecciona qué Squads o Gyms participan, sin borrar el histórico del ledger.">
+    {(error||q.error)&&<div className="auth-error">{error||q.error}</div>}
+    <section className="admin-season-grid-v157">
+      <form className="admin-card-v14 admin-season-form-v157" onSubmit={save}>
+        <span className="eyebrow">{editingId?'EDITAR TEMPORADA':'NUEVA TEMPORADA'}</span>
+        <h2>{editingId?'Corregir ventana competitiva':'Crear ventana competitiva'}</h2>
+        <label>Tipo<select value={type} disabled={Boolean(editingId)} onChange={e=>setType(e.target.value as 'squad'|'gym')}><option value="gym">Gym · GP</option><option value="squad">Squad · TP</option></select></label>
+        <label>Nombre<input required maxLength={120} value={name} onChange={e=>setName(e.target.value)} placeholder={type==='gym'?'Temporada Gym · Octubre':'Temporada Squad · Octubre'}/></label>
+        <div className="admin-form-grid-v14"><label>Inicio<input type="datetime-local" required value={start} onChange={e=>setStart(e.target.value)}/></label><label>Fin<input type="datetime-local" required value={end} onChange={e=>setEnd(e.target.value)}/></label></div>
+        <fieldset className="admin-season-picker-v1573"><legend>{type==='gym'?'Gyms participantes':'Squads participantes'} <small>{selected.length} seleccionados</small></legend>
+          <div className="admin-season-picker-actions-v1573"><button type="button" onClick={()=>setSelected(options.map(item=>item.id))}>Seleccionar todos</button><button type="button" onClick={()=>setSelected([])}>Limpiar</button></div>
+          {optionsLoading?<div className="admin-season-picker-empty-v1573">Cargando participantes…</div>:options.length===0?<div className="admin-season-picker-empty-v1573">No hay {type==='gym'?'Gyms':'Squads'} disponibles.</div>:<div className="admin-season-picker-list-v1573">{options.map(item=><label key={item.id} className={selected.includes(item.id)?'selected':''}><input type="checkbox" checked={selected.includes(item.id)} onChange={()=>toggle(item.id)}/><span><strong>{item.name}</strong>{type==='gym'&&item.verification_status&&<small>{item.verification_status}</small>}</span></label>)}</div>}
+        </fieldset>
+        <div className="admin-season-form-actions-v1573"><button className="admin-season-save-v1573" disabled={saving||selected.length===0}>{saving?(editingId?'Guardando…':'Creando…'):(editingId?'Guardar cambios':'Crear temporada')}</button>{editingId&&<button className="admin-season-cancel-v1573" type="button" onClick={resetForm}>Cancelar edición</button>}</div>
+        <small>No se permite solapar dos temporadas activas/próximas del mismo tipo. El sistema ahora te dirá cuál temporada entra en conflicto.</small>
+      </form>
+      <section className="admin-card-v14"><div className="admin-season-head-v157"><div><span className="eyebrow">HISTÓRICO</span><h2>Temporadas configuradas</h2></div><button type="button" className="admin-refresh-v14" onClick={()=>void q.load()}><RefreshCw size={14}/> Actualizar</button></div>{q.loading?<div className="admin-empty-v142">Cargando…</div>:rows.length===0?<div className="admin-empty-v142"><CalendarDays size={22}/><strong>No hay temporadas.</strong></div>:<div className="admin-season-list-v157">{rows.map(r=><article key={r.id}><div><span className="admin-season-icon-v157">{r.season_type==='gym'?<Building2 size={17}/>:<Trophy size={17}/>}</span><div><strong>{r.name}</strong><small>{r.season_type==='gym'?'Gym · GP':'Squad · TP'} · {date(r.starts_at)} → {date(r.ends_at)} · {fmt(r.score_events)} eventos</small><small className="admin-season-participants-v1573">{((r.participants??[]) as Row[]).length?((r.participants??[]) as Row[]).map(item=>item.name).join(' · '):'Alcance legado: todos los participantes'}</small></div></div><footer><span className={`admin-status-v14 ${r.status}`}>{r.status}</span>{r.status==='upcoming'&&<small className="admin-season-auto-v157">Se activa automáticamente al iniciar</small>}{['upcoming','active'].includes(r.status)&&<button type="button" className="admin-season-edit-v1574" onClick={()=>edit(r)}><Pencil size={12}/> Editar</button>}{r.status==='active'&&<button type="button" className="admin-season-close-v157" onClick={()=>void setStatus(r.id,'completed')}>Cerrar temporada</button>}</footer></article>)}</div>}</section>
+    </section>
+  </AdminShell>;
+}
 
 function Ads(){
   const [placements,setPlacements]=useState<Row[]>([]);
@@ -264,4 +369,4 @@ function Ads(){
 }
 function Audit(){const platform=useRpc('admin_list_audit',{p_limit:200});const reviews=useRpc('admin_list_challenge_reviews',{p_limit:150});return <AdminShell title="Auditoría global" subtitle="Trazabilidad de decisiones administrativas y revisiones de evidencias."><section className="admin-audit-grid-v14"><div className="admin-card-v14"><span className="eyebrow">ADMINISTRACIÓN</span><h2>Acciones SuperAdmin</h2><div className="admin-timeline-v14">{(platform.data??[]).map((r:Row)=><article key={r.id}><span>{date(r.created_at)}</span><strong>{r.action}</strong><p>{r.entity_type} · {r.entity_id||'—'}</p></article>)}</div></div><div className="admin-card-v14"><span className="eyebrow">EVIDENCIAS</span><h2>Revisiones globales</h2><div className="admin-timeline-v14">{(reviews.data??[]).map((r:Row)=><article key={r.review_id}><span>{date(r.created_at)}</span><strong>{r.participant_name} · {r.decision}</strong><p>{r.review_stage} · {r.reviewer_name} · {r.exercise_name}{r.organization_name?` · ${r.organization_name}`:''}</p></article>)}</div></div></section></AdminShell>}
 
-export function AdminPage(){const path=useLocation().pathname;if(path==='/admin/users')return <Users/>;if(path==='/admin/organizations')return <Organizations/>;if(path==='/admin/brands')return <Organizations brandsOnly/>;if(path==='/admin/campaigns')return <Campaigns/>;if(path==='/admin/requests')return <Requests/>;if(path==='/admin/ads')return <Ads/>;if(path==='/admin/audit')return <Audit/>;return <Dashboard/>;}
+export function AdminPage(){const path=useLocation().pathname;if(path==='/admin/users')return <Users/>;if(path==='/admin/organizations')return <Organizations/>;if(path==='/admin/brands')return <Organizations brandsOnly/>;if(path==='/admin/campaigns')return <Campaigns/>;if(path==='/admin/requests')return <Requests/>;if(path==='/admin/rewards')return <RewardsAnalyticsAdmin/>;if(path==='/admin/seasons')return <SeasonsAdmin/>;if(path==='/admin/ads')return <Ads/>;if(path==='/admin/audit')return <Audit/>;return <Dashboard/>;}

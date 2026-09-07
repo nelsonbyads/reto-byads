@@ -57,6 +57,7 @@ export function AppHeader() {
     { to: '/squads', label: 'Squads', icon: Shield, compact: 'secondary' },
     { to: '/organizations', label: 'Organizaciones', icon: Building2, compact: 'secondary' },
     { to: '/sponsored-challenges', label: 'Patrocinados', icon: Sparkles, compact: 'secondary' },
+    { to: '/seasons', label: 'Temporadas', icon: Trophy, compact: 'secondary' },
   ] : gym ? [
     { to: '/workspace', label: 'Dashboard', icon: Trophy },
     { to: '/rewards/manage', label: 'Ofertas', icon: Gift },
@@ -71,6 +72,7 @@ export function AppHeader() {
     { to: '/organizations', label: 'Equipo', icon: Building2 },
   ], [brandManager, gym, personal]);
 
+  const directItems = personal ? navItems.filter((item) => item.compact === 'primary') : navItems;
   const secondaryItems = personal ? navItems.filter((item) => item.compact === 'secondary') : [];
   const secondaryActive = secondaryItems.some((item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`));
 
@@ -83,7 +85,7 @@ export function AppHeader() {
     </div>
 
     <nav className="app-nav-v133 app-nav-v151" aria-label="Navegación principal">
-      {cloud && navItems.map((item) => {
+      {cloud && directItems.map((item) => {
         const Icon = item.icon;
         return <NavLink key={item.to} to={item.to} className={({ isActive }) => `${isActive ? 'active ' : ''}${item.compact === 'secondary' ? 'nav-secondary-v151' : 'nav-primary-v151'}`.trim()}><Icon size={15}/><span>{item.label}</span></NavLink>;
       })}

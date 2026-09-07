@@ -1,4 +1,4 @@
-import { Coins, Edit3, FileUp, Gift, KeyRound, Link2, Pause, Play, Plus, QrCode, RefreshCw, Save, Store, X } from 'lucide-react';
+import { BarChart3, Coins, Edit3, FileUp, Gift, KeyRound, Link2, Pause, Play, Plus, QrCode, RefreshCw, Save, Store, X } from 'lucide-react';
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
@@ -235,7 +235,7 @@ export function RewardManagementPage() {
   return <div className="workout-layout rewards-page-v15"><AppHeader/><main className="rewards-shell-v15">
     <section className="rewards-hero-v15 provider-hero-v15">
       <div><span className="eyebrow">REWARDS PARTNER</span><h1>Ofertas de {activeWorkspace.label}</h1><p>Crea beneficios para que los Gymbros conviertan sus DadoCoins en valor real.</p></div>
-      <div className="provider-hero-actions-v152"><Link to="/rewards/validate" className="provider-validate-link-v152"><QrCode size={17}/> Validar canjes</Link><div className="provider-status-v15"><Store size={19}/><span>Estado</span><strong>{verified ? 'VERIFICADO' : 'SIN VERIFICAR'}</strong></div></div>
+      <div className="provider-hero-actions-v152"><Link to="/rewards/analytics" className="provider-validate-link-v152"><BarChart3 size={17}/> Analytics</Link><Link to="/rewards/validate" className="provider-validate-link-v152"><QrCode size={17}/> Validar canjes</Link><div className="provider-status-v15"><Store size={19}/><span>Estado</span><strong>{verified ? 'VERIFICADO' : 'SIN VERIFICAR'}</strong></div></div>
     </section>
     {!verified && <div className="reward-warning-v15">Puedes preparar borradores, pero la organización debe estar verificada para publicar premios.</div>}
     {error && <div className="auth-error">{error}</div>}

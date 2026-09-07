@@ -11,6 +11,8 @@ function notificationTarget(item: NotificationRow): string {
   const type = item.notification_type;
   if (type === 'sponsored_audit_required') return '/brand-audit';
   if (type === 'sponsored_evidence_submitted') return '/brand-campaigns';
+  if (type === 'sponsored_gym_competition_invited') return '/seasons';
+  if (type === 'sponsored_gym_competition_response') return '/brand-competitions';
   if (type.startsWith('sponsored_')) return '/sponsored-challenges';
   if (type.startsWith('gym_battle_') || item.data?.organization_battle_id) return '/gym-battles';
   if (type.startsWith('organization_challenge_')) return '/organization-challenges';
@@ -49,6 +51,16 @@ export function NotificationBell() {
   const prepareWorkspace = (item: NotificationRow) => {
     if (item.notification_type === 'sponsored_evidence_submitted' || item.notification_type === 'sponsored_audit_required') {
       const organizationId = typeof item.data?.organization_id === 'string' ? item.data.organization_id : null;
+      if (organizationId) selectWorkspace(`org:${organizationId}`);
+      return;
+    }
+    if (item.notification_type === 'sponsored_gym_competition_invited') {
+      const organizationId = typeof item.data?.organization_id === 'string' ? item.data.organization_id : null;
+      if (organizationId) selectWorkspace(`org:${organizationId}`);
+      return;
+    }
+    if (item.notification_type === 'sponsored_gym_competition_response') {
+      const organizationId = typeof item.data?.sponsor_organization_id === 'string' ? item.data.sponsor_organization_id : null;
       if (organizationId) selectWorkspace(`org:${organizationId}`);
       return;
     }
