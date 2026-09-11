@@ -1,10 +1,11 @@
-import { ArrowLeft, Building2, Coins, Save, Sparkles, Trophy, UserRound, UsersRound } from 'lucide-react';
+import { ArrowLeft, Building2, Coins, Eye, EyeOff, KeyRound, Save, ShieldCheck, Sparkles, Trophy, UserRound, UsersRound } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { WorkspaceActionLink } from '../components/WorkspaceActionLink';
 import { AppHeader } from '../components/AppHeader';
 import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabase';
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validateNewPassword, validatePasswordConfirmation } from '../lib/passwordRules';
 
 interface SponsorPointBalance { sponsor_organization_id: string; sponsor_name: string; logo_url: string | null; balance: number; lifetime_earned: number; lifetime_spent: number; }
 
@@ -25,7 +26,7 @@ interface ProfileStats {
 const EMPTY_STATS: ProfileStats = { xp: 0, level: 1, currentStreak: 0, challengesCompleted: 0, coins: 0, gymbros: 0, squads: 0, squadPoints: 0, organizations: 0, organizationPoints: 0, pendingChallenges: 0 };
 
 export function ProfilePage() {
-  const { user } = useAuth();
+  const { user, changePassword } = useAuth();
   const [displayName, setDisplayName] = useState(user?.name ?? '');
   const [username, setUsername] = useState(user?.username ?? '');
   const [stats, setStats] = useState<ProfileStats>(EMPTY_STATS);
@@ -34,6 +35,13 @@ export function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showSecurityPasswords, setShowSecurityPasswords] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
 
   useEffect(() => {
     if (!user || user.provider !== 'supabase' || !supabase) { setLoading(false); return; }
@@ -65,6 +73,30 @@ export function ProfilePage() {
     void load();
     return () => { active = false; };
   }, [user]);
+
+  const savePassword = async (event: FormEvent) => {
+    event.preventDefault();
+    setPasswordError('');
+    setPasswordMessage('');
+    if (!currentPassword) { setPasswordError('Ingresa tu contraseña actual.'); return; }
+    if (currentPassword === newPassword) { setPasswordError('La nueva contraseña debe ser diferente a la actual.'); return; }
+    const passwordRuleError = validateNewPassword(newPassword);
+    if (passwordRuleError) { setPasswordError(passwordRuleError); return; }
+    const confirmationError = validatePasswordConfirmation(newPassword, confirmPassword);
+    if (confirmationError) { setPasswordError(confirmationError); return; }
+    setPasswordSaving(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordMessage('Contraseña actualizada correctamente.');
+    } catch (reason) {
+      setPasswordError(reason instanceof Error ? reason.message : 'No pudimos actualizar la contraseña.');
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
 
   const save = async (event: FormEvent) => {
     event.preventDefault(); setMessage(''); setError('');
@@ -128,6 +160,18 @@ export function ProfilePage() {
             <label>Username<div className="profile-username-field-v9"><span>@</span><input value={username} onChange={(e) => setUsername(e.target.value)} minLength={3} maxLength={30} required/></div></label>
             {error && <div className="auth-error">{error}</div>}{message && <div className="auth-success">{message}</div>}
             <button className="profile-primary-v9" type="submit" disabled={saving}><Save size={16}/>{saving ? 'Guardando…' : 'Guardar cambios'}</button>
+          </form>
+        </section>
+
+        <section id="account-security" className="profile-card-v9 account-security-v15713">
+          <div className="account-security-head-v15713"><div><span className="eyebrow">SEGURIDAD</span><h2>Contraseña de tu cuenta</h2><p className="profile-section-copy-v133">Actualiza tu contraseña verificando primero la actual. Ningún Gym, Marca o administrador puede verla.</p></div><ShieldCheck size={24}/></div>
+          <form className="profile-form-v9 account-security-form-v15713" onSubmit={savePassword}>
+            <label>Contraseña actual<div className="password-field-v15713"><input type={showSecurityPasswords?'text':'password'} autoComplete="current-password" value={currentPassword} onChange={(event)=>setCurrentPassword(event.target.value)} required/><button type="button" onClick={()=>setShowSecurityPasswords((value)=>!value)} aria-label={showSecurityPasswords?'Ocultar contraseñas':'Mostrar contraseñas'}>{showSecurityPasswords?<EyeOff size={17}/>:<Eye size={17}/>}</button></div></label>
+            <label>Nueva contraseña<input type={showSecurityPasswords?'text':'password'} autoComplete="new-password" value={newPassword} onChange={(event)=>setNewPassword(event.target.value)} minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} required/></label>
+            <label>Confirmar contraseña<input type={showSecurityPasswords?'text':'password'} autoComplete="new-password" value={confirmPassword} onChange={(event)=>setConfirmPassword(event.target.value)} minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} required/></label>
+            <div className="password-policy-profile-v15713"><KeyRound size={15}/><span>Entre {PASSWORD_MIN_LENGTH} y {PASSWORD_MAX_LENGTH} caracteres. Evita reutilizar contraseñas de otros servicios.</span></div>
+            {passwordError&&<div className="auth-error" role="alert">{passwordError}</div>}{passwordMessage&&<div className="auth-success" role="status">{passwordMessage}</div>}
+            <button className="profile-primary-v9" type="submit" disabled={passwordSaving}><KeyRound size={16}/>{passwordSaving?'Actualizando…':'Cambiar contraseña'}</button>
           </form>
         </section>
       </>}

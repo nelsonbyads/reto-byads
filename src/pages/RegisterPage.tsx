@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth, type SignupIntent } from '../auth/AuthContext';
 import { isSupabaseConfigured } from '../lib/supabase';
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validateNewPassword } from '../lib/passwordRules';
 
 const INTENTS: Array<{ id: SignupIntent; title: string; description: string; icon: typeof UserRound }> = [
   { id: 'personal', title: 'Soy deportista', description: 'Entrenar, Gymbros, Squads y retos personales.', icon: UserRound },
@@ -29,7 +30,8 @@ export function RegisterPage() {
     setError('');
     setSuccess('');
     if (name.trim().length < 2) { setError('Ingresa tu nombre.'); return; }
-    if (password.length < 6) { setError('La contraseña debe tener mínimo 6 caracteres.'); return; }
+    const passwordError = validateNewPassword(password);
+    if (passwordError) { setError(passwordError); return; }
 
     setSubmitting(true);
     try {
@@ -68,7 +70,7 @@ export function RegisterPage() {
         <form className="auth-form" onSubmit={submit}>
           <label>Nombre<input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required/></label>
           <label>Correo electrónico<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required/></label>
-          <label>Contraseña<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={6} required/></label>
+          <label>Contraseña<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} required/></label>
           {error && <div className="auth-error" role="alert">{error}</div>}
           {success && <div className="auth-success" role="status">{success}</div>}
           <button className="auth-primary" type="submit" disabled={submitting || Boolean(success)}>{submitting ? 'Creando…' : <>CREAR CUENTA <ArrowRight size={18}/></>}</button>

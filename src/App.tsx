@@ -17,6 +17,7 @@ import './styles/v15.4-reward-analytics.css';
 import './styles/v15.7-pre-release.css';
 import './styles/v15.7.11-economy-foundation.css';
 import './styles/v15.7.12-brand-editing.css';
+import './styles/v15.7.13-account-security.css';
 import { AdminPage } from './pages/AdminPage';
 import { BrandAuditPage } from './pages/BrandAuditPage';
 import { BrandCampaignsPage } from './pages/BrandCampaignsPage';
@@ -28,6 +29,8 @@ import { GymbrosPage } from './pages/GymbrosPage';
 import { GymBattlesPage } from './pages/GymBattlesPage';
 import { LegalPage } from './pages/LegalPage';
 import { LoginPage } from './pages/LoginPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { OrganizationChallengesPage } from './pages/OrganizationChallengesPage';
 import { OrganizationsPage } from './pages/OrganizationsPage';
@@ -44,9 +47,10 @@ import { WorkoutPage } from './pages/WorkoutPage';
 import { WorkspaceHomePage } from './pages/WorkspaceHomePage';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, recoveryMode } = useAuth();
   const location = useLocation();
   if (loading) return <main className="auth-loading">Conectando DadoFit…</main>;
+  if (recoveryMode) return <Navigate to="/reset-password" replace/>;
   if (!user) return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />;
   return <PlatformAccountGate>{children}</PlatformAccountGate>;
 }
@@ -59,8 +63,9 @@ function WorkspaceRoute({ allow, children }: { allow: readonly WorkspaceKind[]; 
 }
 
 function WorkspaceRedirect() {
-  const { user } = useAuth();
+  const { user, recoveryMode } = useAuth();
   const { loading, activeWorkspace, signupIntent, needsBusinessSetup } = useWorkspace();
+  if (recoveryMode) return <Navigate to="/reset-password" replace/>;
   if (!user) return <Navigate to="/login" replace/>;
   if (loading) return <main className="auth-loading">Cargando workspace…</main>;
   if (user.provider === 'supabase' && needsBusinessSetup && (signupIntent === 'gym' || signupIntent === 'brand')) return <Navigate to={`/business-setup?type=${signupIntent}`} replace/>;
@@ -74,6 +79,8 @@ export default function App() {
     <Routes>
       <Route path="/" element={<WorkspaceRedirect/>}/>
       <Route path="/login" element={<LoginPage/>}/>
+      <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
+      <Route path="/reset-password" element={<ResetPasswordPage/>}/>
       <Route path="/register" element={<RegisterPage/>}/>
       <Route path="/contact" element={<ContactPage/>}/>
       <Route path="/terms" element={<LegalPage document="terms"/>}/>

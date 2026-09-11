@@ -31,10 +31,41 @@ interface AuthContextValue {
   register: (name: string, email: string, password: string, signupIntent?: SignupIntent) => Promise<RegisterResult>;
   loginAsGuest: () => void;
   logout: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  completePasswordRecovery: (newPassword: string) => Promise<void>;
+  cancelPasswordRecovery: () => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  recoveryMode: boolean;
 }
 
 const USERS_KEY = 'dadofit:local-auth:users';
 const SESSION_KEY = 'dadofit:local-auth:session';
+const RECOVERY_SESSION_KEY = 'dadofit:auth:password-recovery';
+
+function urlHasRecoveryIntent(): boolean {
+  try {
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const search = new URLSearchParams(window.location.search);
+    return hash.get('type') === 'recovery' || search.get('type') === 'recovery';
+  } catch {
+    return false;
+  }
+}
+
+function readRecoveryMarker(): boolean {
+  try {
+    return localStorage.getItem(RECOVERY_SESSION_KEY) === '1' || urlHasRecoveryIntent();
+  } catch {
+    return urlHasRecoveryIntent();
+  }
+}
+
+function writeRecoveryMarker(active: boolean): void {
+  try {
+    if (active) localStorage.setItem(RECOVERY_SESSION_KEY, '1');
+    else localStorage.removeItem(RECOVERY_SESSION_KEY);
+  } catch { /* ignore */ }
+}
 const DEMO_USER: StoredUser = {
   id: 'demo-admin',
   email: 'admin@dadofit.local',
@@ -110,6 +141,16 @@ async function cloudPublicUser(user: SupabaseUser): Promise<AuthUser> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => readFallbackSession());
   const [loading, setLoading] = useState(isSupabaseConfigured);
+  const [recoveryMode, setRecoveryMode] = useState(() => {
+    const active = readRecoveryMarker();
+    if (active) writeRecoveryMarker(true);
+    return active;
+  });
+
+  const setRecoveryActive = (active: boolean) => {
+    writeRecoveryMarker(active);
+    setRecoveryMode(active);
+  };
 
   useEffect(() => {
     if (!supabase) {
@@ -136,7 +177,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     void supabase.auth.getSession().then(({ data }) => hydrate(data.session?.user ?? null));
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setRecoveryActive(true);
+      else if (event === 'SIGNED_OUT') setRecoveryActive(false);
       window.setTimeout(() => { void hydrate(session?.user ?? null); }, 0);
     });
 
@@ -229,6 +272,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { requiresEmailConfirmation: false };
   };
 
+  const requestPasswordReset = async (email: string) => {
+    if (!supabase) throw new Error('La recuperación de contraseña requiere una cuenta cloud.');
+    const normalized = email.trim().toLowerCase();
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(normalized, { redirectTo });
+    if (error) throw new Error(error.message || 'No pudimos enviar el enlace de recuperación.');
+  };
+
+  const completePasswordRecovery = async (newPassword: string) => {
+    if (!supabase) throw new Error('La recuperación de contraseña requiere una cuenta cloud.');
+    if (!recoveryMode) throw new Error('El enlace de recuperación no es válido o ya expiró.');
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw new Error(error.message || 'No pudimos actualizar la contraseña.');
+    setRecoveryActive(false);
+    await supabase.auth.signOut({ scope: 'local' });
+    setUser(null);
+  };
+
+  const cancelPasswordRecovery = async () => {
+    setRecoveryActive(false);
+    if (supabase) await supabase.auth.signOut({ scope: 'local' });
+    setUser(null);
+    try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+  };
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    if (!supabase || !user || user.provider !== 'supabase') throw new Error('Esta acción requiere una cuenta cloud.');
+    const { error: verifyError } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword });
+    if (verifyError) throw new Error(verifyError.message === 'Invalid login credentials' ? 'La contraseña actual es incorrecta.' : verifyError.message);
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    if (updateError) throw new Error(updateError.message || 'No pudimos actualizar la contraseña.');
+  };
+
   const loginAsGuest = () => {
     const next: AuthUser = {
       id: 'guest',
@@ -243,6 +319,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    setRecoveryActive(false);
     if (user?.provider === 'supabase' && supabase) {
       await supabase.auth.signOut({ scope: 'local' });
     }
@@ -251,8 +328,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, loading, login, register, loginAsGuest, logout }),
-    [user, loading],
+    () => ({ user, loading, login, register, loginAsGuest, logout, requestPasswordReset, completePasswordRecovery, cancelPasswordRecovery, changePassword, recoveryMode }),
+    [user, loading, recoveryMode],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
