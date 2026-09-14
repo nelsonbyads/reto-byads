@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, Coins, Eye, EyeOff, KeyRound, Save, ShieldCheck, Sparkles, Trophy, UserRound, UsersRound } from 'lucide-react';
+import { ArrowLeft, Building2, Coins, Eye, EyeOff, KeyRound, Save, ShieldCheck, Sparkles, Trophy, UserRound, UsersRound, WalletCards } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { WorkspaceActionLink } from '../components/WorkspaceActionLink';
@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validateNewPassword, validatePasswordConfirmation } from '../lib/passwordRules';
 
 interface SponsorPointBalance { sponsor_organization_id: string; sponsor_name: string; logo_url: string | null; balance: number; lifetime_earned: number; lifetime_spent: number; }
+interface GymPointBalance { gym_organization_id: string; gym_name: string; logo_url: string | null; balance: number; lifetime_earned: number; lifetime_spent: number; membership_status: string | null; redeemable: boolean; }
 
 interface ProfileStats {
   xp: number;
@@ -31,6 +32,7 @@ export function ProfilePage() {
   const [username, setUsername] = useState(user?.username ?? '');
   const [stats, setStats] = useState<ProfileStats>(EMPTY_STATS);
   const [sponsorBalances, setSponsorBalances] = useState<SponsorPointBalance[]>([]);
+  const [gymBalances, setGymBalances] = useState<GymPointBalance[]>([]);
   const [loading, setLoading] = useState(user?.provider === 'supabase');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -48,7 +50,7 @@ export function ProfilePage() {
     const client = supabase;
     let active = true;
     const load = async () => {
-      const [profileResult, progressResult, walletResult, sentGymbros, receivedGymbros, squadsResult, organizationsResult, dashboardResult, sponsorPointsResult] = await Promise.all([
+      const [profileResult, progressResult, walletResult, sentGymbros, receivedGymbros, squadsResult, organizationsResult, dashboardResult, sponsorPointsResult, gymPointsResult] = await Promise.all([
         client.from('profiles').select('display_name, username').eq('id', user.id).single(),
         client.from('user_progress').select('xp, level, current_streak, challenges_completed').eq('user_id', user.id).single(),
         client.from('wallets').select('balance').eq('user_id', user.id).single(),
@@ -58,6 +60,7 @@ export function ProfilePage() {
         client.from('organization_members').select('organization_id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active'),
         client.rpc('get_dadofit_dashboard_summary'),
         client.rpc('get_my_sponsor_point_balances'),
+        client.rpc('get_my_gym_point_balances'),
       ]);
 
       if (!active) return;
@@ -68,6 +71,7 @@ export function ProfilePage() {
         gymbros: Number(sentGymbros.count ?? 0) + Number(receivedGymbros.count ?? 0), squads: Number(squadsResult.count ?? 0), squadPoints: Number(dashboard.squad_contribution_points ?? 0), organizations: Number(organizationsResult.count ?? 0), organizationPoints: Number(dashboard.organization_contribution_points ?? 0), pendingChallenges: Number(dashboard.direct_pending ?? 0) + Number(dashboard.squad_pending ?? 0) + Number(dashboard.organization_pending ?? 0) + Number(dashboard.gym_battle_pending ?? 0),
       });
       setSponsorBalances(sponsorPointsResult.error ? [] : ((sponsorPointsResult.data ?? []) as SponsorPointBalance[]));
+      setGymBalances(gymPointsResult.error ? [] : ((gymPointsResult.data ?? []) as GymPointBalance[]));
       setLoading(false);
     };
     void load();
@@ -131,6 +135,11 @@ export function ProfilePage() {
           <article><span className="profile-fire-v9">🔥</span><span>Racha</span><strong>{stats.currentStreak} días</strong></article>
         </section>
 
+        <section id="gym-points" className="profile-card-v9 sponsor-wallet-eco1">
+          <div className="sponsor-wallet-head-eco1"><div><span className="eyebrow">GYM POINTS</span><h2>Tus GP disponibles por Gym</h2><p>Este saldo sí es gastable dentro del mismo Gym. No se mezcla entre Gyms y gastarlo nunca reduce tu aporte histórico.</p></div><WalletCards size={24}/></div>
+          {gymBalances.length === 0 ? <div className="sponsor-wallet-empty-eco1"><strong>0 GP</strong><span>Aún no tienes GP disponibles. Completa retos aprobados de tus Gyms para obtenerlos.</span></div> : <div className="sponsor-wallet-grid-eco1">{gymBalances.map((item) => <article key={item.gym_organization_id}><div className="sponsor-wallet-logo-eco1">{item.logo_url ? <img src={item.logo_url} alt=""/> : <Building2 size={18}/>}</div><div><span>{item.gym_name}</span><strong>{Number(item.balance ?? 0).toLocaleString()} GP disponibles</strong><small>Ganados {Number(item.lifetime_earned ?? 0).toLocaleString()} · usados {Number(item.lifetime_spent ?? 0).toLocaleString()}{item.redeemable ? '' : ' · saldo congelado'}</small></div></article>)}</div>}
+        </section>
+
         <section id="sponsor-points" className="profile-card-v9 sponsor-wallet-eco1">
           <div className="sponsor-wallet-head-eco1"><div><span className="eyebrow">SPONSOR POINTS</span><h2>Tus saldos por Marca</h2><p>Los SP son exclusivos de cada patrocinador: SP Nike no se pueden usar en Adidas, Gyms ni otros sponsors.</p></div><Sparkles size={24}/></div>
           {sponsorBalances.length === 0 ? <div className="sponsor-wallet-empty-eco1"><strong>0 SP</strong><span>Aún no has ganado Sponsor Points. Participa en Branded Challenges para obtenerlos.</span></div> : <div className="sponsor-wallet-grid-eco1">{sponsorBalances.map((item) => <article key={item.sponsor_organization_id}><div className="sponsor-wallet-logo-eco1">{item.logo_url ? <img src={item.logo_url} alt=""/> : <Sparkles size={18}/>}</div><div><span>{item.sponsor_name}</span><strong>{Number(item.balance ?? 0).toLocaleString()} SP</strong><small>Ganados {Number(item.lifetime_earned ?? 0).toLocaleString()} · usados {Number(item.lifetime_spent ?? 0).toLocaleString()}</small></div></article>)}</div>}
@@ -145,7 +154,7 @@ export function ProfilePage() {
               <div><span>Squads</span><strong>{stats.squads}</strong></div>
               <div><span>Retos pendientes</span><strong>{stats.pendingChallenges}</strong></div>
               <div><span>Aporte a Squads</span><strong>{stats.squadPoints.toLocaleString()} TP</strong></div>
-              <div><span>Aporte a Gym</span><strong>{stats.organizationPoints.toLocaleString()} GP</strong></div>
+              <div><span>Aporte histórico a Gym</span><strong>{stats.organizationPoints.toLocaleString()} GP</strong></div>
             </div>
             <div className="profile-action-links-v133">
               <WorkspaceActionLink to="/gymbros" workspaceId="personal"><UsersRound size={16}/> Gymbros</WorkspaceActionLink>
