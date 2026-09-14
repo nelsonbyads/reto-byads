@@ -1,0 +1,49 @@
+.reward-native-cost-eco3 {
+  display: flex;
+  gap: .75rem;
+  align-items: flex-start;
+  padding: .9rem;
+  border: 1px solid var(--border, rgba(148, 163, 184, .25));
+  border-radius: 14px;
+}
+
+.reward-native-cost-eco3 label {
+  flex: 1;
+}
+
+.reward-native-cost-eco3 small {
+  display: block;
+  margin-top: .35rem;
+  opacity: .72;
+}
+
+.reward-payment-summary-eco3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem 1rem;
+  align-items: center;
+  margin-top: .75rem;
+}
+
+.reward-payment-summary-eco3 strong {
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+}
+
+.reward-payment-actions-eco3 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .6rem;
+  margin-top: .65rem;
+}
+
+.reward-payment-actions-eco3 button {
+  min-height: 42px;
+}
+
+@media (max-width: 640px) {
+  .reward-payment-actions-eco3 {
+    grid-template-columns: 1fr;
+  }
+}

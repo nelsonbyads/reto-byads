@@ -18,6 +18,7 @@ import './styles/v15.7-pre-release.css';
 import './styles/v15.7.11-economy-foundation.css';
 import './styles/v15.7.12-brand-editing.css';
 import './styles/v15.7.13-account-security.css';
+import './styles/v15.7.15-eco3-marketplace.css';
 import { AdminPage } from './pages/AdminPage';
 import { BrandAuditPage } from './pages/BrandAuditPage';
 import { BrandCampaignsPage } from './pages/BrandCampaignsPage';
@@ -100,9 +101,9 @@ export default function App() {
       <Route path="/sponsored-challenges" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/sponsored-challenges']}><MonetizedPageShell><SponsoredChallengesPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/seasons" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/seasons']}><MonetizedPageShell workspaceKinds={['personal','gym']}><SeasonHubPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/rewards" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/rewards']}><MonetizedPageShell><RewardsMarketplacePage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
-      <Route path="/rewards/manage" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/rewards/manage']}><MonetizedPageShell workspaceKinds={['gym']}><RewardManagementPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
-      <Route path="/rewards/analytics" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/rewards/analytics']}><MonetizedPageShell workspaceKinds={['gym']}><RewardAnalyticsPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
-      <Route path="/rewards/validate" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/rewards/validate']}><MonetizedPageShell workspaceKinds={['gym']}><RewardValidationPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
+      <Route path="/rewards/manage" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/rewards/manage']}><MonetizedPageShell workspaceKinds={['gym','brand']}><RewardManagementPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
+      <Route path="/rewards/analytics" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/rewards/analytics']}><MonetizedPageShell workspaceKinds={['gym','brand']}><RewardAnalyticsPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
+      <Route path="/rewards/validate" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/rewards/validate']}><MonetizedPageShell workspaceKinds={['gym','brand']}><RewardValidationPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/organizations" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/organizations']}><MonetizedPageShell workspaceKinds={['personal','gym']}><OrganizationsPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/organization-challenges" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/organization-challenges']}><MonetizedPageShell workspaceKinds={['personal','gym']}><OrganizationChallengesPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>
       <Route path="/gym-battles" element={<ProtectedRoute><WorkspaceRoute allow={WORKSPACE_ROUTE_ACCESS['/gym-battles']}><MonetizedPageShell workspaceKinds={['gym']}><GymBattlesPage/></MonetizedPageShell></WorkspaceRoute></ProtectedRoute>}/>

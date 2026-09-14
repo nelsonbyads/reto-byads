@@ -1,4 +1,4 @@
-import { BarChart3, Coins, Edit3, FileUp, Gift, KeyRound, Link2, Pause, Play, Plus, QrCode, RefreshCw, Save, Store, X } from 'lucide-react';
+import { BarChart3, Building2, Coins, Edit3, FileUp, Gift, KeyRound, Link2, Pause, Play, Plus, QrCode, RefreshCw, Save, Sparkles, Store, X } from 'lucide-react';
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
@@ -14,6 +14,8 @@ type RewardRow = {
   description: string | null;
   reward_type: string;
   coin_cost: number;
+  native_currency: 'gp' | 'sp' | null;
+  native_cost: number | null;
   inventory: number | null;
   max_per_user: number;
   status: string;
@@ -38,6 +40,7 @@ type RewardForm = {
   description: string;
   rewardType: string;
   coinCost: string;
+  nativeCost: string;
   inventory: string;
   maxPerUser: string;
   imageUrl: string;
@@ -57,6 +60,7 @@ const empty: RewardForm = {
   description: '',
   rewardType: 'discount',
   coinCost: '250',
+  nativeCost: '250',
   inventory: '50',
   maxPerUser: '1',
   imageUrl: '',
@@ -117,6 +121,8 @@ export function RewardManagementPage() {
   const orgId = activeWorkspace.organizationId;
   const manager = activeWorkspace.role === 'owner' || activeWorkspace.role === 'admin';
   const verified = activeWorkspace.verificationStatus === 'verified';
+  const nativeCurrency = activeWorkspace.kind === 'gym' ? 'GP' : 'SP';
+  const NativeIcon = activeWorkspace.kind === 'gym' ? Building2 : Sparkles;
   const [rows, setRows] = useState<RewardRow[]>([]);
   const [form, setForm] = useState<RewardForm>(empty);
   const [editing, setEditing] = useState<string | null>(null);
@@ -153,6 +159,7 @@ export function RewardManagementPage() {
       description: r.description ?? '',
       rewardType: r.reward_type,
       coinCost: String(r.coin_cost),
+      nativeCost: r.native_cost === null ? '' : String(r.native_cost),
       inventory: r.inventory === null ? '' : String(r.inventory),
       maxPerUser: String(r.max_per_user),
       imageUrl: r.image_url ?? '',
@@ -195,6 +202,7 @@ export function RewardManagementPage() {
       p_description: form.description || null,
       p_reward_type: form.rewardType,
       p_coin_cost: Number(form.coinCost),
+      p_native_cost: Number(form.nativeCost),
       p_inventory: form.inventory === '' ? null : Number(form.inventory),
       p_max_per_user: Number(form.maxPerUser),
       p_image_url: form.imageUrl || null,
@@ -234,7 +242,7 @@ export function RewardManagementPage() {
 
   return <div className="workout-layout rewards-page-v15"><AppHeader/><main className="rewards-shell-v15">
     <section className="rewards-hero-v15 provider-hero-v15">
-      <div><span className="eyebrow">REWARDS PARTNER</span><h1>Ofertas de {activeWorkspace.label}</h1><p>Crea beneficios para que los Gymbros conviertan sus DadoCoins en valor real.</p></div>
+      <div><span className="eyebrow">REWARDS PARTNER</span><h1>Ofertas de {activeWorkspace.label}</h1><p>Crea beneficios con pago nativo en {nativeCurrency} y una alternativa universal en DadoCoins.</p></div>
       <div className="provider-hero-actions-v152"><Link to="/rewards/analytics" className="provider-validate-link-v152"><BarChart3 size={17}/> Analytics</Link><Link to="/rewards/validate" className="provider-validate-link-v152"><QrCode size={17}/> Validar canjes</Link><div className="provider-status-v15"><Store size={19}/><span>Estado</span><strong>{verified ? 'VERIFICADO' : 'SIN VERIFICAR'}</strong></div></div>
     </section>
     {!verified && <div className="reward-warning-v15">Puedes preparar borradores, pero la organización debe estar verificada para publicar premios.</div>}
@@ -254,6 +262,7 @@ export function RewardManagementPage() {
           <label>Tipo<select value={form.rewardType} onChange={(e) => setForm({ ...form, rewardType: e.target.value })}><option value="discount">Descuento</option><option value="product">Producto</option><option value="gym_pass">Pase de Gym</option><option value="subscription">Suscripción</option><option value="experience">Experiencia</option><option value="other">Otro</option></select></label>
           <label>Costo DC<input type="number" min="1" required value={form.coinCost} onChange={(e) => setForm({ ...form, coinCost: e.target.value })}/></label>
         </div>
+        <div className="reward-native-cost-eco3"><NativeIcon size={18}/><label>Costo {nativeCurrency}<input type="number" min="1" required value={form.nativeCost} onChange={(e) => setForm({ ...form, nativeCost: e.target.value })}/><small>{activeWorkspace.kind === 'gym' ? 'Solo los miembros activos de este Gym pueden pagar con estos GP.' : 'Solo se aceptan SP emitidos por esta misma Marca. Los SP de otras marcas no aplican.'}</small></label></div>
 
         <div className="reward-form-row-v15">
           <label>Stock<input type="number" min="0" value={form.inventory} onChange={(e) => setForm({ ...form, inventory: e.target.value })} placeholder="Vacío = ilimitado"/></label>
@@ -268,7 +277,7 @@ export function RewardManagementPage() {
 
         {form.fulfillmentMode === 'code_pool' && <div className="fulfillment-box-v151 code-pool-box-v151"><KeyRound size={18}/><div className="fulfillment-field-v151"><strong>Pool de códigos únicos</strong>{editingRow && <span className="coupon-stats-v151">{editingRow.code_pool_available} disponibles · {editingRow.code_pool_assigned} asignados · {editingRow.code_pool_total} cargados</span>}<textarea rows={5} value={form.couponCodes} onChange={(e) => setForm({ ...form, couponCodes: e.target.value })} placeholder={'NIKE-A82K\nNIKE-B91F\nNIKE-C74X'}/><div className="coupon-import-row-v151"><small>Uno por línea, coma o punto y coma. Al editar, solo agrega códigos nuevos.</small><label className="coupon-file-v151"><FileUp size={15}/> Importar CSV<input type="file" accept=".csv,.txt,text/csv,text/plain" onChange={(e) => void importCodes(e)}/></label></div></div></div>}
 
-        {form.fulfillmentMode === 'redemption_url' && <div className="fulfillment-box-v151"><Link2 size={18}/><label>URL de redención<input type="url" value={form.redemptionUrl} onChange={(e) => setForm({ ...form, redemptionUrl: e.target.value })} placeholder="https://marca.com/dadofit"/><small>El link solo se revela después de descontar los DadoCoins.</small></label></div>}
+        {form.fulfillmentMode === 'redemption_url' && <div className="fulfillment-box-v151"><Link2 size={18}/><label>URL de redención<input type="url" value={form.redemptionUrl} onChange={(e) => setForm({ ...form, redemptionUrl: e.target.value })} placeholder="https://marca.com/dadofit"/><small>El link solo se revela después de completar el canje.</small></label></div>}
 
         {form.fulfillmentMode === 'generated_code' && <div className="fulfillment-note-v151">DadoFit generará un código interno único. Úsalo para beneficios administrados directamente por DadoFit o para pruebas; para ecommerce real recomendamos código compartido o pool.</div>}
 
@@ -284,7 +293,7 @@ export function RewardManagementPage() {
           <div className="provider-reward-image-v15">{r.image_url ? <img src={r.image_url} alt=""/> : <Gift/>}</div>
           <div className="provider-reward-copy-v15">
             <span>{r.status}</span><h3>{r.title}</h3>
-            <p><Coins size={14}/>{fmt(r.coin_cost)} DC · {r.redemptions} canjes · {r.remaining_stock === null ? 'stock abierto' : `${r.remaining_stock} disponibles`}</p>
+            <p><Coins size={14}/>{fmt(r.coin_cost)} DC{r.native_cost !== null ? ` · ${fmt(r.native_cost)} ${r.native_currency?.toUpperCase()}` : ' · sin precio nativo'} · {r.redemptions} canjes · {r.remaining_stock === null ? 'stock abierto' : `${r.remaining_stock} disponibles`}</p>
             <div className="provider-fulfillment-v151"><KeyRound size={12}/><span>{modeLabels[r.fulfillment_mode ?? 'generated_code']}</span>{r.fulfillment_mode === 'code_pool' && <b>{r.code_pool_available} libres / {r.code_pool_total} cargados</b>}</div>
           </div>
           <div className="provider-reward-actions-v15"><button onClick={() => edit(r)}><Edit3 size={15}/> Editar</button>{r.status === 'active' ? <button onClick={() => void status(r.id, 'paused')}><Pause size={15}/> Pausar</button> : r.status !== 'ended' ? <button className="primary" onClick={() => void status(r.id, 'active')}><Play size={15}/> Publicar</button> : null}{r.status !== 'ended' && <button onClick={() => void status(r.id, 'ended')}>Finalizar</button>}</div>
