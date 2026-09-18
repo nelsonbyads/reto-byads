@@ -19,6 +19,8 @@ import './styles/v15.7.11-economy-foundation.css';
 import './styles/v15.7.12-brand-editing.css';
 import './styles/v15.7.13-account-security.css';
 import './styles/v15.7.15-eco3-marketplace.css';
+import './styles/v15.8-fitness-premium.css';
+import './styles/v15.8.1-global-visual-system.css';
 import { AdminPage } from './pages/AdminPage';
 import { BrandAuditPage } from './pages/BrandAuditPage';
 import { BrandCampaignsPage } from './pages/BrandCampaignsPage';

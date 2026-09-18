@@ -1,15 +1,21 @@
-DadoFit V15.7.13.1 — copiar sobre V15.7.13
+DadoFit V15.9.2 - Exercise Suggestions Contrast Fix
 
-src/auth/AuthContext.tsx
-src/App.tsx
-src/pages/LoginPage.tsx
-src/pages/ForgotPasswordPage.tsx
-src/pages/ResetPasswordPage.tsx
-src/styles/v15.7.13-account-security.css
-docs/V15.7.13.1-RECOVERY-SESSION-GUARD-HOTFIX.md
+Corrige el texto negro en:
+- SUGERIDOS
+- botones de sugerencias
+- Crear actividad personalizada
+- resultados del buscador de ejercicios
 
-No requiere migracion Supabase.
-Luego ejecutar:
-  npm test
-  npm run build
-  npm run dev
+Archivo a reemplazar:
+src/styles/v15.8.1-global-visual-system.css
+
+Instalacion:
+1. Descomprime el ZIP.
+2. Copia la carpeta src encima de la raiz de reto-byads.
+3. Reemplaza el archivo indicado.
+4. Ejecuta:
+   npm test
+   npm run build
+   npm run dev
+
+No requiere Supabase db push.

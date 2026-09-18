@@ -1,4 +1,4 @@
-import { CheckCircle2, Clipboard, Coins, ExternalLink, Gift, History, Package, QrCode, RefreshCw, Search, Store, Ticket, XCircle } from 'lucide-react';
+import { Building2, CheckCircle2, Clipboard, Coins, ExternalLink, Gift, History, Package, QrCode, RefreshCw, Search, Sparkles, Store, Ticket, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppHeader } from '../components/AppHeader';
 import { RewardQrCode } from '../components/RewardQrCode';
@@ -8,6 +8,15 @@ type Offer = {
   id: string; provider_name: string; provider_type: string; title: string; description: string | null; reward_type: string;
   coin_cost: number; native_currency: 'gp' | 'sp' | null; native_cost: number | null; native_balance: number; native_eligible: boolean; native_can_redeem: boolean; dc_can_redeem: boolean; inventory: number | null; max_per_user: number; image_url: string | null; fulfillment_type: string;
   fulfillment_mode: string; terms: string | null; remaining_stock: number | null; user_redemptions: number; availability_status: string; can_redeem: boolean;
+};
+
+
+type GymPointBalance = {
+  gym_organization_id: string; gym_name: string; balance: number; lifetime_earned: number; lifetime_spent: number; redeemable: boolean;
+};
+
+type SponsorPointBalance = {
+  sponsor_organization_id: string; sponsor_name: string; balance: number; lifetime_earned: number; lifetime_spent: number;
 };
 
 type Redemption = {
@@ -37,6 +46,8 @@ export function RewardsMarketplacePage() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [history, setHistory] = useState<Redemption[]>([]);
   const [balance, setBalance] = useState(0);
+  const [gymBalances, setGymBalances] = useState<GymPointBalance[]>([]);
+  const [sponsorBalances, setSponsorBalances] = useState<SponsorPointBalance[]>([]);
   const [tab, setTab] = useState<'catalog' | 'history'>('catalog');
   const [search, setSearch] = useState('');
   const [type, setType] = useState('all');
@@ -51,9 +62,11 @@ export function RewardsMarketplacePage() {
     if (!supabase) return;
     setLoading(true);
     setError('');
-    const [market, redemptions] = await Promise.all([
+    const [market, redemptions, gymPoints, sponsorPoints] = await Promise.all([
       supabase.rpc('get_reward_marketplace'),
       supabase.rpc('get_my_reward_redemptions'),
+      supabase.rpc('get_my_gym_point_balances'),
+      supabase.rpc('get_my_sponsor_point_balances'),
     ]);
     if (market.error || redemptions.error) {
       setError(market.error?.message || redemptions.error?.message || 'No fue posible cargar los premios.');
@@ -64,6 +77,8 @@ export function RewardsMarketplacePage() {
     setBalance(Number(payload.balance ?? 0));
     setOffers((payload.offers ?? []) as Offer[]);
     setHistory((redemptions.data ?? []) as Redemption[]);
+    setGymBalances(gymPoints.error ? [] : ((gymPoints.data ?? []) as GymPointBalance[]));
+    setSponsorBalances(sponsorPoints.error ? [] : ((sponsorPoints.data ?? []) as SponsorPointBalance[]));
     setLoading(false);
   }, []);
 
@@ -118,7 +133,7 @@ export function RewardsMarketplacePage() {
   };
 
   return <div className="rewards-page-v15"><AppHeader/><main className="rewards-shell-v15">
-    <section className="rewards-hero-v15"><div><span className="eyebrow">DADOFIT REWARDS</span><h1>Convierte tu esfuerzo en premios.</h1><p>Paga cada premio con la moneda nativa del partner o usa DadoCoins como alternativa universal. Nunca se mezclan monedas.</p></div><div className="rewards-balance-v15"><Coins size={20}/><span>Tu saldo</span><strong>{fmt(balance)} DC</strong></div></section>
+    <section className="rewards-hero-v15"><div><span className="eyebrow">DADOFIT REWARDS</span><h1>Convierte tu esfuerzo en premios.</h1><p>Paga cada premio con la moneda nativa del partner o usa DadoCoins como alternativa universal. Nunca se mezclan monedas.</p></div><div className="rewards-wallets-v158"><div className="reward-wallet-chip-v158 dc"><Coins size={18}/><span>DadoCoins</span><strong>{fmt(balance)} DC</strong></div>{gymBalances.length === 0 ? <div className="reward-wallet-chip-v158 gp"><Building2 size={18}/><span>GP disponibles</span><strong>0 GP</strong></div> : gymBalances.map((wallet) => <div className="reward-wallet-chip-v158 gp" key={wallet.gym_organization_id} title={`${wallet.gym_name} · ganados ${fmt(wallet.lifetime_earned)} · usados ${fmt(wallet.lifetime_spent)}`}><Building2 size={18}/><span>{wallet.gym_name}</span><strong>{fmt(wallet.balance)} GP</strong></div>)}{sponsorBalances.length === 0 ? <div className="reward-wallet-chip-v158 sp"><Sparkles size={18}/><span>Sponsor Points</span><strong>0 SP</strong></div> : sponsorBalances.map((wallet) => <div className="reward-wallet-chip-v158 sp" key={wallet.sponsor_organization_id} title={`${wallet.sponsor_name} · ganados ${fmt(wallet.lifetime_earned)} · usados ${fmt(wallet.lifetime_spent)}`}><Sparkles size={18}/><span>{wallet.sponsor_name}</span><strong>{fmt(wallet.balance)} SP</strong></div>)}</div></section>
     <div className="rewards-tabs-v15"><button className={tab === 'catalog' ? 'active' : ''} onClick={() => setTab('catalog')}><Gift size={16}/> Premios</button><button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}><History size={16}/> Mis canjes <span>{history.length}</span></button><button className="rewards-refresh-v15" onClick={() => void load()}><RefreshCw size={15}/> Actualizar</button></div>
     {error && <div className="auth-error">{error}</div>}
     {success && <div className="rewards-success-v15 reward-success-detail-v151"><CheckCircle2 size={18}/><div><strong>Canje confirmado: {success.title}</strong><span>Referencia DadoFit {success.redemption_reference ?? '—'} · Pagaste {fmt(success.payment_amount)} {success.payment_currency.toUpperCase()} · Nuevo saldo {fmt(success.new_balance)} {success.payment_currency.toUpperCase()}</span>{success.redemption_code && <span className="reward-delivery-line-v151">Código promocional: <b>{success.redemption_code}</b> <button type="button" onClick={() => void copyText(success.redemption_code!)}><Clipboard size={13}/>{copied === success.redemption_code ? 'Copiado' : 'Copiar'}</button></span>}{success.redemption_url && <a className="reward-open-link-v151" href={success.redemption_url} target="_blank" rel="noreferrer"><ExternalLink size={14}/> Abrir página de redención</a>}</div><button className="reward-success-close-v151" onClick={() => setSuccess(null)}>×</button></div>}
@@ -130,10 +145,10 @@ export function RewardsMarketplacePage() {
         <div className="reward-body-v15"><div className="reward-provider-v15"><Store size={14}/><span>{o.provider_name}</span><i>{o.provider_type === 'gym' ? 'GYM' : 'PARTNER'}</i></div><h2>{o.title}</h2><p>{o.description || 'Beneficio exclusivo dentro del ecosistema DadoFit.'}</p>
           <div className="reward-meta-v15"><span><Ticket size={14}/>{fulfillmentLabels[o.fulfillment_type] ?? 'Canje'}</span><span><Package size={14}/>{o.remaining_stock === null ? 'Stock abierto' : `${o.remaining_stock} disponibles`}</span></div>
           <div className="reward-payment-summary-eco3"><strong><Coins size={17}/>{fmt(o.coin_cost)} DC</strong>{o.native_currency && o.native_cost !== null && <strong>{fmt(o.native_cost)} {o.native_currency.toUpperCase()}</strong>}</div>
-          <div className="reward-payment-actions-eco3">
+          {o.availability_status === 'limit_reached' ? <div className="reward-locked-state-v158"><CheckCircle2 size={15}/> Límite alcanzado</div> : o.availability_status === 'sold_out' ? <div className="reward-locked-state-v158"><Package size={15}/> Agotado</div> : <div className="reward-payment-actions-eco3">
             {o.native_currency && o.native_cost !== null && <button disabled={!o.native_can_redeem || acting !== ''} onClick={() => void redeem(o, o.native_currency!)}>{paymentLabel(o, o.native_currency)}</button>}
             <button disabled={!o.dc_can_redeem || acting !== ''} onClick={() => void redeem(o, 'dc')}>{paymentLabel(o, 'dc')}</button>
-          </div>
+          </div>}
           {o.native_currency && o.native_cost !== null && <small>Saldo {o.native_currency.toUpperCase()}: {fmt(o.native_balance)} · alternativa DC: {fmt(o.coin_cost)}. Pago completo con una sola moneda.</small>}
           <small>Máximo {o.max_per_user} {o.max_per_user === 1 ? 'canje' : 'canjes'} por Gymbro.</small>
         </div>

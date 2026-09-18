@@ -1,0 +1,2458 @@
+/* =========================================================
+   DadoFit V15.8.1 — Global Visual System
+   ---------------------------------------------------------
+   Purpose
+   - Unify the protected product under one dark fitness UI.
+   - Normalize header, page width, vertical rhythm and surfaces.
+   - Preserve every existing route, RPC, RLS rule and economy flow.
+   - Loaded AFTER V15.8 so this file is a visual-only final layer.
+   ========================================================= */
+
+:root {
+  --dfg-bg: #070907;
+  --dfg-bg-soft: #0a0d0b;
+  --dfg-panel: #0f1310;
+  --dfg-panel-2: #151a16;
+  --dfg-panel-3: #1a201b;
+  --dfg-text: #f5f7ef;
+  --dfg-soft: #b9c2b3;
+  --dfg-muted: #7f8a7a;
+  --dfg-lime: #c8ff19;
+  --dfg-lime-hover: #d7ff3d;
+  --dfg-line: rgba(221,255,92,.14);
+  --dfg-line-strong: rgba(221,255,92,.28);
+  --dfg-line-neutral: rgba(255,255,255,.08);
+  --dfg-danger: #ff6b57;
+  --dfg-warning: #ffca63;
+  --dfg-info: #6dd6ff;
+  --dfg-radius-sm: 10px;
+  --dfg-radius: 14px;
+  --dfg-radius-lg: 20px;
+  --dfg-content: 1180px;
+  --dfg-gutter: 32px;
+  --dfg-shadow: 0 20px 52px rgba(0,0,0,.28);
+}
+
+/* ---------- Global protected-app canvas ---------- */
+html[data-dadofit-theme="dark"] body {
+  color: var(--dfg-text);
+  background:
+    radial-gradient(circle at 10% -12%, rgba(200,255,25,.08), transparent 36rem),
+    var(--dfg-bg) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .workout-layout,
+  .profile-shell-v9,
+  .rewards-page-v15,
+  .notifications-shell-v113,
+  .challenges-shell-v10,
+  .sponsored-shell-v13,
+  .season-shell-v157,
+  .organizations-shell-v12,
+  .organization-challenges-shell-v12,
+  .gym-battles-shell-v121,
+  .brand-campaigns-shell-v13,
+  .brand-competition-shell-v157,
+  .brand-audit-shell-v133,
+  .workspace-shell-v122,
+  .workspace-shell-v133,
+  .business-setup-shell-v122,
+  .admin-shell-v14
+) {
+  --bg: var(--dfg-bg);
+  --bg-glow: rgba(200,255,25,.075);
+  --panel: var(--dfg-panel);
+  --panel-soft: var(--dfg-panel-2);
+  --panel-elevated: var(--dfg-panel-2);
+  --panel-strong: #050605;
+  --text: var(--dfg-text);
+  --text-soft: var(--dfg-soft);
+  --muted: var(--dfg-muted);
+  --line: var(--dfg-line);
+  --line-strong: var(--dfg-line-strong);
+  --primary: var(--dfg-lime);
+  --primary-hover: var(--dfg-lime-hover);
+  --primary-text: #090b08;
+  --secondary: var(--dfg-lime);
+  --secondary-soft: rgba(200,255,25,.09);
+  --selected-bg: rgba(200,255,25,.12);
+  --selected-text: var(--dfg-lime);
+  --focus: var(--dfg-lime);
+  --shadow: var(--dfg-shadow);
+  --shadow-soft: none;
+  color: var(--dfg-text) !important;
+  background:
+    radial-gradient(circle at 11% -10%, rgba(200,255,25,.07), transparent 32rem),
+    var(--dfg-bg) !important;
+}
+
+/* ---------- One geometry for every top-level page ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .profile-page-v9,
+  .profile-page-v133,
+  .gymbros-page-v9,
+  .challenges-page-v10,
+  .squads-page-v11,
+  .sponsored-page-v13,
+  .season-page-v157,
+  .rewards-shell-v15,
+  .notifications-page-v113,
+  .organizations-page-v12,
+  .organization-challenges-page-v12,
+  .gym-battles-page-v121,
+  .brand-campaigns-page-v13,
+  .brand-competition-page-v157,
+  .brand-audit-page-v133,
+  .workspace-home-v122,
+  .workspace-home-v133
+) {
+  width: min(var(--dfg-content), calc(100% - var(--dfg-gutter))) !important;
+  max-width: var(--dfg-content) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-top: 10px !important;
+  box-sizing: border-box;
+}
+
+/* Monetized secondary pages must start at the same Y coordinate as /app. */
+html[data-dadofit-theme="dark"] .monetized-network-shell-v142,
+html[data-dadofit-theme="dark"] .monetized-network-page-v142,
+html[data-dadofit-theme="dark"] .monetized-network-center-v142 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  align-self: start !important;
+}
+
+html[data-dadofit-theme="dark"] .monetized-network-center-v142 > :where(
+  .profile-shell-v9,
+  .rewards-page-v15
+) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Challenge nav uses the same horizontal grid as all product pages. */
+html[data-dadofit-theme="dark"] .challenge-center-shell-v1577,
+html[data-dadofit-theme="dark"] .challenge-center-nav-v157 {
+  width: min(var(--dfg-content), calc(100% - var(--dfg-gutter))) !important;
+  max-width: var(--dfg-content) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* ---------- Header: same box on every route ---------- */
+html[data-dadofit-theme="dark"] .topbar.topbar-v7.topbar-v122.topbar-v133.topbar-v151,
+html[data-dadofit-theme="dark"] .workout-layout .topbar.topbar-v7.topbar-v122.topbar-v133.topbar-v151 {
+  width: min(var(--dfg-content), calc(100% - var(--dfg-gutter))) !important;
+  max-width: var(--dfg-content) !important;
+  min-height: 56px;
+  margin: 12px auto 10px !important;
+  padding: 8px 10px !important;
+  box-sizing: border-box;
+  border: 1px solid var(--dfg-line-neutral) !important;
+  border-radius: 15px !important;
+  background: rgba(12,16,13,.94) !important;
+  box-shadow: 0 12px 34px rgba(0,0,0,.20) !important;
+  backdrop-filter: blur(16px);
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .app-nav-v133,
+  .app-nav-v151,
+  .header-tools-v133,
+  .header-tools-v151
+) {
+  align-items: center;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .app-nav-v151 a,
+  .nav-more-trigger-v151,
+  .header-tool-v133,
+  .user-trigger-v133
+) {
+  min-height: 34px;
+  border-radius: 9px !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .app-nav-v151 a.active,
+  .nav-more-trigger-v151.active
+) {
+  color: #080a08 !important;
+  background: var(--dfg-lime) !important;
+  border-color: var(--dfg-lime) !important;
+}
+
+/* ---------- Shared typography ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .profile-shell-v9,
+  .rewards-page-v15,
+  .admin-shell-v14,
+  .workspace-shell-v122,
+  .brand-campaigns-shell-v13,
+  .brand-competition-shell-v157,
+  .brand-audit-shell-v133
+) :where(h1,h2,h3) {
+  color: var(--dfg-text);
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .profile-shell-v9,
+  .rewards-page-v15,
+  .admin-shell-v14,
+  .workspace-shell-v122,
+  .brand-campaigns-shell-v13,
+  .brand-competition-shell-v157,
+  .brand-audit-shell-v133
+) :where(p,small) {
+  color: var(--dfg-soft);
+}
+
+html[data-dadofit-theme="dark"] .eyebrow {
+  color: var(--dfg-lime) !important;
+  font-weight: 900 !important;
+  letter-spacing: .14em !important;
+}
+
+/* ---------- Heroes ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .profile-hero-v9,
+  .profile-hero-v133,
+  .gymbros-hero-v9,
+  .challenges-hero-v10,
+  .squads-hero-v11,
+  .sponsored-hero-v13,
+  .season-hero-v157,
+  .rewards-hero-v15,
+  .notifications-hero-v113,
+  .organizations-hero-v12,
+  .gym-battles-hero-v121,
+  .brand-hero-v13,
+  .brand-competition-hero-v157,
+  .brand-audit-hero-v133,
+  .workspace-hero-v122,
+  .workspace-hero-v133,
+  .reward-validation-hero-v152
+) {
+  margin-bottom: 14px !important;
+  padding: 22px 24px !important;
+  border: 1px solid var(--dfg-line-strong) !important;
+  border-radius: var(--dfg-radius-lg) !important;
+  background:
+    linear-gradient(110deg, rgba(200,255,25,.075), transparent 48%),
+    linear-gradient(180deg,#111510,#0b0e0c) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .profile-hero-v9,
+  .challenges-hero-v10,
+  .squads-hero-v11,
+  .sponsored-hero-v13,
+  .season-hero-v157,
+  .notifications-hero-v113,
+  .organizations-hero-v12,
+  .gym-battles-hero-v121,
+  .brand-hero-v13,
+  .brand-competition-hero-v157,
+  .brand-audit-hero-v133,
+  .workspace-hero-v122
+) h1 {
+  margin-top: 4px !important;
+  margin-bottom: 5px !important;
+  font-size: clamp(1.7rem,3vw,2.45rem) !important;
+}
+
+/* Rewards is not allowed to use a visually different giant masthead. */
+html[data-dadofit-theme="dark"] .rewards-hero-v15 {
+  min-height: 0 !important;
+  padding: 22px 24px !important;
+}
+
+html[data-dadofit-theme="dark"] .rewards-hero-v15 h1 {
+  max-width: 650px !important;
+  margin: 5px 0 6px !important;
+  font-size: clamp(1.9rem,3.4vw,2.65rem) !important;
+  line-height: .98 !important;
+}
+
+/* ---------- Universal surfaces / cards ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .profile-card-v9,
+  .gymbro-search-card-v9,
+  .challenge-card-v10,
+  .challenge-summary-v10,
+  .challenge-modal-v10,
+  .squad-card-v11,
+  .squad-battle-card-v11,
+  .organization-card-v12,
+  .organization-challenge-card-v12,
+  .organization-published-v12,
+  .gym-battle-card-v121,
+  .gym-battle-modal-v121,
+  .sponsored-card-v13,
+  .season-card-v157,
+  .brand-section-v13,
+  .brand-campaign-card-v13,
+  .brand-challenge-card-v13,
+  .brand-review-card-v13,
+  .brand-health-card-v133,
+  .audit-card-v133,
+  .audit-history-card-v133,
+  .workspace-section-v133,
+  .reward-editor-v15,
+  .provider-rewards-v15,
+  .reward-analytics-card-v154,
+  .reward-trend-card-v154,
+  .notifications-list-card-v113,
+  .admin-card-v14,
+  .business-setup-card-v122
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: linear-gradient(180deg,#121612,#0d100e) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .profile-card-v9,
+  .challenge-card-v10,
+  .sponsored-card-v13,
+  .season-card-v157,
+  .organization-card-v12,
+  .gym-battle-card-v121,
+  .brand-section-v13,
+  .workspace-section-v133,
+  .admin-card-v14
+) {
+  border-radius: var(--dfg-radius) !important;
+}
+
+/* ---------- Compact stat / KPI blocks ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .profile-stats-v9 > article,
+  .social-summary-stats-v112 > a,
+  .organizations-hero-stats-v12 > div,
+  .squads-hero-stats-v11 > div,
+  .gym-battles-hero-stats-v121 > div,
+  .brand-dashboard-grid-v133 > *,
+  .admin-kpi-grid-v14 > *,
+  .organization-stats-v12 > div,
+  .organization-published-stats-v12 > div
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #111511 !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .profile-stats-v9 > article,
+  .social-summary-stats-v112 > a,
+  .organizations-hero-stats-v12 > div,
+  .squads-hero-stats-v11 > div,
+  .gym-battles-hero-stats-v121 > div
+) :where(span,small) {
+  color: var(--dfg-muted) !important;
+}
+
+/* ---------- Tabs / segmented navigation ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .challenge-tabs-v10,
+  .squads-tabs-v11,
+  .organization-challenge-tabs-v12,
+  .gym-battle-tabs-v121,
+  .rewards-tabs-v15,
+  .notifications-toolbar-v113 > div
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #0d100e !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-tabs-v10 button,
+  .squads-tabs-v11 button,
+  .organization-challenge-tabs-v12 button,
+  .gym-battle-tabs-v121 button,
+  .rewards-tabs-v15 button,
+  .notifications-toolbar-v113 button
+) {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--dfg-soft) !important;
+  border-radius: 9px !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-tabs-v10 button.active,
+  .squads-tabs-v11 button.active,
+  .organization-challenge-tabs-v12 button.active,
+  .gym-battle-tabs-v121 button.active,
+  .rewards-tabs-v15 button.active,
+  .notifications-toolbar-v113 button.active
+) {
+  border-color: var(--dfg-lime) !important;
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+}
+
+/* ---------- Inputs / selects / filters ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .profile-shell-v9,
+  .rewards-page-v15,
+  .admin-shell-v14,
+  .business-setup-shell-v122
+) :where(input,select,textarea) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #0b0e0c !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .profile-shell-v9,
+  .rewards-page-v15,
+  .admin-shell-v14,
+  .business-setup-shell-v122
+) :where(input,textarea)::placeholder {
+  color: #697366 !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .profile-shell-v9,
+  .rewards-page-v15,
+  .admin-shell-v14,
+  .business-setup-shell-v122
+) :where(input,select,textarea):focus {
+  border-color: rgba(200,255,25,.55) !important;
+  box-shadow: 0 0 0 3px rgba(200,255,25,.08) !important;
+}
+
+/* ---------- Buttons ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .profile-primary-v9,
+  .challenge-submit-v10,
+  .challenge-accept-v10,
+  .organization-submit-v12,
+  .organization-finalize-v12,
+  .gym-battle-send-v121,
+  .reward-save-v15,
+  .challenge-create-v157
+) {
+  border-color: var(--dfg-lime) !important;
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .profile-primary-v9,
+  .challenge-submit-v10,
+  .challenge-accept-v10,
+  .organization-submit-v12,
+  .organization-finalize-v12,
+  .gym-battle-send-v121,
+  .reward-save-v15,
+  .challenge-create-v157
+):hover:not(:disabled) {
+  background: var(--dfg-lime-hover) !important;
+}
+
+/* ---------- Rewards keeps ECO-3 behavior, adopts common geometry ---------- */
+html[data-dadofit-theme="dark"] .rewards-shell-v15 {
+  padding-bottom: 86px !important;
+}
+
+html[data-dadofit-theme="dark"] .rewards-toolbar-v15 {
+  gap: 9px !important;
+  margin-bottom: 12px !important;
+}
+
+html[data-dadofit-theme="dark"] .rewards-toolbar-v15 :where(label,select) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #0d100e !important;
+}
+
+html[data-dadofit-theme="dark"] .rewards-grid-v15 {
+  align-items: stretch;
+  gap: 12px !important;
+}
+
+html[data-dadofit-theme="dark"] .reward-card-v15 {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #0e120f !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .reward-card-v15:hover {
+  border-color: rgba(200,255,25,.24) !important;
+  transform: translateY(-1px);
+}
+
+html[data-dadofit-theme="dark"] .reward-payment-actions-eco3 button:not(:disabled) {
+  border-color: rgba(200,255,25,.36) !important;
+}
+
+/* ---------- Lists / rows ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .gymbro-row-v9,
+  .squad-member-list-v11 > article,
+  .organization-member-row-v12,
+  .notifications-list-v113 > article,
+  .redemptions-list-v15 > article,
+  .provider-rewards-v15 > article,
+  .brand-competition-list-v157 > div > article
+) {
+  border-color: var(--dfg-line-neutral) !important;
+}
+
+/* ---------- Empty states ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .empty-state,
+  .gymbro-empty-v9,
+  .challenge-empty-page-v10,
+  .squad-empty-v11,
+  .sponsored-empty-v13,
+  .season-empty-v157,
+  .organization-empty-v12,
+  .gym-battle-empty-v121,
+  .notifications-empty-v113,
+  .rewards-empty-v15,
+  .reward-analytics-empty-v154,
+  .workspace-empty-v133,
+  .brand-empty-v13,
+  .admin-empty-v142
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #0d100e !important;
+  color: var(--dfg-soft) !important;
+}
+
+/* ---------- Modals ---------- */
+html[data-dadofit-theme="dark"] :where(
+  .challenge-modal-v10,
+  .squad-challenge-modal-v11,
+  .organization-challenge-modal-v12,
+  .gym-battle-modal-v121
+) {
+  border: 1px solid var(--dfg-line-strong) !important;
+  background: #0e120f !important;
+  color: var(--dfg-text) !important;
+  box-shadow: var(--dfg-shadow) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-modal-backdrop-v10,
+  .filter-backdrop,
+  .filter-backdrop-v1521
+) {
+  background: rgba(0,0,0,.72) !important;
+  backdrop-filter: blur(6px);
+}
+
+/* ---------- Admin: preserve sidebar model but share palette ---------- */
+html[data-dadofit-theme="dark"] .admin-shell-v14 {
+  background: var(--dfg-bg) !important;
+}
+
+html[data-dadofit-theme="dark"] .admin-sidebar-v14 {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #0a0d0b !important;
+  color: var(--dfg-text) !important;
+}
+
+html[data-dadofit-theme="dark"] .admin-sidebar-v14 nav a {
+  color: var(--dfg-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] .admin-sidebar-v14 nav a.active {
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+}
+
+html[data-dadofit-theme="dark"] .admin-main-v14 {
+  background: var(--dfg-bg) !important;
+  color: var(--dfg-text) !important;
+}
+
+html[data-dadofit-theme="dark"] .admin-top-v14 {
+  border-color: var(--dfg-line-neutral) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .admin-table-wrap-v14,
+  .reward-analytics-table-wrap-v154,
+  .admin-ad-metrics-table-v144
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #0e120f !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .admin-table-wrap-v14 table,
+  .reward-analytics-table-wrap-v154 table,
+  .admin-ad-metrics-table-v144 table
+) :where(th,td) {
+  border-color: var(--dfg-line-neutral) !important;
+  color: var(--dfg-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .admin-table-wrap-v14 table,
+  .reward-analytics-table-wrap-v154 table,
+  .admin-ad-metrics-table-v144 table
+) th {
+  color: var(--dfg-text) !important;
+  background: #111511 !important;
+}
+
+/* ---------- Mobile / tablet ---------- */
+@media (max-width: 980px) {
+  :root { --dfg-gutter: 24px; }
+
+  html[data-dadofit-theme="dark"] :where(
+    .profile-page-v9,
+    .rewards-shell-v15,
+    .season-page-v157,
+    .brand-competition-page-v157,
+    .brand-campaigns-page-v13,
+    .brand-audit-page-v133,
+    .workspace-home-v122,
+    .workspace-home-v133
+  ) {
+    width: min(var(--dfg-content), calc(100% - 24px)) !important;
+  }
+
+  html[data-dadofit-theme="dark"] .topbar.topbar-v7.topbar-v122.topbar-v133.topbar-v151,
+  html[data-dadofit-theme="dark"] .workout-layout .topbar.topbar-v7.topbar-v122.topbar-v133.topbar-v151 {
+    width: min(var(--dfg-content), calc(100% - 24px)) !important;
+  }
+
+  html[data-dadofit-theme="dark"] :where(
+    .profile-hero-v9,
+    .challenges-hero-v10,
+    .squads-hero-v11,
+    .sponsored-hero-v13,
+    .season-hero-v157,
+    .rewards-hero-v15,
+    .notifications-hero-v113,
+    .organizations-hero-v12,
+    .gym-battles-hero-v121,
+    .brand-hero-v13,
+    .brand-competition-hero-v157,
+    .brand-audit-hero-v133,
+    .workspace-hero-v122,
+    .workspace-hero-v133
+  ) {
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  :root { --dfg-gutter: 20px; }
+
+  html[data-dadofit-theme="dark"] :where(
+    .profile-page-v9,
+    .rewards-shell-v15,
+    .season-page-v157,
+    .brand-competition-page-v157,
+    .brand-campaigns-page-v13,
+    .brand-audit-page-v133,
+    .workspace-home-v122,
+    .workspace-home-v133,
+    .challenge-center-shell-v1577,
+    .challenge-center-nav-v157
+  ) {
+    width: calc(100% - 20px) !important;
+  }
+
+  html[data-dadofit-theme="dark"] .topbar.topbar-v7.topbar-v122.topbar-v133.topbar-v151,
+  html[data-dadofit-theme="dark"] .workout-layout .topbar.topbar-v7.topbar-v122.topbar-v133.topbar-v151 {
+    width: calc(100% - 20px) !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    border-radius: 13px !important;
+  }
+
+  html[data-dadofit-theme="dark"] :where(
+    .profile-hero-v9,
+    .challenges-hero-v10,
+    .squads-hero-v11,
+    .sponsored-hero-v13,
+    .season-hero-v157,
+    .rewards-hero-v15,
+    .notifications-hero-v113,
+    .organizations-hero-v12,
+    .gym-battles-hero-v121,
+    .brand-hero-v13,
+    .brand-competition-hero-v157,
+    .brand-audit-hero-v133,
+    .workspace-hero-v122,
+    .workspace-hero-v133
+  ) {
+    padding: 17px !important;
+    border-radius: 16px !important;
+  }
+
+  html[data-dadofit-theme="dark"] .rewards-hero-v15 h1 {
+    font-size: 2rem !important;
+  }
+
+  html[data-dadofit-theme="dark"] :where(
+    .challenge-tabs-v10,
+    .squads-tabs-v11,
+    .organization-challenge-tabs-v12,
+    .gym-battle-tabs-v121,
+    .rewards-tabs-v15
+  ) {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  html[data-dadofit-theme="dark"] :where(
+    .challenge-tabs-v10,
+    .squads-tabs-v11,
+    .organization-challenge-tabs-v12,
+    .gym-battle-tabs-v121,
+    .rewards-tabs-v15
+  )::-webkit-scrollbar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-dadofit-theme="dark"] .reward-card-v15 { transition: none !important; }
+}
+
+/* =========================================================
+   DadoFit V15.8.3 — Workout Theme Homologation
+   ---------------------------------------------------------
+   /app still had a second legacy token family (--df-*) defined in
+   index.css. The rest of the protected app uses the V15.8 global
+   tokens (--dfg-*). This bridge makes Entrenar consume the exact same
+   visual palette without touching workout behavior or component logic.
+   ========================================================= */
+
+html[data-dadofit-theme="dark"] .workout-layout {
+  /* Bridge legacy workout tokens to the global V15.8 system. */
+  --df-bg: var(--dfg-bg);
+  --df-bg-soft: var(--dfg-bg-soft);
+  --df-surface: var(--dfg-panel);
+  --df-surface-2: var(--dfg-panel-2);
+  --df-surface-3: var(--dfg-panel-3);
+  --df-border: var(--dfg-line-neutral);
+  --df-border-strong: var(--dfg-line-strong);
+  --df-text: var(--dfg-text);
+  --df-text-soft: var(--dfg-soft);
+  --df-muted: var(--dfg-muted);
+  --df-muted-2: #657064;
+  --df-primary: var(--dfg-lime);
+  --df-primary-strong: var(--dfg-lime-hover);
+  --df-primary-deep: #a8d914;
+  --df-mint: var(--dfg-lime);
+  --df-danger: var(--dfg-danger);
+  --df-shadow: none;
+
+  background:
+    radial-gradient(circle at 11% -10%, rgba(200,255,25,.07), transparent 32rem),
+    var(--dfg-bg) !important;
+}
+
+/* Remove the old workout-only decorative divider and use the same shell rhythm. */
+html[data-dadofit-theme="dark"] .workout-layout .topbar::after {
+  display: none !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .app-shell {
+  width: min(var(--dfg-content), calc(100% - var(--dfg-gutter))) !important;
+  max-width: var(--dfg-content) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-top: 0 !important;
+}
+
+/* Workout surfaces now use the same neutral/green graphite recipe as Retos. */
+html[data-dadofit-theme="dark"] .workout-layout :where(
+  .session-summary,
+  .level-card,
+  .level-card-v7,
+  .dice-card,
+  .exercise-cube,
+  .result-card,
+  .history-card,
+  .filter-btn,
+  .active-filter-chips button,
+  .secondary-roll-actions button,
+  .account-chip
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #111511 !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout :where(
+  .session-summary,
+  .dice-card,
+  .result-card,
+  .history-card
+) {
+  border-radius: var(--dfg-radius) !important;
+}
+
+/* Preserve intensity semantics, but make selection language global. */
+html[data-dadofit-theme="dark"] .workout-layout .level-card-v7.selected,
+html[data-dadofit-theme="dark"] .workout-layout .level-card.selected {
+  border-color: rgba(200,255,25,.52) !important;
+  background:
+    linear-gradient(135deg, rgba(200,255,25,.10), transparent 58%),
+    #111511 !important;
+  box-shadow: inset 0 0 0 1px rgba(200,255,25,.06) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .level-card-v7.selected :where(strong,small),
+html[data-dadofit-theme="dark"] .workout-layout .level-card.selected :where(strong,small) {
+  color: var(--dfg-text) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .level-card-v7.selected .level-check-v7 {
+  border-color: var(--dfg-lime) !important;
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+}
+
+/* The old workout dice used a cool gray palette. Bring it into graphite/lime. */
+html[data-dadofit-theme="dark"] .workout-layout .d20-shape {
+  border: 1px solid var(--dfg-line-neutral) !important;
+  background: linear-gradient(145deg, #1b201c, #121612) !important;
+  color: var(--dfg-text) !important;
+  filter: none !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .exercise-cube {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #171b18 !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .dice-card::after {
+  border-color: rgba(200,255,25,.10) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout :where(
+  .eyebrow,
+  .dice-caption,
+  .toolbar-v7 > p strong
+) {
+  color: var(--dfg-lime) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout :where(
+  .section-heading-inline p,
+  .keyboard-hint,
+  .session-summary span,
+  .toolbar-v7 > p,
+  .dice-range
+) {
+  color: var(--dfg-muted) !important;
+}
+
+/* Primary workout action = same primary action used throughout the product. */
+html[data-dadofit-theme="dark"] .workout-layout .roll-button {
+  border: 1px solid var(--dfg-lime) !important;
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .roll-button:hover:not(:disabled) {
+  background: var(--dfg-lime-hover) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout :where(
+  .filter-btn,
+  .active-filter-chips button,
+  .secondary-roll-actions button
+):hover:not(:disabled) {
+  border-color: rgba(200,255,25,.34) !important;
+  color: var(--dfg-lime) !important;
+  background: #151a16 !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .filter-btn span {
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+}
+
+/* Result/evidence areas: remove the old mint accent and use the single lime system. */
+html[data-dadofit-theme="dark"] .workout-layout .result-card {
+  background:
+    linear-gradient(135deg, rgba(200,255,25,.035), transparent 46%),
+    #111511 !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .result-card::before,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-item::before {
+  background: var(--dfg-lime) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout :where(
+  .reps-line strong,
+  .evidence-type
+) {
+  color: var(--dfg-lime) !important;
+}
+
+/* Personal KPI bar must look identical on /app and all other personal routes. */
+html[data-dadofit-theme="dark"] .workout-layout .social-summary-stats-v112 > a {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #111511 !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .social-summary-stats-v112 > a svg {
+  color: var(--dfg-lime) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .social-summary-stats-v112 > a span {
+  color: var(--dfg-muted) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .social-summary-stats-v112 > a strong {
+  color: var(--dfg-text) !important;
+}
+
+@media (max-width: 680px) {
+  html[data-dadofit-theme="dark"] .workout-layout .app-shell {
+    width: min(100% - 20px, var(--dfg-content)) !important;
+  }
+}
+
+/* =========================================================
+   DadoFit V15.8.4 — Protected App Token Bridge + Challenge Center
+   ---------------------------------------------------------
+   Root cause fixed here:
+   older feature CSS uses several token families (--df-*, --surface,
+   --border, --muted) and some hard-coded light surfaces. V15.8 global
+   tokens alone cannot recolor those rules. This bridge makes ALL protected
+   shells consume one palette and then normalizes the five Challenge Center
+   routes explicitly.
+   ========================================================= */
+
+/* One token contract for every protected shell, including legacy modules. */
+html[data-dadofit-theme="dark"] :where(
+  .workout-layout,
+  .profile-shell-v9,
+  .notifications-shell-v113,
+  .challenges-shell-v10,
+  .sponsored-shell-v13,
+  .season-shell-v157,
+  .organizations-shell-v12,
+  .organization-challenges-shell-v12,
+  .gym-battles-shell-v121,
+  .brand-campaigns-shell-v13,
+  .brand-competition-shell-v157,
+  .brand-audit-shell-v133,
+  .workspace-shell-v122,
+  .workspace-shell-v133,
+  .business-setup-shell-v122,
+  .admin-shell-v14,
+  .rewards-page-v15
+) {
+  --df-bg: var(--dfg-bg);
+  --df-bg-soft: var(--dfg-bg-soft);
+  --df-panel: var(--dfg-panel);
+  --df-panel-soft: var(--dfg-panel-2);
+  --df-panel-elevated: var(--dfg-panel-2);
+  --df-text: var(--dfg-text);
+  --df-soft: var(--dfg-soft);
+  --df-muted: var(--dfg-muted);
+  --df-line: var(--dfg-line-neutral);
+  --df-line-strong: var(--dfg-line-strong);
+  --df-primary: var(--dfg-lime);
+  --df-primary-hover: var(--dfg-lime-hover);
+  --df-primary-text: #080a08;
+  --df-shadow: none;
+
+  /* V13 brand/sponsored legacy family. */
+  --surface: var(--dfg-panel);
+  --surface-2: var(--dfg-panel-2);
+  --border: var(--dfg-line-neutral);
+  --muted: var(--dfg-panel-2);
+}
+
+/* Challenge Center: one navigation bar on every route. */
+html[data-dadofit-theme="dark"] .challenge-center-shell-v1577 {
+  width: min(var(--dfg-content), calc(100% - var(--dfg-gutter))) !important;
+  max-width: var(--dfg-content) !important;
+  padding-top: 10px !important;
+  margin: 0 auto !important;
+}
+
+html[data-dadofit-theme="dark"] .challenge-center-nav-v157 {
+  width: 100% !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  margin: 0 !important;
+  padding: 6px !important;
+  gap: 6px !important;
+  border: 1px solid var(--dfg-line-neutral) !important;
+  border-radius: 14px !important;
+  background: #111511 !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .challenge-center-nav-v157 a {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 11px !important;
+  border: 1px solid transparent !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  color: var(--dfg-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] .challenge-center-nav-v157 a:hover {
+  border-color: rgba(200,255,25,.18) !important;
+  background: rgba(200,255,25,.06) !important;
+  color: var(--dfg-text) !important;
+}
+
+html[data-dadofit-theme="dark"] .challenge-center-nav-v157 a.active {
+  border-color: var(--dfg-lime) !important;
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+}
+
+html[data-dadofit-theme="dark"] .challenge-center-main-v1577 {
+  width: min(var(--dfg-content), calc(100% - var(--dfg-gutter))) !important;
+  max-width: var(--dfg-content) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-top: 12px !important;
+}
+
+/* One content canvas for the 5 personal challenge tabs. */
+html[data-dadofit-theme="dark"] :where(
+  .challenges-page-v10,
+  .organization-challenges-page-v12,
+  .squads-page-v11,
+  .sponsored-page-v13,
+  .season-page-v157
+) {
+  color: var(--dfg-text) !important;
+  background: transparent !important;
+}
+
+/* Top lines / back + refresh controls. */
+html[data-dadofit-theme="dark"] :where(
+  .challenges-topline-v10,
+  .squads-topline-v11,
+  .organizations-topline-v12,
+  .gym-battles-topline-v121,
+  .brand-topline-v13
+) :where(button,a) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #111511 !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+/* Heroes on 1v1 / Gym / Squads / Sponsored / Seasons use the same recipe. */
+html[data-dadofit-theme="dark"] :where(
+  .challenges-hero-v10,
+  .organizations-hero-v12,
+  .squads-hero-v11,
+  .sponsored-hero-v13,
+  .season-hero-v157
+) {
+  border: 1px solid var(--dfg-line-neutral) !important;
+  border-radius: var(--dfg-radius-lg) !important;
+  background:
+    linear-gradient(110deg, rgba(200,255,25,.055), transparent 48%),
+    #151a16 !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+/* The old Sponsored module forced #272626 / #333 in dark mode. */
+html[data-dadofit-theme="dark"] :where(
+  .sponsored-hero-v13,
+  .sponsored-card-v13,
+  .sponsored-exercise-v13,
+  .sponsored-evidence-list-v13 article,
+  .sponsored-season-list-v157 > article
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #151a16 !important;
+  color: var(--dfg-text) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .sponsored-brand-mark-v13,
+  .season-icon-v157,
+  .squad-mini-mark-v11,
+  .squad-big-mark-v11
+) {
+  background: rgba(200,255,25,.12) !important;
+  color: var(--dfg-lime) !important;
+}
+
+/* Shared challenge cards and secondary surfaces. */
+html[data-dadofit-theme="dark"] :where(
+  .challenge-card-v10,
+  .challenge-summary-v10 > div,
+  .challenge-pending-total-v10,
+  .challenge-reps-v10,
+  .challenge-muted-box-v10,
+  .organization-challenge-card-v12,
+  .organization-published-v12,
+  .organization-challenge-rewards-v12,
+  .squad-card-v11,
+  .squad-battle-card-v11,
+  .squad-review-card-v11,
+  .squad-create-v11,
+  .squad-member-list-v11,
+  .sponsored-card-v13,
+  .sponsored-exercise-v13,
+  .season-card-v157,
+  .season-history-v157,
+  .sponsored-seasons-v157,
+  .season-ranking-v157 article,
+  .season-invites-v157
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #151a16 !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-card-head-v10,
+  .organization-challenge-card-v12 > header,
+  .squad-detail-head-v11,
+  .season-ranking-v157 article,
+  .season-invites-v157 > article
+) {
+  border-color: var(--dfg-line-neutral) !important;
+}
+
+/* Secondary copy uses the same muted tone, not route-specific grays. */
+html[data-dadofit-theme="dark"] :where(
+  .challenges-page-v10,
+  .organization-challenges-page-v12,
+  .squads-page-v11,
+  .sponsored-page-v13,
+  .season-page-v157
+) :where(p,small,.challenge-muted-v10,.organization-muted-v12,.squad-muted-v11,.sponsored-muted-v13) {
+  color: var(--dfg-soft) !important;
+}
+
+/* Inputs / selects / textareas across all Challenge Center tabs. */
+html[data-dadofit-theme="dark"] :where(
+  .challenges-page-v10,
+  .organization-challenges-page-v12,
+  .squads-page-v11,
+  .sponsored-page-v13,
+  .season-page-v157
+) :where(input,select,textarea) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #0b0e0c !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenges-page-v10,
+  .organization-challenges-page-v12,
+  .squads-page-v11,
+  .sponsored-page-v13,
+  .season-page-v157
+) :where(input,select,textarea):focus {
+  border-color: rgba(200,255,25,.55) !important;
+  box-shadow: 0 0 0 3px rgba(200,255,25,.08) !important;
+}
+
+/* Local tabs inside each route use lime for the selected state. */
+html[data-dadofit-theme="dark"] :where(
+  .challenge-tabs-v10,
+  .organization-challenge-tabs-v12,
+  .squads-tabs-v11
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #111511 !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-tabs-v10 button,
+  .organization-challenge-tabs-v12 button,
+  .squads-tabs-v11 button
+) {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--dfg-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-tabs-v10 button.active,
+  .organization-challenge-tabs-v12 button.active,
+  .squads-tabs-v11 button.active
+) {
+  border-color: var(--dfg-lime) !important;
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-tabs-v10 button.active span,
+  .organization-challenge-tabs-v12 button.active span,
+  .squads-tabs-v11 button.active span
+) {
+  background: rgba(8,10,8,.14) !important;
+  color: #080a08 !important;
+}
+
+/* Semantic success/warning states remain semantic, but remove light-mode slabs. */
+html[data-dadofit-theme="dark"] :where(
+  .challenge-completed-v10,
+  .organization-approved-v12,
+  .sponsored-approved-v13,
+  .squad-approved-v11
+) {
+  border: 1px solid rgba(200,255,25,.22) !important;
+  background: rgba(200,255,25,.10) !important;
+  color: var(--dfg-text) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-warning-v10,
+  .squad-waiting-v11,
+  .organization-policy-note-v12
+) {
+  border-color: rgba(255,202,99,.20) !important;
+  background: rgba(255,202,99,.08) !important;
+  color: var(--dfg-warning) !important;
+}
+
+/* Status chips and ranking rows follow the product language. */
+html[data-dadofit-theme="dark"] :where(
+  .challenge-status-badge-v10,
+  .organization-status-v12,
+  .squad-member-status-v11,
+  .squad-battle-status-v11,
+  .season-status-v157,
+  .brand-status-v13
+) {
+  border: 1px solid var(--dfg-line-neutral) !important;
+  background: #1a201b !important;
+  color: var(--dfg-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-status-badge-v10.status-approved,
+  .organization-status-v12.status-approved,
+  .season-status-v157.active,
+  .brand-status-v13.status-active,
+  .brand-status-v13.status-approved
+) {
+  border-color: rgba(200,255,25,.28) !important;
+  background: rgba(200,255,25,.12) !important;
+  color: var(--dfg-lime) !important;
+}
+
+/* Primary actions in all five tabs. */
+html[data-dadofit-theme="dark"] :where(
+  .challenge-accept-v10,
+  .challenge-approve-v10,
+  .challenge-submit-v10,
+  .organization-submit-v12,
+  .organization-finalize-v12,
+  .squad-create-v11 > button,
+  .squad-send-battle-v11,
+  .squad-finalize-v11,
+  .sponsored-join-v13,
+  .sponsored-submit-v13,
+  .challenge-create-v157
+) {
+  border-color: var(--dfg-lime) !important;
+  background: var(--dfg-lime) !important;
+  color: #080a08 !important;
+  box-shadow: none !important;
+}
+
+/* Modals belonging to the challenge family. */
+html[data-dadofit-theme="dark"] :where(
+  .challenge-modal-v10,
+  .squad-challenge-modal-v11,
+  .organization-challenge-modal-v12
+) {
+  border-color: var(--dfg-line-strong) !important;
+  background: #151a16 !important;
+  color: var(--dfg-text) !important;
+  box-shadow: var(--dfg-shadow) !important;
+}
+
+html[data-dadofit-theme="dark"] :where(
+  .challenge-modal-close-v10,
+  .challenge-summary-v10 > div,
+  .challenge-modal-actions-v10 button
+) {
+  border-color: var(--dfg-line-neutral) !important;
+  background: #111511 !important;
+  color: var(--dfg-text) !important;
+}
+
+@media (max-width: 680px) {
+  html[data-dadofit-theme="dark"] .challenge-center-shell-v1577,
+  html[data-dadofit-theme="dark"] .challenge-center-main-v1577 {
+    width: calc(100% - 20px) !important;
+  }
+}
+
+/* =========================================================
+   DadoFit V15.8.5 — Challenge Surface Parity
+   ---------------------------------------------------------
+   IMPORTANT: these rules intentionally use HIGH specificity.
+   Several legacy dark-mode styles (V10/V11/V12/V13) hard-code
+   blue/gray surfaces with selectors such as:
+     html[data-dadofit-theme='dark'] .challenge-card-v10
+   and therefore beat low-specificity :where(...) overrides even
+   when the global stylesheet is loaded last.
+
+   This section makes the five Challenge Center routes use the
+   exact same dark surface family as Rewards.
+   ========================================================= */
+
+:root {
+  --dfg-reward-parity-panel: #0d100e;
+  --dfg-reward-parity-panel-soft: #111511;
+  --dfg-reward-parity-panel-raised: #151916;
+  --dfg-reward-parity-line: rgba(221,255,92,.14);
+  --dfg-reward-parity-line-strong: rgba(221,255,92,.28);
+}
+
+/* Route-level token reset: Challenge Center now consumes the same palette
+   as /rewards, including old --df-*, --panel and --surface aliases. */
+html[data-dadofit-theme="dark"] .challenges-shell-v10,
+html[data-dadofit-theme="dark"] .organization-challenges-shell-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9:has(.squads-page-v11),
+html[data-dadofit-theme="dark"] .sponsored-shell-v13,
+html[data-dadofit-theme="dark"] .season-shell-v157 {
+  --df-panel: var(--dfg-reward-parity-panel) !important;
+  --df-panel-soft: var(--dfg-reward-parity-panel-soft) !important;
+  --df-panel-elevated: var(--dfg-reward-parity-panel-raised) !important;
+  --df-line: var(--dfg-reward-parity-line) !important;
+  --df-line-strong: var(--dfg-reward-parity-line-strong) !important;
+  --panel: var(--dfg-reward-parity-panel) !important;
+  --panel-soft: var(--dfg-reward-parity-panel-soft) !important;
+  --panel-elevated: var(--dfg-reward-parity-panel-raised) !important;
+  --line: var(--dfg-reward-parity-line) !important;
+  --line-strong: var(--dfg-reward-parity-line-strong) !important;
+  --surface: var(--dfg-reward-parity-panel) !important;
+  --surface-2: var(--dfg-reward-parity-panel-soft) !important;
+  --border: var(--dfg-reward-parity-line) !important;
+}
+
+/* Challenge Center navigation: same black-green surface as Rewards tabs. */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenge-center-shell-v1577 .challenge-center-nav-v157,
+html[data-dadofit-theme="dark"] .season-shell-v157 .challenge-center-shell-v1577 .challenge-center-nav-v157 {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel) !important;
+  box-shadow: none !important;
+}
+
+/* -------- 1 vs 1 -------- */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenges-hero-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .profile-card-v9,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-card-v10 {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-pending-total-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-reps-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-evidence-item-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-review-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-muted-box-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-evidence-preview-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-evidence-head-v10 > button {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel-soft) !important;
+  color: var(--dfg-text) !important;
+}
+
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-card-head-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-evidence-v10 {
+  border-color: var(--dfg-reward-parity-line) !important;
+}
+
+/* -------- Del Gym -------- */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .profile-hero-v9,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .profile-card-v9,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-challenge-card-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-published-v12 {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-challenge-rewards-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-published-stats-v12 > div,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-evidence-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-evidence-head-v12 button,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-review-v12 textarea {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel-soft) !important;
+  color: var(--dfg-text) !important;
+}
+
+/* -------- Squads -------- */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squads-hero-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .profile-card-v9,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-create-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-review-card-v11 {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squads-tabs-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-member-list-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-roster-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-invite-gymbros-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-my-participation-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-review-queue-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-scoreboard-v11 > div:not(.versus),
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-battle-rules-v11 > div,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-evidence-item-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-review-notes-v11 textarea {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel-soft) !important;
+  color: var(--dfg-text) !important;
+}
+
+/* -------- Patrocinados -------- */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 .sponsored-hero-v13,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 .profile-card-v9,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 .sponsored-card-v13 {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 .sponsored-exercise-v13,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 .sponsored-evidence-list-v13 article,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 .sponsored-meta-v13 span {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel-soft) !important;
+  color: var(--dfg-text) !important;
+}
+
+/* -------- Temporadas -------- */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-page-v157 .season-hero-v157,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-page-v157 .profile-card-v9,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-page-v157 .season-card-v157,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-page-v157 .season-history-v157,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-page-v157 .sponsored-seasons-v157,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 .season-hero-v157,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 .profile-card-v9,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 .season-card-v157,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 .season-history-v157,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 .sponsored-seasons-v157 {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-page-v157 .season-ranking-v157 article,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-page-v157 .season-invites-v157 > article,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-page-v157 .sponsored-season-list-v157 > article,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 .season-ranking-v157 article,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 .season-invites-v157 > article,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 .sponsored-season-list-v157 > article {
+  border-color: var(--dfg-reward-parity-line) !important;
+  background: var(--dfg-reward-parity-panel-soft) !important;
+  color: var(--dfg-text) !important;
+}
+
+/* -------- Semantic states: keep meaning without introducing a second green UI -------- */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-completed-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-approved-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-approved-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 .sponsored-approved-v13 {
+  border: 1px solid rgba(200,255,25,.28) !important;
+  background: rgba(200,255,25,.075) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 .challenge-completed-v10 strong,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 .organization-approved-v12 strong,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 .squad-approved-v11 strong,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 .sponsored-approved-v13 strong {
+  color: var(--dfg-lime) !important;
+}
+
+/* Remove blue-gray legacy borders from all main Challenge Center panels. */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenges-page-v10 *,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenges-page-v12 *,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squads-page-v11 *,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-page-v13 *,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-page-v157 * {
+  --df-line: var(--dfg-reward-parity-line);
+  --border: var(--dfg-reward-parity-line);
+}
+
+/* =========================================================
+   DadoFit V15.9 — Design System Consolidation
+   ---------------------------------------------------------
+   This is the FINAL visual authority for protected product UI.
+   It intentionally uses explicit, high-specificity selectors and
+   !important because legacy V3/V7/V10-V15 styles still coexist.
+
+   Surface contract:
+   - Canvas:       #070907
+   - Main panel:   #0d100e
+   - Nested panel: #111511
+   - Raised/input: #151916
+   - Accent:       #c8ff19
+
+   Only semantic states (danger/warning/success) may tint a surface.
+   ========================================================= */
+
+:root {
+  --dfg-canvas: #070907;
+  --dfg-surface: #0d100e;
+  --dfg-surface-soft: #111511;
+  --dfg-surface-raised: #151916;
+  --dfg-surface-line: rgba(221,255,92,.14);
+  --dfg-surface-line-strong: rgba(221,255,92,.28);
+}
+
+/* -------- Global token reset for every protected workspace -------- */
+html[data-dadofit-theme="dark"] .workout-layout,
+html[data-dadofit-theme="dark"] .profile-shell-v9,
+html[data-dadofit-theme="dark"] .challenges-shell-v10,
+html[data-dadofit-theme="dark"] .organization-challenges-shell-v12,
+html[data-dadofit-theme="dark"] .sponsored-shell-v13,
+html[data-dadofit-theme="dark"] .season-shell-v157,
+html[data-dadofit-theme="dark"] .organizations-shell-v12,
+html[data-dadofit-theme="dark"] .gym-battles-shell-v121,
+html[data-dadofit-theme="dark"] .rewards-page-v15,
+html[data-dadofit-theme="dark"] .brand-campaigns-shell-v13,
+html[data-dadofit-theme="dark"] .brand-competition-shell-v157,
+html[data-dadofit-theme="dark"] .brand-audit-shell-v133,
+html[data-dadofit-theme="dark"] .workspace-shell-v122,
+html[data-dadofit-theme="dark"] .business-setup-shell-v122,
+html[data-dadofit-theme="dark"] .admin-shell-v14 {
+  --bg: var(--dfg-canvas) !important;
+  --panel: var(--dfg-surface) !important;
+  --panel-soft: var(--dfg-surface-soft) !important;
+  --panel-elevated: var(--dfg-surface-raised) !important;
+  --line: var(--dfg-surface-line) !important;
+  --line-strong: var(--dfg-surface-line-strong) !important;
+  --surface: var(--dfg-surface) !important;
+  --surface-2: var(--dfg-surface-soft) !important;
+  --border: var(--dfg-surface-line) !important;
+  --df-panel: var(--dfg-surface) !important;
+  --df-panel-soft: var(--dfg-surface-soft) !important;
+  --df-panel-elevated: var(--dfg-surface-raised) !important;
+  --df-line: var(--dfg-surface-line) !important;
+  --df-line-strong: var(--dfg-surface-line-strong) !important;
+  --df-primary: var(--dfg-lime) !important;
+  --df-mint: var(--dfg-lime) !important;
+}
+
+/* =========================================================
+   /app — Workout deep surface parity
+   ========================================================= */
+
+/* Primary workout containers use ONE surface family. */
+html[data-dadofit-theme="dark"] .workout-layout .session-summary,
+html[data-dadofit-theme="dark"] .workout-layout .level-card-v7,
+html[data-dadofit-theme="dark"] .workout-layout .dice-card,
+html[data-dadofit-theme="dark"] .workout-layout .result-card,
+html[data-dadofit-theme="dark"] .workout-layout .history-card-v7,
+html[data-dadofit-theme="dark"] .workout-layout .history-card,
+html[data-dadofit-theme="dark"] .workout-layout .empty-state {
+  border: 1px solid var(--dfg-surface-line) !important;
+  border-radius: 12px !important;
+  background: var(--dfg-surface) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+/* Rep dice and exercise dice are peers: no old gray/beige/mint surfaces. */
+html[data-dadofit-theme="dark"] .workout-layout .dice-card,
+html[data-dadofit-theme="dark"] .workout-layout .exercise-cube {
+  border: 1px solid var(--dfg-surface-line) !important;
+  background: var(--dfg-surface-soft) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .exercise-cube strong,
+html[data-dadofit-theme="dark"] .workout-layout .d20-shape strong {
+  color: var(--dfg-text) !important;
+}
+
+/* Remove decorative leftovers from the pre-V15 fitness themes. */
+html[data-dadofit-theme="dark"] .workout-layout .dice-card::before,
+html[data-dadofit-theme="dark"] .workout-layout .result-card::before,
+html[data-dadofit-theme="dark"] .workout-layout .exercise-cube::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Deep result panels: exact same nested surface as the dice cards. */
+html[data-dadofit-theme="dark"] .workout-layout .result-reps-v7,
+html[data-dadofit-theme="dark"] .workout-layout .metadata-grid-v7 > div,
+html[data-dadofit-theme="dark"] .workout-layout .instructions-v7,
+html[data-dadofit-theme="dark"] .workout-layout .result-completion-v7,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-section-v7,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-count-v7,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-item-v7,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-item,
+html[data-dadofit-theme="dark"] .workout-layout .history-item-v7,
+html[data-dadofit-theme="dark"] .workout-layout .result-roll-badge-v7,
+html[data-dadofit-theme="dark"] .workout-layout .social-challenge-actions-v11 button,
+html[data-dadofit-theme="dark"] .workout-layout .social-challenge-actions-v12 button {
+  border: 1px solid var(--dfg-surface-line) !important;
+  border-radius: 9px !important;
+  background: var(--dfg-surface-soft) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+/* Metadata used to have four different top-border colors. One system now. */
+html[data-dadofit-theme="dark"] .workout-layout .metadata-grid-v7 > div,
+html[data-dadofit-theme="dark"] .workout-layout .metadata-grid > div {
+  border: 1px solid var(--dfg-surface-line) !important;
+  border-top: 1px solid var(--dfg-surface-line) !important;
+  background: var(--dfg-surface-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .metadata-grid-v7 dt,
+html[data-dadofit-theme="dark"] .workout-layout .metadata-grid dt,
+html[data-dadofit-theme="dark"] .workout-layout .result-completion-v7 > div span,
+html[data-dadofit-theme="dark"] .workout-layout .instructions-toggle small,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-meta small,
+html[data-dadofit-theme="dark"] .workout-layout .secondary-muscles,
+html[data-dadofit-theme="dark"] .workout-layout .attribution {
+  color: var(--dfg-muted) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .metadata-grid-v7 dd,
+html[data-dadofit-theme="dark"] .workout-layout .metadata-grid dd,
+html[data-dadofit-theme="dark"] .workout-layout .result-completion-v7 > div strong,
+html[data-dadofit-theme="dark"] .workout-layout .instructions-toggle,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-meta strong {
+  color: var(--dfg-text) !important;
+}
+
+/* Media/evidence frames keep content neutral; no beige or blue-gray slabs. */
+html[data-dadofit-theme="dark"] .workout-layout .result-visual-v7 .media-frame,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-preview,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-preview-v7,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-linked-roll {
+  border: 1px solid var(--dfg-surface-line) !important;
+  background: var(--dfg-surface-raised) !important;
+  box-shadow: none !important;
+}
+
+/* Evidence block is a normal nested panel, not a second green theme. */
+html[data-dadofit-theme="dark"] .workout-layout .evidence-section-v7,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-section {
+  border: 1px solid var(--dfg-surface-line) !important;
+  background: var(--dfg-surface-soft) !important;
+  color: var(--dfg-text) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .evidence-heading-v7,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-heading {
+  border-bottom-color: var(--dfg-surface-line) !important;
+}
+
+html[data-dadofit-theme="dark"] .workout-layout .evidence-heading-v7 .eyebrow,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-heading .eyebrow,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-type,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-linked-copy > span {
+  color: var(--dfg-lime) !important;
+}
+
+/* Completion warning remains semantic without introducing a brown panel system. */
+html[data-dadofit-theme="dark"] .workout-layout .completion-evidence-guard-v113 {
+  border: 1px solid rgba(255,202,99,.30) !important;
+  background: rgba(255,202,99,.07) !important;
+  color: #ffd98a !important;
+}
+
+/* Secondary workout controls share raised surface. */
+html[data-dadofit-theme="dark"] .workout-layout .filter-btn,
+html[data-dadofit-theme="dark"] .workout-layout .active-filter-chips button,
+html[data-dadofit-theme="dark"] .workout-layout .secondary-roll-actions button,
+html[data-dadofit-theme="dark"] .workout-layout .evidence-actions button,
+html[data-dadofit-theme="dark"] .workout-layout .filter-panel,
+html[data-dadofit-theme="dark"] .workout-layout .filter-section,
+html[data-dadofit-theme="dark"] .workout-layout .filter-group {
+  border-color: var(--dfg-surface-line) !important;
+  background: var(--dfg-surface-raised) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   Protected app — full surface normalization
+   Main cards / heroes = primary surface.
+   Nested rows / evidence / stat blocks = secondary surface.
+   ========================================================= */
+
+html[data-dadofit-theme="dark"] .profile-shell-v9 .profile-card-v9,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .gymbro-search-card-v9,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenge-card-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squad-create-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squad-review-card-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-card-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenge-card-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-card-v13,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-card-v157,
+html[data-dadofit-theme="dark"] .organizations-shell-v12 .organization-card-v12,
+html[data-dadofit-theme="dark"] .gym-battles-shell-v121 .gym-battle-review-card-v121,
+html[data-dadofit-theme="dark"] .brand-campaigns-shell-v13 .brand-campaign-card-v13,
+html[data-dadofit-theme="dark"] .brand-campaigns-shell-v13 .brand-challenge-card-v13,
+html[data-dadofit-theme="dark"] .brand-campaigns-shell-v13 .brand-review-card-v13,
+html[data-dadofit-theme="dark"] .brand-audit-shell-v133 .audit-card-v133,
+html[data-dadofit-theme="dark"] .brand-audit-shell-v133 .audit-history-card-v133,
+html[data-dadofit-theme="dark"] .admin-shell-v14 .admin-card-v14,
+html[data-dadofit-theme="dark"] .business-setup-shell-v122 .business-setup-card-v122,
+html[data-dadofit-theme="dark"] .rewards-page-v15 .reward-card-v15,
+html[data-dadofit-theme="dark"] .rewards-page-v15 .reward-analytics-card-v154,
+html[data-dadofit-theme="dark"] .rewards-page-v15 .reward-trend-card-v154,
+html[data-dadofit-theme="dark"] .notifications-shell-v113 .notifications-list-card-v113 {
+  border: 1px solid var(--dfg-surface-line) !important;
+  background: var(--dfg-surface) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+/* Deep/nested surfaces across social, Gym, Brand and Admin. */
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenge-pending-total-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenge-reps-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenge-evidence-item-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .challenge-review-v10,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-challenge-rewards-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .organization-evidence-v12,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .squad-evidence-item-v11,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-exercise-v13,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .sponsored-evidence-list-v13 article,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-ranking-v157 article,
+html[data-dadofit-theme="dark"] .profile-shell-v9 .season-invites-v157 > article,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-ranking-v157 article,
+html[data-dadofit-theme="dark"] .season-shell-v157 .season-invites-v157 > article,
+html[data-dadofit-theme="dark"] .organizations-shell-v12 .organization-stats-v12 > div,
+html[data-dadofit-theme="dark"] .gym-battles-shell-v121 .gym-battle-evidence-v121,
+html[data-dadofit-theme="dark"] .gym-battles-shell-v121 .gym-battle-evidence-list-v121 > *,
+html[data-dadofit-theme="dark"] .brand-audit-shell-v133 .audit-history-row-v133,
+html[data-dadofit-theme="dark"] .admin-shell-v14 .admin-kpi-grid-v14 > * {
+  border-color: var(--dfg-surface-line) !important;
+  background: var(--dfg-surface-soft) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+/* Inputs are never allowed to reintroduce blue-gray/beige legacy surfaces. */
+html[data-dadofit-theme="dark"] .workout-layout input,
+html[data-dadofit-theme="dark"] .workout-layout select,
+html[data-dadofit-theme="dark"] .workout-layout textarea,
+html[data-dadofit-theme="dark"] .profile-shell-v9 input,
+html[data-dadofit-theme="dark"] .profile-shell-v9 select,
+html[data-dadofit-theme="dark"] .profile-shell-v9 textarea,
+html[data-dadofit-theme="dark"] .admin-shell-v14 input,
+html[data-dadofit-theme="dark"] .admin-shell-v14 select,
+html[data-dadofit-theme="dark"] .admin-shell-v14 textarea,
+html[data-dadofit-theme="dark"] .brand-campaigns-shell-v13 input,
+html[data-dadofit-theme="dark"] .brand-campaigns-shell-v13 select,
+html[data-dadofit-theme="dark"] .brand-campaigns-shell-v13 textarea {
+  border-color: var(--dfg-surface-line) !important;
+  background: var(--dfg-surface-raised) !important;
+  color: var(--dfg-text) !important;
+  box-shadow: none !important;
+}
+
+/* Semantic success states: dark surface + lime signal, never a pale-green slab. */
+html[data-dadofit-theme="dark"] .challenge-completed-v10,
+html[data-dadofit-theme="dark"] .organization-approved-v12,
+html[data-dadofit-theme="dark"] .squad-approved-v11,
+html[data-dadofit-theme="dark"] .sponsored-approved-v13,
+html[data-dadofit-theme="dark"] .workout-layout .done-btn.completed {
+  border-color: rgba(200,255,25,.32) !important;
+  background: rgba(200,255,25,.09) !important;
+  color: var(--dfg-lime) !important;
+  box-shadow: none !important;
+}
+
+/* Mobile keeps the same surface contract; only geometry changes. */
+@media (max-width: 680px) {
+  html[data-dadofit-theme="dark"] .workout-layout .result-dashboard-v7 {
+    gap: 10px !important;
+  }
+
+  html[data-dadofit-theme="dark"] .workout-layout .metadata-grid-v7 {
+    gap: 7px !important;
+  }
+}
+
+/* =========================================================
+   DadoFit V15.9.1 — FULL PRODUCT HOMOLOGATION
+   ---------------------------------------------------------
+   Final route-by-route authority. This section deliberately
+   avoids zero-specificity helper selectors for parity rules so legacy V7/V10-V15
+   selectors cannot win on specificity.
+
+   Canonical surfaces:
+   canvas        #070907
+   primary       #0d100e
+   nested        #111511
+   raised/input  #151916
+   accent        #c8ff19
+   ========================================================= */
+
+:root {
+  --dfg-v1591-canvas: #070907;
+  --dfg-v1591-primary: #0d100e;
+  --dfg-v1591-nested: #111511;
+  --dfg-v1591-raised: #151916;
+  --dfg-v1591-text: #f5f7ef;
+  --dfg-v1591-soft: #b9c2b3;
+  --dfg-v1591-muted: #7f8a7a;
+  --dfg-v1591-lime: #c8ff19;
+  --dfg-v1591-line: rgba(221,255,92,.14);
+  --dfg-v1591-line-strong: rgba(221,255,92,.28);
+}
+
+html[data-dadofit-theme="dark"] body {
+  background: var(--dfg-v1591-canvas) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+/* Shared legacy token bridge for every protected product shell. */
+html[data-dadofit-theme="dark"] body .workout-layout,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122,
+html[data-dadofit-theme="dark"] body .profile-shell-v9,
+html[data-dadofit-theme="dark"] body .notifications-shell-v113,
+html[data-dadofit-theme="dark"] body .challenges-shell-v10,
+html[data-dadofit-theme="dark"] body .organization-challenges-shell-v12,
+html[data-dadofit-theme="dark"] body .sponsored-shell-v13,
+html[data-dadofit-theme="dark"] body .season-shell-v157,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121,
+html[data-dadofit-theme="dark"] body .rewards-page-v15,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133,
+html[data-dadofit-theme="dark"] body .business-setup-shell-v122,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 {
+  --bg: var(--dfg-v1591-canvas) !important;
+  --panel: var(--dfg-v1591-primary) !important;
+  --panel-soft: var(--dfg-v1591-nested) !important;
+  --panel-elevated: var(--dfg-v1591-raised) !important;
+  --surface: var(--dfg-v1591-primary) !important;
+  --surface-2: var(--dfg-v1591-nested) !important;
+  --df-panel: var(--dfg-v1591-primary) !important;
+  --df-panel-soft: var(--dfg-v1591-nested) !important;
+  --df-panel-elevated: var(--dfg-v1591-raised) !important;
+  --line: var(--dfg-v1591-line) !important;
+  --line-strong: var(--dfg-v1591-line-strong) !important;
+  --border: var(--dfg-v1591-line) !important;
+  --df-line: var(--dfg-v1591-line) !important;
+  --df-line-strong: var(--dfg-v1591-line-strong) !important;
+  --text: var(--dfg-v1591-text) !important;
+  --text-soft: var(--dfg-v1591-soft) !important;
+  --muted: var(--dfg-v1591-muted) !important;
+  --primary: var(--dfg-v1591-lime) !important;
+  --primary-hover: #d7ff3d !important;
+  --primary-text: #090b08 !important;
+  background: var(--dfg-v1591-canvas) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+/* Shared active/selected controls. */
+html[data-dadofit-theme="dark"] body .workout-layout button.active,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 button.active,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 button.active,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 button.active,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 button.active,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 button.active,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 button.active {
+  border-color: var(--dfg-v1591-lime) !important;
+  background: var(--dfg-v1591-lime) !important;
+  color: #090b08 !important;
+}
+
+/* /app ---------------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .workout-layout .dice-card,
+html[data-dadofit-theme="dark"] body .workout-layout .exercise-cube,
+html[data-dadofit-theme="dark"] body .workout-layout .result-card,
+html[data-dadofit-theme="dark"] body .workout-layout .history-card-v7 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .workout-layout .result-reps-v7,
+html[data-dadofit-theme="dark"] body .workout-layout .metadata-grid-v7 > div,
+html[data-dadofit-theme="dark"] body .workout-layout .instructions-v7,
+html[data-dadofit-theme="dark"] body .workout-layout .result-completion-v7,
+html[data-dadofit-theme="dark"] body .workout-layout .evidence-section-v7,
+html[data-dadofit-theme="dark"] body .workout-layout .evidence-count-v7,
+html[data-dadofit-theme="dark"] body .workout-layout .evidence-item-v7,
+html[data-dadofit-theme="dark"] body .workout-layout .secondary-roll-actions button,
+html[data-dadofit-theme="dark"] body .workout-layout .filter-btn,
+html[data-dadofit-theme="dark"] body .workout-layout .active-filter-chips button {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .workout-layout .metadata-grid-v7 > div {
+  border-top: 1px solid var(--dfg-v1591-line) !important;
+}
+html[data-dadofit-theme="dark"] body .workout-layout .result-details-v7 input,
+html[data-dadofit-theme="dark"] body .workout-layout .result-details-v7 select,
+html[data-dadofit-theme="dark"] body .workout-layout .result-details-v7 textarea,
+html[data-dadofit-theme="dark"] body .workout-layout .filter-panel input,
+html[data-dadofit-theme="dark"] body .workout-layout .filter-panel select {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+/* /workspace ----------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-v122,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .brand-health-card-v133,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .brand-recent-v133 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-stats-v122 > *,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-action-grid-v122 > *,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .brand-health-grid-v133 > *,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .brand-recent-list-v133 > * {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /profile ------------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .profile-hero-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .account-security-v15713,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .sponsor-wallet-eco1 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .profile-stats-v9 > article,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .profile-community-grid-v133 > div,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .sponsor-wallet-grid-eco1 > article,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .sponsor-wallet-empty-eco1 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /notifications ------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .notifications-shell-v113 .notifications-hero-v113,
+html[data-dadofit-theme="dark"] body .notifications-shell-v113 .notifications-list-card-v113 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .notifications-shell-v113 .notifications-toolbar-v113,
+html[data-dadofit-theme="dark"] body .notifications-shell-v113 .notifications-list-v113 > *,
+html[data-dadofit-theme="dark"] body .notifications-shell-v113 .notifications-empty-v113,
+html[data-dadofit-theme="dark"] body .notifications-shell-v113 .notifications-state-v113 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /gymbros ------------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .gymbros-hero-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .gymbro-search-card-v9 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .gymbro-row-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .gymbro-search-results-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .gymbro-empty-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .gymbro-list-v9 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .gymbro-avatar-v9 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-lime) !important;
+}
+
+/* /challenges + /organization-challenges + /squads + /sponsored-challenges */
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .challenges-page-v10 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .challenges-page-v10 .challenge-card-v10,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .organization-challenges-page-v12 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .organization-challenges-page-v12 .organization-challenge-card-v12,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .squads-page-v11 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .sponsored-page-v13 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .sponsored-page-v13 .sponsored-card-v13 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .challenges-page-v10 .challenge-pending-total-v10,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .challenges-page-v10 .challenge-reps-v10,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .challenges-page-v10 .challenge-evidence-item-v10,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .challenges-page-v10 .challenge-review-v10,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .organization-challenges-page-v12 .organization-challenge-rewards-v12,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .organization-challenges-page-v12 .organization-evidence-v12,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .squads-page-v11 .squad-roster-v11,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .squads-page-v11 .squad-member-list-v11,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .squads-page-v11 .squad-invite-gymbros-v11,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .squads-page-v11 .squad-evidence-item-v11,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .sponsored-page-v13 .sponsored-exercise-v13,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 .sponsored-page-v13 .sponsored-evidence-list-v13 article {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /seasons ------------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .season-shell-v157 .season-hero-v157,
+html[data-dadofit-theme="dark"] body .season-shell-v157 .season-card-v157,
+html[data-dadofit-theme="dark"] body .season-shell-v157 .season-history-v157,
+html[data-dadofit-theme="dark"] body .season-shell-v157 .sponsored-seasons-v157 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .season-shell-v157 .season-ranking-v157 article,
+html[data-dadofit-theme="dark"] body .season-shell-v157 .season-invites-v157 > article,
+html[data-dadofit-theme="dark"] body .season-shell-v157 .sponsored-season-list-v157 > article {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /rewards ------------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-hero-v15,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-card-v15,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .redemptions-list-v15 > *,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-empty-v15 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-body-v15,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-qr-panel-v152 {
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+/* /rewards/manage ------------------------------------------------------ */
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-editor-v15,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .provider-rewards-v15,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .provider-rewards-v15 > * {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .fulfillment-box-v151,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .coupon-stats-v151,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .coupon-import-row-v151,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .provider-fulfillment-v151 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /rewards/analytics --------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-analytics-card-v154,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-analytics-table-wrap-v154,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-recent-list-v154 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-analytics-kpis-v154 > *,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-stock-list-v154 > *,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-recent-list-v154 > * {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /rewards/validate ---------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-validator-v152,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-pending-v152,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-pending-list-v152 > * {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-validation-status-v152,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-validation-grid-v152 > *,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-validation-instructions-v152 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /organizations ------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organizations-hero-v12,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-card-v12,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-create-v12 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-stats-v12 > div,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-member-row-v12,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-invite-gymbros-v12,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-invites-v12 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /gym-battles --------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-hero-v121,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-card-v121,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-review-card-v121 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-evidence-v121,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-evidence-list-v121 > *,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-score-v121,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-info-v121,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-approved-v121 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /brand-campaigns ----------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-hero-v13,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-campaign-card-v13,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-challenge-card-v13,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-review-card-v13 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-summary-v13 > *,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-campaign-metrics-v13 > *,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .sponsored-goal-builder-v132,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .sponsored-goal-preview-v132,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-review-evidence-v13 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /brand-competitions -------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-hero-v157,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-form-v157,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-list-v157 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-gym-picker-v157,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-requirement-v157,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-entries-v157 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /brand-audit --------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .brand-audit-hero-v133,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .profile-card-v9,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-card-v133,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-history-card-v133,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .governance-config-v133 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .brand-audit-stats-v133 > *,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-history-row-v133,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .governance-campaign-list-v133 > *,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-reviewer-v133,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-media-v133,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-notes-v133 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* /business-setup ------------------------------------------------------ */
+html[data-dadofit-theme="dark"] body .business-setup-shell-v122 .business-setup-card-v122 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .business-setup-shell-v122 .business-setup-form-v122 input,
+html[data-dadofit-theme="dark"] body .business-setup-shell-v122 .business-setup-form-v122 select,
+html[data-dadofit-theme="dark"] body .business-setup-shell-v122 .business-setup-form-v122 textarea {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+/* /admin/* ------------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-sidebar-v14,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-top-v14,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-card-v14,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-table-wrap-v14,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-ad-rotation-v143,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-request-list-v14,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-season-picker-v1573,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-ad-creative-guide-v142 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-kpi-grid-v14 > *,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-callouts-v14 > *,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-season-list-v157 > *,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-ad-kpis-v144 > *,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-ad-click-list-v144 > *,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 .admin-timeline-v14 > * {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .admin-shell-v14 input,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 select,
+html[data-dadofit-theme="dark"] body .admin-shell-v14 textarea {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+/* Footer ---------------------------------------------------------------
+   SiteFooter is outside the route shells, so it needs its own contract.
+   Remove legacy navy + blue/orange tri-color system completely. */
+html[data-dadofit-theme="dark"] body .site-footer-v141 {
+  border-top: 1px solid var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-canvas) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-accent-v141 {
+  height: 1px !important;
+  background: var(--dfg-v1591-lime) !important;
+  opacity: .65;
+}
+html[data-dadofit-theme="dark"] body .site-footer-v141::before {
+  background: radial-gradient(circle, rgba(200,255,25,.09), transparent 68%) !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-logo-v141 > span {
+  background: var(--dfg-v1591-lime) !important;
+  color: #090b08 !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-brand-v141 p,
+html[data-dadofit-theme="dark"] body .site-footer-nav-v141 a,
+html[data-dadofit-theme="dark"] body .site-footer-commercial-copy-v141 p,
+html[data-dadofit-theme="dark"] body .site-footer-bottom-v141,
+html[data-dadofit-theme="dark"] body .site-footer-bottom-v141 a {
+  color: var(--dfg-v1591-soft) !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-pill-row-v141 span,
+html[data-dadofit-theme="dark"] body .site-footer-commercial-v141 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-commercial-v141 {
+  background: linear-gradient(110deg, rgba(200,255,25,.06), var(--dfg-v1591-primary) 58%) !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-commercial-v141 > a {
+  background: var(--dfg-v1591-lime) !important;
+  color: #090b08 !important;
+  box-shadow: none !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-bottom-v141 {
+  border-top-color: var(--dfg-v1591-line) !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-nav-v141 h2,
+html[data-dadofit-theme="dark"] body .site-footer-logo-v141,
+html[data-dadofit-theme="dark"] body .site-footer-commercial-copy-v141 strong {
+  color: var(--dfg-v1591-text) !important;
+}
+html[data-dadofit-theme="dark"] body .site-footer-nav-v141 h2 svg,
+html[data-dadofit-theme="dark"] body .site-footer-commercial-copy-v141 > span {
+  color: var(--dfg-v1591-lime) !important;
+}
+
+/* Shared form controls across all protected routes. */
+html[data-dadofit-theme="dark"] body .profile-shell-v9 input,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 select,
+html[data-dadofit-theme="dark"] body .profile-shell-v9 textarea,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 input,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 select,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 textarea,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 input,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 select,
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 textarea,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 input,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 select,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 textarea,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 input,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 select,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 textarea,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 input,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 select,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 textarea {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* Semantic success may tint; it must never become a second visual system. */
+html[data-dadofit-theme="dark"] body .auth-success,
+html[data-dadofit-theme="dark"] body .challenge-completed-v10,
+html[data-dadofit-theme="dark"] body .organization-approved-v12,
+html[data-dadofit-theme="dark"] body .squad-approved-v11,
+html[data-dadofit-theme="dark"] body .sponsored-approved-v13,
+html[data-dadofit-theme="dark"] body .gym-battle-approved-v121,
+html[data-dadofit-theme="dark"] body .reward-validation-done-v152 {
+  border-color: rgba(200,255,25,.28) !important;
+  background: rgba(200,255,25,.075) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* Mobile: same surfaces, only geometry changes. */
+@media (max-width: 720px) {
+  html[data-dadofit-theme="dark"] body .site-footer-inner-v141,
+  html[data-dadofit-theme="dark"] body .site-footer-commercial-v141,
+  html[data-dadofit-theme="dark"] body .site-footer-bottom-v141 {
+    width: calc(100% - 28px) !important;
+  }
+}
+
+
+/* =========================================================
+   DadoFit V15.9.2 - Exercise suggestions contrast fix
+   Brand Campaigns / ExerciseCatalogPicker
+   ========================================================= */
+
+html[data-dadofit-theme="dark"] .exercise-suggestions-v131 > span {
+  color: #8d978f !important;
+  opacity: 1 !important;
+}
+
+html[data-dadofit-theme="dark"] .exercise-suggestions-v131 button {
+  color: #b8c1ba !important;
+  background: #0d100e !important;
+  border-color: rgba(200, 255, 25, .16) !important;
+}
+
+html[data-dadofit-theme="dark"] .exercise-suggestions-v131 button:hover,
+html[data-dadofit-theme="dark"] .exercise-suggestions-v131 button:focus-visible {
+  color: #070907 !important;
+  background: #c8ff19 !important;
+  border-color: #c8ff19 !important;
+}
+
+html[data-dadofit-theme="dark"] .exercise-custom-toggle-v131,
+html[data-dadofit-theme="dark"] .exercise-picker-title-v131 button {
+  color: #aab4ac !important;
+}
+
+html[data-dadofit-theme="dark"] .exercise-custom-toggle-v131:hover,
+html[data-dadofit-theme="dark"] .exercise-custom-toggle-v131:focus-visible,
+html[data-dadofit-theme="dark"] .exercise-picker-title-v131 button:hover,
+html[data-dadofit-theme="dark"] .exercise-picker-title-v131 button:focus-visible {
+  color: #c8ff19 !important;
+}
+
+html[data-dadofit-theme="dark"] .exercise-search-v131 > span,
+html[data-dadofit-theme="dark"] .exercise-custom-v131 {
+  color: #f2f5f0 !important;
+}
+
+html[data-dadofit-theme="dark"] .exercise-results-v131 {
+  color: #f2f5f0 !important;
+  background: #111511 !important;
+  border-color: rgba(200, 255, 25, .12) !important;
+}
+
+html[data-dadofit-theme="dark"] .exercise-results-v131 > button {
+  color: #f2f5f0 !important;
+  border-bottom-color: rgba(200, 255, 25, .10) !important;
+}
+
+html[data-dadofit-theme="dark"] .exercise-results-v131 > button:hover {
+  background: rgba(200, 255, 25, .08) !important;
+}
