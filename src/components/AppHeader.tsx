@@ -7,11 +7,12 @@ import { usePlatformAdminStatus } from '../hooks/usePlatformAdminStatus';
 import { NotificationBell } from './NotificationBell';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { WorkspaceActionLink } from './WorkspaceActionLink';
+import { SocialSummaryBar } from './SocialSummaryBar';
 import { getWorkspaceNavigation, type WorkspaceNavIcon } from '../lib/workspaceNavigation';
 
 type DadoFitTheme = 'pastel' | 'light' | 'dark';
 
-const THEME_KEY = 'dadofit:theme:v7';
+const THEME_KEY = 'dadofit:theme:v15.8';
 const THEME_OPTIONS: Array<{ id: DadoFitTheme; label: string; icon: typeof Palette }> = [
   { id: 'pastel', label: 'Pastel', icon: Palette },
   { id: 'light', label: 'Claro', icon: Sun },
@@ -23,7 +24,7 @@ function readInitialTheme(): DadoFitTheme {
     const stored = localStorage.getItem(THEME_KEY);
     if (stored === 'pastel' || stored === 'light' || stored === 'dark') return stored;
   } catch { /* ignore */ }
-  return 'light';
+  return 'dark';
 }
 
 export function AppHeader() {
@@ -64,7 +65,8 @@ export function AppHeader() {
   const secondaryItems = navItems.filter((item) => item.tier === 'secondary');
   const secondaryActive = secondaryItems.some((item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`));
 
-  return <header className="topbar topbar-v7 topbar-v122 topbar-v133 topbar-v151" data-workspace-kind={activeWorkspace.kind}>
+  return <>
+  <header className="topbar topbar-v7 topbar-v122 topbar-v133 topbar-v151" data-workspace-kind={activeWorkspace.kind}>
     <div className="topbar-brand">
       <Link className="brand-home-v133" to={personal ? '/app' : '/workspace'} aria-label="Ir al inicio de DadoFit">
         <div className="brand-mark brand-mark-v7"><Dice5 size={20}/></div>
@@ -95,5 +97,7 @@ export function AppHeader() {
         {userOpen && <div className="header-menu-v133 user-menu-v133"><div className="user-menu-head-v133"><strong>{user?.name ?? 'Invitado'}</strong><span>{personal ? 'Perfil personal' : `${activeWorkspace.label} · ${activeWorkspace.role ?? 'member'}`}</span></div>{isPlatformAdmin && <Link to="/admin" onClick={() => setUserOpen(false)}><ShieldCheck size={16}/><span>Administración DadoFit</span></Link>}<WorkspaceActionLink to="/profile" workspaceId="personal" onClick={() => setUserOpen(false)}><UserRound size={16}/><span>Mi perfil</span></WorkspaceActionLink><Link to="/contact" onClick={() => setUserOpen(false)}><LifeBuoy size={16}/><span>Soporte / Contáctanos</span></Link><button type="button" className="logout-v133" onClick={() => { setUserOpen(false); void logout(); }}><LogOut size={16}/><span>Cerrar sesión</span></button></div>}
       </div>
     </div>
-  </header>;
+  </header>
+  <SocialSummaryBar/>
+  </>;
 }

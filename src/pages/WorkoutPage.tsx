@@ -9,7 +9,6 @@ import { FilterPanel } from '../components/FilterPanel';
 import { RepDice } from '../components/RepDice';
 import { RollHistory } from '../components/RollHistory';
 import { SessionSummary } from '../components/SessionSummary';
-import { SocialSummaryBar } from '../components/SocialSummaryBar';
 import { useExercises } from '../hooks/useExercises';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { useWorkoutRoll } from '../hooks/useWorkoutRoll';
@@ -61,7 +60,6 @@ export function WorkoutPage() {
         <div className="workout-center-v8">
           <AppHeader/>
           <div className="app-shell">
-            <SocialSummaryBar/>
             <SessionSummary exercises={session.exercises} reps={session.reps} onReset={resetSession}/>
             <main className="workout-main-v7">
               <DiceLevelSelector value={diceLevel} onChange={setDiceLevel}/>
