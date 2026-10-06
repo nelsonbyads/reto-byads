@@ -17,6 +17,28 @@ Principios:
 - proteger reglas de negocio en backend;
 - pensar siempre en producto, operación y monetización.
 
+## 1.1 Regla de autoridad documental — DadoFit 2.1
+
+Para economía y rewards, usar este orden de autoridad:
+
+```text
+1. repositorio real / migraciones aplicadas
+2. docs/DADOFIT_2_1_ECONOMY_AUDIT.md
+3. este AGENT.md
+4. documentación histórica anterior
+```
+
+Si existe contradicción, no asumir: verificar código y migraciones reales.
+
+Modelo económico oficial desde 2.1:
+
+```text
+XP = progreso no gastable
+DadoCoins = única moneda universal
+Partner Points = puntos gastables por organización
+Competitive Score = histórico separado del wallet
+```
+
 ---
 
 # 2. Proyecto
@@ -455,7 +477,7 @@ SuperAdmin        ✅ /admin
 
 # 14. Estado de versiones
 
-Completado:
+Completado y validado históricamente:
 
 ```text
 V8      MVP Individual
@@ -499,13 +521,38 @@ V15.1   Reward Fulfillment + Coupon Inventory
 V15.2   QR / Physical Reward Fulfillment
 V15.2.1 Filter Overlay + Instructions Legibility
 V15.2.2 Gym Reward Offer Notifications
-V15.3   Gym Challenge Economy + configurable DC/XP/GP + reward clarity
+V15.3   Gym Challenge Economy + Reward Clarity
 V15.4   Rewards Analytics Partner/Gym + SuperAdmin
 V15.4.1 Responsive Header Hotfix
-V15.7   Pre-Release Feature Pack: Unified Challenges + TP/GP Seasons + Sponsored Gym Competitions
+V15.7   Unified Challenges + TP/GP Seasons + Sponsored Gym Competitions
+ECO-1   Sponsor Point Wallets / Sponsor economy foundation
+ECO-2   Gym Point Wallets + score-to-wallet separation
+ECO-3   Rewards multi-currency payment foundation
 ```
 
----
+Estado real confirmado por auditoría 2.1:
+
+```text
+La base ECO-1 / ECO-2 / ECO-3 ya existe en código y migraciones.
+La economía 2.1 NO parte de cero.
+No se considera terminada la migración conceptual a Partner Points.
+No existe todavía gobierno formal de presupuesto/cupo DC por convenio.
+```
+
+Milestone actual:
+
+```text
+DadoFit / Reto ByAds Reloaded 2.1
+ECONOMY MIGRATION — SPEC / IMPLEMENTATION PENDING
+```
+
+Fuente de verdad para esta fase:
+
+```text
+docs/DADOFIT_2_1_ECONOMY_AUDIT.md
++ repositorio real
++ este AGENT.md actualizado
+```
 
 # 15. Flujo de trabajo oficial
 
@@ -566,113 +613,255 @@ secretos
 
 ---
 
-# 17. Economía DadoFit
+# 17. Economía DadoFit — modelo oficial 2.1
 
-Hay cuatro sistemas conceptuales.
+La economía oficial de DadoFit 2.1 se compone de tres conceptos separados:
+
+```text
+XP
+DADOCOINS (DC)
+PARTNER POINTS
+```
+
+Y existe una cuarta dimensión independiente:
+
+```text
+COMPETITIVE / HISTORICAL SCORE
+```
+
+Nunca mezclar saldo gastable con score histórico.
 
 ## XP
 
 ```text
 Progreso personal
+No es moneda
+No se gasta
 ```
 
-No gastable.
+Persistencia actual:
+
+```text
+user_progress.xp
+progress_transactions
+```
+
+XP puede participar en progresión, nivel, streaks y métricas personales, pero no paga rewards.
 
 ## DC — DadoCoins
 
-```text
-Moneda de fidelización / rewards
-```
-
-Sí gastable.
-
-No es:
+DadoCoins es la única moneda universal de DadoFit.
 
 ```text
-crypto
-cash
-P2P
+DC = moneda global de rewards DadoFit
 ```
 
-Principio:
+Reglas oficiales:
 
 ```text
-COMPLETAR UN RETO
-≠
-TENER DERECHO A RECOMPENSA
+- un único saldo global por usuario;
+- pertenece a DadoFit;
+- no pertenece a Gym, Brand ni Sponsor;
+- no es crypto;
+- no es cash;
+- no es P2P;
+- no es transferible entre usuarios;
+- Partner Points NO se convierten a DC;
+- un Partner NO puede imprimir DC libremente.
 ```
+
+Persistencia actual:
+
+```text
+wallets
+wallet_transactions
+```
+
+El ledger de DC es obligatorio. No modificar saldos únicamente desde frontend.
+
+Principio de gobierno 2.1:
+
+```text
+DadoFit es el emisor y gobernador de DadoCoins.
+```
+
+Los retos oficiales pueden entregar DC. Los retos o campañas de partner solo podrán entregar DC cuando exista un convenio/presupuesto aprobado por DadoFit.
+
+Modelo objetivo de presupuesto:
+
+```text
+budget_dc
+spent_dc
+remaining_dc
+reward_dc_per_user
+max_rewarded_users
+valid_from
+valid_until
+```
+
+Una vez agotado el presupuesto, el reto puede continuar si corresponde, pero no debe seguir emitiendo DC.
+
+## Partner Points
+
+Partner Points es el concepto unificado para puntos gastables propios de una organización.
+
+Ejemplos de presentación:
+
+```text
+Titanes Points
+Nike Points
+Adidas Points
+```
+
+Cada organización puede personalizar:
+
+```text
+points_name
+points_short_name
+points_icon
+points_color
+enabled
+```
+
+Reglas:
+
+```text
+- pertenecen a una organización;
+- son saldo gastable;
+- no son universales;
+- no se comparten entre organizaciones;
+- no se convierten a DC;
+- cada Partner gobierna únicamente sus propios puntos;
+- cada Partner puede tener su propio Marketplace.
+```
+
+Infraestructura física actual que se reutiliza durante la migración:
+
+```text
+gym_point_wallets
+gym_point_ledger
+sponsor_point_wallets
+sponsor_point_ledger
+```
+
+No renombrar estas tablas de forma destructiva en 2.1. Primero abstraer producto y API; deprecar nombres legacy posteriormente.
 
 ## TP — Team Points
 
-```text
-Puntos competitivos de Squad
-```
-
-Sirven para:
+TP NO se convierte en Partner Points.
 
 ```text
-rankings de Squad
-temporadas
-competencias
-premios colectivos
+TP = score competitivo histórico de Squad
 ```
 
-No deberían gastarse como moneda.
-
-## GP — Gym Points
-
-Actualmente el backend usa históricamente:
+Persistencia:
 
 ```text
-sponsor_points
-SP
+score_events.team_points
 ```
 
-pero conceptualmente debe migrarse visualmente a:
+TP:
 
 ```text
-GP — Gym Points
+- no es wallet;
+- no se gasta;
+- sirve para ranking, seasons y competencia de Squads.
 ```
 
-Sirven para:
+## GP / SP — compatibilidad existente
+
+GP y SP son implementaciones actuales que deben presentarse progresivamente como Partner Points cuando sean saldo gastable.
+
+Estado real:
 
 ```text
-ranking de Gyms
-Gym vs Gym
-temporadas
-activaciones patrocinadas
+GP gastable
+→ gym_point_wallets
+
+SP gastable real
+→ sponsor_point_wallets
 ```
 
-NO confundir con DadoCoins.
+ATENCIÓN — legacy crítico:
 
-Puede mantenerse `sponsor_points` internamente por compatibilidad y mostrar `GP` en frontend.
+```text
+challenges.sponsor_points
+score_events.sponsor_points
+```
 
----
+NO representan los Sponsor Points reales de una Brand.
 
-# 18. DadoCoins — fuentes confirmadas
+Esos campos funcionan como compatibilidad / espejo legacy de Gym Points.
+
+SP real vive en:
+
+```text
+sponsor_point_wallets
+sponsor_point_ledger
+challenge_participants.sponsor_reward_points_granted
+```
+
+No interpretar `sponsor_points` legacy por nombre.
+
+## Saldo vs score histórico
+
+Siempre separar:
+
+```text
+balance
+lifetime_earned
+lifetime_spent
+competitive_score
+```
+
+Ejemplo:
+
+```text
+Titanes Points
+
+lifetime_earned   1840
+lifetime_spent     600
+balance           1240
+competitive_score 1840
+```
+
+Si el usuario gasta 500:
+
+```text
+balance            740
+competitive_score 1840
+```
+
+El ranking NO debe bajar por un canje.
+
+# 18. DadoCoins — fuentes actuales y gobierno 2.1
+
+El backend actual ya emite DC mediante RPCs con caps, idempotencia, locks y anti-farming. Esto se conserva.
+
+Lo nuevo en 2.1 es distinguir:
+
+```text
+CAP DE RECOMPENSA
+!=
+PRESUPUESTO DE EMISIÓN
+```
+
+Un límite como `máx. 50 DC por aprobación` no reemplaza un presupuesto comercial.
 
 ## Retos 1 vs 1
 
-Aprobación elegible:
+Aprobación elegible actual:
 
 ```text
 hasta 25 DC
 hasta 50 XP
 ```
 
-Anti-farming:
-
-```text
-mismo challenger → mismo Gymbro:
-máx. 1 recompensa / 24h
-
-mismo receptor:
-máx. 5 recompensas 1v1 / 24h
-```
+Anti-farming existente se conserva.
 
 ## Squad battles
 
-Aprobación elegible:
+Aprobación elegible actual:
 
 ```text
 hasta 25 DC
@@ -680,69 +869,80 @@ hasta 50 XP
 hasta 100 TP
 ```
 
-Anti-farming:
-
-```text
-misma pareja de Squads:
-máx. 1 batalla recompensada / 24h
-
-mismo usuario:
-máx. 5 contribuciones recompensadas / 24h
-```
+TP es score competitivo, no Partner Points.
 
 ## Retos de Gym / Organización
 
-Aprobación elegible actual:
+Aprobación actual puede configurar:
 
 ```text
-hasta 25 DC
-hasta 50 XP
-hasta 100 SP
+0..25 DC
+0..50 XP
+0..100 GP
 ```
 
-SP debe presentarse en producto como:
+En 2.1:
 
 ```text
-GP
+GP gastable
+→ se presenta conceptualmente como Partner Points del Gym
 ```
 
-Anti-farming:
-
-```text
-mismo usuario / misma organización:
-cooldown 24h
-
-máx. 5 recompensas de organización / 24h
-```
+Si el Gym entrega DC, esa emisión deberá quedar sujeta al modelo de autorización/presupuesto DadoFit cuando se implemente la capa 2.1.
 
 ## Gym vs Gym
 
-Aprobación elegible:
+Puede otorgar actualmente:
 
 ```text
-hasta 25 DC
-hasta 50 XP
-hasta 100 GP
+DC
+XP
+GP / score de Gym
 ```
+
+Conservar score histórico separado del saldo gastable.
 
 ## Retos patrocinados
 
-Aprobación elegible:
+Actualmente pueden otorgar:
 
 ```text
-hasta 50 DC
-hasta 100 XP
+0..50 DC
+0..100 XP
+0..500 SP reales
 ```
 
-Anti-farming:
+En 2.1:
 
 ```text
-máx. 3 recompensas patrocinadas / 24h
+SP gastable
+→ Partner Points de la Brand/Sponsor
 ```
 
-La marca no puede farmear su propia campaña.
+Y DC:
 
----
+```text
+solo con presupuesto/cupo aprobado por DadoFit
+```
+
+Ejemplo objetivo:
+
+```text
+DadoFit x Nike
++250 XP
++50 DC            ← presupuesto DadoFit/convenio
++150 Nike Points  ← economía Nike
+```
+
+## Invariante
+
+```text
+COMPLETAR UN RETO
+!=
+TENER DERECHO A RECOMPENSA
+```
+
+Anti-farming, presupuesto agotado, vigencia, elegibilidad o idempotencia pueden producir aprobación con payout parcial o cero según reglas de negocio.
 
 # 19. Anti-farming
 
@@ -808,37 +1008,117 @@ Semántica oficial de producto:
 TP = Team Points = Squads
 GP = Gym Points  = Gyms
 ```
-# 22. Rewards Marketplace
+# 22. Rewards Marketplace — modelo 2.1
 
-Ruta Gymbro:
+La infraestructura actual de Rewards se conserva y se generaliza.
 
-```text
-/rewards
-```
-
-Funciones:
+Estado real confirmado:
 
 ```text
-Premios
-Mis canjes
-Saldo DC
-Búsqueda
-Filtros
-Stock
-Límite por usuario
+rewards
+reward_redemptions
+reward_coupon_codes
+reward_offer_events
+reward_redemption_events
 ```
 
----
-
-# 23. Gestión de ofertas
-
-Ruta:
+ECO-3 ya permite una redención con un único método:
 
 ```text
-/rewards/manage
+redeem_reward(..., p_payment_method)
+
+p_payment_method:
+'dc'
+'gp'
+'sp'
 ```
 
-Owner/Admin puede:
+Esto demuestra que la base multi-economía ya existe.
+
+## Marketplace DadoFit
+
+Pago permitido:
+
+```text
+DADOCOINS
+```
+
+Puede contener rewards propios o convenios globales.
+
+## Marketplace Partner
+
+Pago permitido:
+
+```text
+PARTNER_POINTS de esa organization_id
+```
+
+Ejemplos:
+
+```text
+Titanes Rewards → Titanes Points
+Nike Rewards    → Nike Points
+```
+
+## Regla de pago
+
+Una redención usa UNA sola economía.
+
+Permitido:
+
+```text
+100 DC
+```
+
+o:
+
+```text
+500 Nike Points
+```
+
+No permitido:
+
+```text
+50 DC + 300 Nike Points
+```
+
+No introducir pagos combinados sin una decisión explícita de producto futura.
+
+## Compatibilidad física actual
+
+Mientras se implementa la abstracción:
+
+```text
+native_currency = 'gp' | 'sp'
+native_cost
+coin_cost
+```
+
+pueden mantenerse internamente.
+
+La UI 2.1 debe ocultar la complejidad GP/SP y mostrar el nombre configurado del Partner.
+
+## Reutilizar
+
+Conservar:
+
+```text
+inventario
+stock
+max_per_user
+vigencia
+coupon pools
+QR
+redemption URL
+instrucciones
+fulfillment físico/digital
+auditoría
+analytics
+```
+
+# 23. Gestión de ofertas — 2.1
+
+Owner/Admin del Partner puede mantener el ciclo existente:
 
 ```text
 crear
@@ -848,24 +1128,28 @@ pausar
 finalizar
 ```
 
-Campos:
+Campos actuales de Rewards se preservan.
+
+En 2.1 la gestión debe distinguir claramente:
 
 ```text
-Nombre
-Descripción
-Tipo
-Costo DC
-Stock
-Máx. por usuario
-Imagen URL
-Tipo de entrega
-Instrucciones
-Términos
-Inicio
-Fin
+Marketplace DadoFit
+→ costo en DC
+
+Marketplace Partner
+→ costo en Partner Points
 ```
 
----
+Nunca hacer que el operador seleccione GP/SP como conceptos de producto finales.
+
+Debe ver el nombre configurado, por ejemplo:
+
+```text
+Costo
+500 Titanes Points
+```
+
+Backend puede mantener compatibilidad con `native_currency` / `native_cost` mientras la capa de producto evoluciona.
 
 # 24. Reward Fulfillment
 
@@ -1277,7 +1561,7 @@ No reducir tipografía indiscriminadamente.
 Canje:
 
 ```text
-frontend NO descuenta DC
+frontend NO descuenta saldos
 ```
 
 Debe hacerlo backend de forma transaccional.
@@ -1290,9 +1574,26 @@ stock
 vigencia
 estado
 límite por usuario
-eligibilidad
+elegibilidad
+organización / marketplace
+método de pago permitido
 código disponible
 ```
+
+Para DC validar wallet global.
+
+Para Partner Points validar wallet correspondiente al `organization_id` del marketplace/reward.
+
+Una redención:
+
+```text
+1 reward
+1 payment_currency
+1 payment_amount
+1 payment_organization_id cuando aplique
+```
+
+No pagos mixtos.
 
 Si falla algo:
 
@@ -1300,30 +1601,67 @@ Si falla algo:
 ROLLBACK completo
 ```
 
----
-
 # 40. Wallet / Ledger
 
-DadoFit ya tiene:
+DadoFit ya posee tres familias de wallets/ledgers gastables:
 
 ```text
+DC
 wallets
 wallet_transactions
+
+GP
+ gym_point_wallets
+ gym_point_ledger
+
+SP real
+ sponsor_point_wallets
+ sponsor_point_ledger
 ```
 
-Ledger conceptual:
+En 2.1:
 
 ```text
-+25 DC reto 1v1
-+25 DC reto Gym
-+50 DC patrocinado
--50 DC batido Titanes
--250 DC descuento Nike
+DC
+→ sigue siendo wallet global DadoFit
+
+GP/SP gastables
+→ se abstraen como Partner Points
 ```
 
-Mantener trazabilidad.
+No unificar físicamente tablas en una sola migración destructiva.
 
----
+Primero:
+
+```text
+API/configuración común
+labels dinámicos
+marketplace por organization_id
+reglas comunes de emisión/spend
+```
+
+Luego evaluar deprecación física.
+
+Todo movimiento debe dejar ledger e idempotency key.
+
+Ejemplo DC:
+
+```text
++25 DC reto oficial
++50 DC convenio aprobado
+-50 DC reward DadoFit
+```
+
+Ejemplo Partner Points:
+
+```text
++100 Titanes Points reto Gym
+-50 Titanes Points batido
++150 Nike Points campaña Nike
+-300 Nike Points cupón Nike
+```
+
+Score histórico se mantiene separado en `score_events` y agregados de ranking.
 
 # 41. SuperAdmin — estado probado
 
@@ -1455,34 +1793,97 @@ nothing to commit, working tree clean
 
 ---
 
-# 47. Milestone actual — V15.7 Pre-Release Feature Pack
+# 47. Milestone actual — DadoFit / Reto ByAds Reloaded 2.1
 
-Implementado como último paquete funcional antes del feature freeze:
+La auditoría técnica 2.1 confirmó que ECO-1 / ECO-2 / ECO-3 ya implementaron aproximadamente la mayor parte de la infraestructura necesaria para la nueva economía.
 
-### A. Unified Challenges
-
-```text
-/challenges
-/organization-challenges
-/squads
-/sponsored-challenges
-/seasons
-```
-
-Comparten navegación contextual para que el Gymbro no tenga que entender la separación técnica interna.
-
-### B. TP / GP Seasons
+Estado:
 
 ```text
-TP → ranking de Squads
-GP → ranking de Gyms
+AUDITORÍA ECONÓMICA 2.1     ✅
+AGENT.md 2.1                ✅ este documento
+SPEC DE IMPLEMENTACIÓN      ⏳ siguiente paso
+BUILD / MIGRACIONES         ⏳ pendiente
+QA 2.1                      ⏳ pendiente
 ```
 
-La temporada no borra puntos históricos. `score_events` conserva el ledger y `season_id` define la ventana global.
+Objetivo del milestone:
 
-### C. Sponsored Gym Competitions
+```text
+Una moneda universal DadoCoins
++
+N economías Partner Points
++
+score competitivo separado
++
+gobierno formal de emisión DC
++
+Marketplace DadoFit / Marketplace Partner
+```
 
-Brands verificadas pueden invitar Gyms verificados a una competencia por GP con fecha de inicio/fin. Los Gyms Owner/Admin aceptan o rechazan. La tabla patrocinada calcula GP por ventana temporal, por lo que no roba puntos a la temporada global.
+## A. Foundation existente — KEEP
+
+```text
+wallets / wallet_transactions
+XP / progress_transactions
+gym_point_wallets / ledger
+sponsor_point_wallets / ledger
+score_events
+anti-farming
+idempotency
+advisory locks
+Rewards fulfillment
+QR / coupon pools
+organizations / RBAC
+```
+
+## B. Partner Points abstraction — ADAPT
+
+Agregar configuración por organización:
+
+```text
+points_name
+points_short_name
+points_icon
+points_color
+enabled
+```
+
+No borrar GP/SP físicos todavía.
+
+## C. DC Budget Governance — ADD
+
+Crear una capa de presupuesto/cupo para campañas o convenios que puedan entregar DC.
+
+Debe permitir conocer:
+
+```text
+asignados
+emitidos
+restantes
+vigencia
+máximo premiados
+```
+
+## D. Marketplace split — ADAPT
+
+Separar experiencia:
+
+```text
+Marketplace DadoFit
+Marketplace Partner
+```
+
+sin reescribir fulfillment existente.
+
+## E. Historical Score — KEEP
+
+```text
+TP / GP score histórico
+```
+
+no se debita cuando el usuario gasta Partner Points.
+
 # 48. Diseño propuesto para crear reto Gym
 
 Modal:
@@ -1629,76 +2030,68 @@ por edición.
 
 # 51. Qué NO hacer ahora
 
-No abrir grandes features nuevas antes de cerrar:
+Durante la migración económica 2.1 NO:
 
 ```text
-Rewards QA
-Gym challenge reward configuration
-notifications
-TP/GP semantics
-partner analytics
+- renombrar o borrar tablas GP/SP de forma destructiva;
+- reinterpretar sponsor_points legacy como Sponsor Points reales;
+- mezclar wallet y score histórico;
+- permitir conversión Partner Points → DC;
+- permitir transferencias P2P;
+- habilitar cash-out;
+- introducir crypto;
+- permitir pagos mixtos DC + Partner Points;
+- permitir que un Partner emita DC sin presupuesto/autorización;
+- editar migraciones ya aplicadas;
+- romper RPCs legacy antes de tener compatibilidad;
+- reescribir Rewards/QR/fulfillment que ya funciona.
 ```
 
-Evitar todavía:
-
-```text
-Marketplace abierto P2P
-cash-out
-crypto
-billing complejo
-seasons enormes
-```
-
----
+Evitar refactors cosméticos mientras se implementa la capa económica.
 
 # 52. Roadmap real desde aquí
 
+Orden oficial recomendado para DadoFit 2.1:
+
 ```text
-V15.2.1   Filter/legibility hotfix                 ✅
-V15.2.2   Gym reward notifications                 ✅
-V15.3     Gym Challenge Economy / Reward Clarity   ✅
-V15.4     Rewards Analytics                         ✅
-V15.4.1   Responsive Header Hotfix                  ✅
-V15.7     Unified Challenges + Seasons + Sponsored Gym Competitions ✅
-
-FEATURE FREEZE
-
-QA FINAL
-- Unified Challenges
-- TP / GP Seasons
-- Sponsored Gym Competitions
-- Rewards / QR
-- Analytics
-- Anti-farming
-- RBAC
-- Responsive
-- Ads
-
-LEGAL FINAL
-DOCUMENTACIÓN FINAL
-DOCKER FINAL
-GIT RELEASE
-PRODUCCIÓN
+1. AUDITORÍA ECONOMÍA 2.1                    ✅
+2. AGENT.md 2.1                              ✅
+3. SPEC DadoFit 2.1 Economy                  ⏳
+4. Partner Points Config                     ⏳
+5. DC Budget Governance                      ⏳
+6. Challenge Reward Budget Enforcement       ⏳
+7. Marketplace DadoFit / Partner split       ⏳
+8. Frontend dynamic economy labels           ⏳
+9. Compatibility layer legacy GP/SP          ⏳
+10. Analytics + Notifications adaptation     ⏳
+11. QA anti-farming / idempotency / RLS      ⏳
+12. Responsive QA                            ⏳
+13. Docker final                             ⏳
+14. Git release                              ⏳
 ```
 
-No abrir nuevas features del roadmap anterior antes de terminar QA. Las nuevas peticiones del usuario se evalúan después de este cierre.
+No hacer deprecaciones destructivas antes de completar QA y al menos una ventana de compatibilidad.
+
 # 53. Brechas comerciales aún relevantes
 
-Antes de release revisar:
+Para la economía 2.1 revisar:
 
 ```text
-Analytics del partner
-Segmentación de ofertas
+Presupuesto DC por convenio/campaña
+Owner explícito del presupuesto
+DC asignados / emitidos / restantes
+Partner Points emitidos / gastados
 Stock bajo / alertas
-Economía DC emitidos/canjeados
-UTM / atribución externa
-Moderación de ofertas
+Segmentación de ofertas
+Analytics por Marketplace
+Atribución de campañas
+Moderación de rewards
 Reportes comerciales
+Expiración de Partner Points
+Reglas multi-sede
 ```
 
-No todas deben bloquear release.
-
----
+No todas bloquean la primera implementación, pero presupuesto DC sí es requisito central del modelo 2.1.
 
 # 54. Definición de Done
 
@@ -1761,68 +2154,117 @@ Si algo ya está aprobado:
 NO rediseñarlo sin necesidad.
 ```
 
-Preservar:
+Preservar especialmente:
 
 ```text
-arquitectura
-economía
-anti-farming
+arquitectura de organizations
+RBAC
 RLS
-rewards
+anti-farming
+idempotency
+Rewards fulfillment
+QR
+coupon pools
+wallet ledgers
+score_events
 ads
 workspaces
 brand governance
 SuperAdmin
 ```
 
----
+Nueva regla de continuidad 2.1:
+
+```text
+NO volver al modelo de múltiples monedas globales.
+```
+
+Modelo oficial:
+
+```text
+DadoCoins = única moneda universal
+Partner Points = economía propia por organization_id
+Score histórico = separado y no gastable
+```
 
 # 57. Último estado exacto de conversación
 
-Validado manualmente antes de V15.7:
+Último estado funcional histórico validado antes de abrir 2.1:
 
 ```text
 Rewards Marketplace                 ✅
-Batido Titanes visible por vigencia ✅
-Canje 10 DC                         ✅
-Saldo 25 → 15 DC                    ✅
+Canje DC                            ✅
 QR generado                         ✅
 Mis canjes                          ✅
-Rewards Analytics Gym               ✅
-Header Personal compacto            ✅
+Rewards Analytics                   ✅
+Header Personal                     ✅
+Unified Challenges                  ✅ implementado previamente
+TP / GP Seasons                     ✅ implementado previamente
+Sponsored Gym Competitions          ✅ implementado previamente
 ```
 
-Analytics mostró coherencia con el canje:
+Auditoría DadoFit 2.1 confirmó adicionalmente:
 
 ```text
-Canjes             1
-DC consumidos      10
-Gymbros únicos     1
-Pendientes entrega 1
-Ofertas activas    1
+DC wallet + ledger                  ✅
+GP wallet + ledger                  ✅
+SP real wallet + ledger             ✅
+Single-currency reward redemption   ✅
+Score histórico separado            ✅ parcialmente consolidado
+Partner Points abstraction          ⏳
+DC campaign budgets                 ❌ todavía no existe
+Marketplace UX split                ⏳
 ```
 
-Se decidió aplicar en un único ZIP el resto del roadmap funcional antes de entrar en QA.
+Documento de auditoría:
+
+```text
+docs/DADOFIT_2_1_ECONOMY_AUDIT.md
+```
+
 # 58. Primera tarea recomendada al iniciar el siguiente chat
 
-Continuar en modo QA, no en modo feature development:
+La siguiente tarea NO es implementar a ciegas.
+
+Debe ser:
 
 ```text
-Estamos en V15.7 Pre-Release Feature Pack.
+Crear SPEC de migración económica DadoFit 2.1
+basada en:
+- AGENT.md actualizado
+- docs/DADOFIT_2_1_ECONOMY_AUDIT.md
+- repositorio real
+```
 
-Primero validar migración y build.
-Después probar click-by-click:
-1. Unified Challenges
-2. Temporada Squad TP
-3. Temporada Gym GP
-4. Sponsored Gym Competition Brand → Gym invite → accept → leaderboard
-5. Rewards / QR delivery
-6. Rewards Analytics
-7. Anti-farming
-8. RBAC
-9. Responsive
-10. Ads
+La SPEC debe cubrir como mínimo:
 
-Corregir únicamente regresiones detectadas.
-Después: FEATURE FREEZE → Docker → Git release.
+```text
+1. Partner Points config
+2. DC budget governance
+3. enforcement de presupuesto en rewards/challenges patrocinados
+4. marketplace DadoFit vs Partner
+5. labels dinámicos por organización
+6. compatibilidad GP/SP legacy
+7. score histórico separado de saldo
+8. analytics
+9. notifications
+10. RLS / RBAC
+11. migration strategy
+12. rollback / compatibility
+13. acceptance criteria
+14. QA click-by-click
+```
+
+No borrar tablas ni columnas legacy en la primera fase.
+
+Después de aprobar la SPEC:
+
+```text
+BUILD incremental
+→ migración aditiva
+→ tests
+→ build
+→ QA
+→ Docker
+→ Git checkpoint
 ```
