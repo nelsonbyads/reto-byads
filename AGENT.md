@@ -543,7 +543,10 @@ Milestone actual:
 
 ```text
 DadoFit / Reto ByAds Reloaded 2.1
-ECONOMY MIGRATION — SPEC / IMPLEMENTATION PENDING
+ECO-4A — PARTNER ECONOMY FOUNDATION ✅
+ECO-4B — DC Budget Governance ✅
+ECO-4C — CHALLENGE REWARD BUDGET ENFORCEMENT
+SIGUIENTE PASO
 ```
 
 Fuente de verdad para esta fase:
@@ -615,21 +618,25 @@ secretos
 
 # 17. Economía DadoFit — modelo oficial 2.1
 
-La economía oficial de DadoFit 2.1 se compone de tres conceptos separados:
+A nivel de producto, DadoFit 2.1 expone únicamente cuatro conceptos económicos/de progreso:
 
 ```text
 XP
 DADOCOINS (DC)
 PARTNER POINTS
+COMPETITIVE SCORE
 ```
 
-Y existe una cuarta dimensión independiente:
+Solo **DadoCoins** y **Partner Points** son gastables.
 
 ```text
-COMPETITIVE / HISTORICAL SCORE
+XP                → progreso personal; no se gasta
+DadoCoins         → única moneda universal de DadoFit
+Partner Points    → puntos gastables propios de cada organization_id
+Competitive Score → ranking/temporadas; no se gasta
 ```
 
-Nunca mezclar saldo gastable con score histórico.
+Los identificadores históricos `TP`, `GP`, `SP`, `team_points`, `gym_points` y `sponsor_points` pueden seguir existiendo internamente mientras dure la compatibilidad técnica, pero **NO son economías visibles ni monedas adicionales del producto 2.1**.
 
 ## XP
 
@@ -650,11 +657,7 @@ XP puede participar en progresión, nivel, streaks y métricas personales, pero 
 
 ## DC — DadoCoins
 
-DadoCoins es la única moneda universal de DadoFit.
-
-```text
-DC = moneda global de rewards DadoFit
-```
+DadoCoins es la **única moneda universal** de DadoFit.
 
 Reglas oficiales:
 
@@ -667,7 +670,7 @@ Reglas oficiales:
 - no es P2P;
 - no es transferible entre usuarios;
 - Partner Points NO se convierten a DC;
-- un Partner NO puede imprimir DC libremente.
+- un Partner NO puede emitir DC libremente.
 ```
 
 Persistencia actual:
@@ -677,7 +680,7 @@ wallets
 wallet_transactions
 ```
 
-El ledger de DC es obligatorio. No modificar saldos únicamente desde frontend.
+El ledger de DC es obligatorio. El frontend nunca modifica saldos directamente.
 
 Principio de gobierno 2.1:
 
@@ -685,35 +688,29 @@ Principio de gobierno 2.1:
 DadoFit es el emisor y gobernador de DadoCoins.
 ```
 
-Los retos oficiales pueden entregar DC. Los retos o campañas de partner solo podrán entregar DC cuando exista un convenio/presupuesto aprobado por DadoFit.
+Los retos oficiales pueden entregar DC y los retos/campañas de Partner solo pueden hacerlo con presupuesto aprobado por DadoFit.
 
-Modelo objetivo de presupuesto:
+Regla final 2.1:
 
 ```text
-budget_dc
-spent_dc
-remaining_dc
-reward_dc_per_user
-max_rewarded_users
-valid_from
-valid_until
+TODO payout de DC debe consumir un DC Budget válido.
 ```
 
-Una vez agotado el presupuesto, el reto puede continuar si corresponde, pero no debe seguir emitiendo DC.
+Para retos propios de DadoFit se usa un **budget interno DadoFit**. Para convenios se usa un budget asociado a campaña/partner. Los caps y el anti-farming siguen existiendo, pero no sustituyen el presupuesto de emisión.
 
 ## Partner Points
 
-Partner Points es el concepto unificado para puntos gastables propios de una organización.
+`Partner Points` es el **único concepto de producto** para puntos gastables de organizaciones.
 
-Ejemplos de presentación:
+Ejemplos visibles:
 
 ```text
-Titanes Points
-Nike Points
-Adidas Points
+Titanes Gym → Titanes Points
+Nike        → Nike Points
+Adidas      → Adidas Points
 ```
 
-Cada organización puede personalizar:
+Cada organización puede configurar:
 
 ```text
 points_name
@@ -726,16 +723,16 @@ enabled
 Reglas:
 
 ```text
-- pertenecen a una organización;
+- pertenecen a una organization_id;
 - son saldo gastable;
 - no son universales;
 - no se comparten entre organizaciones;
 - no se convierten a DC;
 - cada Partner gobierna únicamente sus propios puntos;
-- cada Partner puede tener su propio Marketplace.
+- se canjean únicamente en el Marketplace de ese Partner.
 ```
 
-Infraestructura física actual que se reutiliza durante la migración:
+Infraestructura física legacy reutilizada durante 2.1:
 
 ```text
 gym_point_wallets
@@ -744,42 +741,42 @@ sponsor_point_wallets
 sponsor_point_ledger
 ```
 
-No renombrar estas tablas de forma destructiva en 2.1. Primero abstraer producto y API; deprecar nombres legacy posteriormente.
+Estas tablas son implementación interna. **No significan que el producto tenga monedas GP y SP.** No renombrarlas destructivamente en 2.1; abstraerlas detrás del dominio Partner Points.
 
-## TP — Team Points
+## Competitive Score
 
-TP NO se convierte en Partner Points.
+El score competitivo es una dimensión separada de la economía gastable. Sirve para rankings, temporadas y competencias.
 
-```text
-TP = score competitivo histórico de Squad
-```
-
-Persistencia:
+Persistencia histórica actual puede incluir:
 
 ```text
 score_events.team_points
+score_events.gym_points
+score_events.sponsor_points   -- legacy GP mirror
+group_scores
+organization_scores
 ```
 
-TP:
+Reglas:
 
 ```text
 - no es wallet;
 - no se gasta;
-- sirve para ranking, seasons y competencia de Squads.
+- no aparece como moneda;
+- gastar Partner Points nunca reduce el score;
+- TP/GP históricos son nombres técnicos/legacy de score, no productos económicos visibles.
 ```
 
-## GP / SP — compatibilidad existente
+## Legacy GP / SP / TP
 
-GP y SP son implementaciones actuales que deben presentarse progresivamente como Partner Points cuando sean saldo gastable.
-
-Estado real:
+A partir de DadoFit 2.1:
 
 ```text
-GP gastable
-→ gym_point_wallets
+GP / SP gastables en tablas existentes
+→ implementación legacy de Partner Points
 
-SP gastable real
-→ sponsor_point_wallets
+TP / GP de score
+→ implementación legacy de Competitive Score
 ```
 
 ATENCIÓN — legacy crítico:
@@ -789,11 +786,9 @@ challenges.sponsor_points
 score_events.sponsor_points
 ```
 
-NO representan los Sponsor Points reales de una Brand.
+NO representan los Partner Points de una Brand. Funcionan como compatibilidad/espejo legacy de score de Gym.
 
-Esos campos funcionan como compatibilidad / espejo legacy de Gym Points.
-
-SP real vive en:
+Los Partner Points reales de una Brand/Sponsor se apoyan actualmente en:
 
 ```text
 sponsor_point_wallets
@@ -801,7 +796,7 @@ sponsor_point_ledger
 challenge_participants.sponsor_reward_points_granted
 ```
 
-No interpretar `sponsor_points` legacy por nombre.
+No interpretar nombres legacy por su etiqueta histórica.
 
 ## Saldo vs score histórico
 
@@ -832,7 +827,7 @@ balance            740
 competitive_score 1840
 ```
 
-El ranking NO debe bajar por un canje.
+El ranking NO baja por un canje.
 
 # 18. DadoCoins — fuentes actuales y gobierno 2.1
 
@@ -1802,8 +1797,10 @@ Estado:
 ```text
 AUDITORÍA ECONÓMICA 2.1     ✅
 AGENT.md 2.1                ✅ este documento
-SPEC DE IMPLEMENTACIÓN      ⏳ siguiente paso
-BUILD / MIGRACIONES         ⏳ pendiente
+SPEC DE IMPLEMENTACIÓN      ✅ aprobada
+ECO-4A Partner Economy       ✅ implementado y probado
+ECO-4B DC Budget Governance  ✅
+ECO-4C Challenge Reward Budget Enforcement  ⏳ siguiente paso
 QA 2.1                      ⏳ pendiente
 ```
 
@@ -1879,7 +1876,7 @@ sin reescribir fulfillment existente.
 ## E. Historical Score — KEEP
 
 ```text
-TP / GP score histórico
+Competitive Score (persistencia legacy TP/GP)
 ```
 
 no se debita cuando el usuario gasta Partner Points.
@@ -1908,7 +1905,7 @@ DadoCoins
 XP
 [ 50 ]
 
-Gym Points
+Titanes Points
 [ 100 ]
 
 [ Publicar en Titanes ]
@@ -1918,7 +1915,7 @@ Mostrar helper:
 
 ```text
 Máximos:
-25 DC · 50 XP · 100 GP
+25 DC · 50 XP · 100 Titanes Points
 ```
 
 Permitir 0:
@@ -1926,7 +1923,7 @@ Permitir 0:
 ```text
 0 DC
 50 XP
-100 GP
+100 Titanes Points
 ```
 
 o:
@@ -1934,7 +1931,7 @@ o:
 ```text
 25 DC
 0 XP
-0 GP
+0 Titanes Points
 ```
 
 No obligar siempre las tres.
@@ -1967,13 +1964,7 @@ reward_xp
 sponsor_points
 ```
 
-Aunque frontend diga:
-
-```text
-Gym Points
-```
-
-por compatibilidad.
+Aunque el backend conserve `p_gym_points` / `sponsor_points` por compatibilidad, la UI 2.1 debe mostrar el nombre configurado del Partner, por ejemplo `Titanes Points`.
 
 ---
 
@@ -2003,7 +1994,7 @@ Nuevo premio en Titanes
 Body:
 
 ```text
-Batido proteína Titanes · 50 DC
+Batido proteína Titanes · 50 Titanes Points
 ```
 
 Data:
@@ -2056,13 +2047,14 @@ Orden oficial recomendado para DadoFit 2.1:
 ```text
 1. AUDITORÍA ECONOMÍA 2.1                    ✅
 2. AGENT.md 2.1                              ✅
-3. SPEC DadoFit 2.1 Economy                  ⏳
-4. Partner Points Config                     ⏳
-5. DC Budget Governance                      ⏳
+3. SPEC DadoFit 2.1 Economy                  ✅
+4. ECO-4A Partner Economy Foundation         ✅
+5. ECO-4B DC Budget Governance               ✅
+6. ECO-4C Challenge Reward Budget Enforcement     ⏳ siguiente paso
 6. Challenge Reward Budget Enforcement       ⏳
 7. Marketplace DadoFit / Partner split       ⏳
 8. Frontend dynamic economy labels           ⏳
-9. Compatibility layer legacy GP/SP          ⏳
+9. Compatibility layer legacy identifiers    ⏳
 10. Analytics + Notifications adaptation     ⏳
 11. QA anti-farming / idempotency / RLS      ⏳
 12. Responsive QA                            ⏳
@@ -2199,7 +2191,7 @@ Mis canjes                          ✅
 Rewards Analytics                   ✅
 Header Personal                     ✅
 Unified Challenges                  ✅ implementado previamente
-TP / GP Seasons                     ✅ implementado previamente
+Competitive Seasons (legacy TP/GP storage) ✅ implementado previamente
 Sponsored Gym Competitions          ✅ implementado previamente
 ```
 
@@ -2211,7 +2203,7 @@ GP wallet + ledger                  ✅
 SP real wallet + ledger             ✅
 Single-currency reward redemption   ✅
 Score histórico separado            ✅ parcialmente consolidado
-Partner Points abstraction          ⏳
+Partner Points abstraction          ✅ ECO-4A
 DC campaign budgets                 ❌ todavía no existe
 Marketplace UX split                ⏳
 ```
@@ -2224,47 +2216,45 @@ docs/DADOFIT_2_1_ECONOMY_AUDIT.md
 
 # 58. Primera tarea recomendada al iniciar el siguiente chat
 
-La siguiente tarea NO es implementar a ciegas.
+La auditoría, el AGENT 2.1, la SPEC económica y ECO-4A ya están completados.
 
-Debe ser:
+Estado inmediato:
 
 ```text
-Crear SPEC de migración económica DadoFit 2.1
-basada en:
+ECO-4A Partner Economy Foundation   ✅
+ECO-4B DC Budget Governance         ✅
+ECO-4C Challenge Reward Budget Enforcement  ⏳ siguiente paso
+```
+
+Antes de ECO-4B recordar el contrato de producto:
+
+```text
+XP                = progreso no gastable
+DadoCoins         = única moneda universal
+Partner Points    = único sistema de puntos gastables por organization_id
+Competitive Score = ranking/temporadas no gastable
+
+GP / SP / TP      = únicamente identificadores técnicos/legacy donde todavía existan
+```
+
+La siguiente implementación debe ser **ECO-4B — DC Budget Governance**, basada en:
+
+```text
 - AGENT.md actualizado
+- docs/SPEC_DADOFIT_2_1_ECONOMY.md
 - docs/DADOFIT_2_1_ECONOMY_AUDIT.md
 - repositorio real
 ```
 
-La SPEC debe cubrir como mínimo:
+ECO-4B debe introducir presupuesto y ledger de emisión DC sin cambiar todavía el Marketplace ni los payouts de challenges.
+
+Después:
 
 ```text
-1. Partner Points config
-2. DC budget governance
-3. enforcement de presupuesto en rewards/challenges patrocinados
-4. marketplace DadoFit vs Partner
-5. labels dinámicos por organización
-6. compatibilidad GP/SP legacy
-7. score histórico separado de saldo
-8. analytics
-9. notifications
-10. RLS / RBAC
-11. migration strategy
-12. rollback / compatibility
-13. acceptance criteria
-14. QA click-by-click
-```
-
-No borrar tablas ni columnas legacy en la primera fase.
-
-Después de aprobar la SPEC:
-
-```text
-BUILD incremental
-→ migración aditiva
-→ tests
-→ build
+ECO-4B
 → QA
-→ Docker
 → Git checkpoint
+→ ECO-4C Challenge Reward Budget Enforcement
 ```
+
+No avanzar a ECO-4C sin validar ECO-4B.
