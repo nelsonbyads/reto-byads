@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getWorkspaceNavigation, workspaceCanAccessPath } from './workspaceNavigation';
+import { CHALLENGE_NAVIGATION, getWorkspaceNavigation, workspaceCanAccessPath } from './workspaceNavigation';
 
 const destinations = (kind: 'personal' | 'gym' | 'brand', role: 'owner' | 'admin' | 'coach' | 'member' | null) =>
   getWorkspaceNavigation(kind, role).map((item) => item.to);
@@ -42,5 +42,11 @@ describe('workspace navigation audit', () => {
     const member = destinations('brand', 'member');
     expect(member).not.toContain('/rewards/manage');
     expect(member).not.toContain('/brand-audit');
+  });
+
+  it('keeps challenge destinations in Retos and out of Más', () => {
+    const personal = getWorkspaceNavigation('personal', null);
+    expect(personal.filter((item) => item.tier === 'secondary').map((item) => item.label)).toEqual(['Gymbros', 'Organizaciones']);
+    expect(CHALLENGE_NAVIGATION.map((item) => item.label)).toEqual(['1 vs 1', 'Del Gym', 'Squads', 'Patrocinados', 'Temporadas']);
   });
 });

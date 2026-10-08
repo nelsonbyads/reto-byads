@@ -166,7 +166,7 @@ export function SquadChallengeButton({ exercise, reps, diceLevel }: Props) {
                 <p>{title}</p>
                 <div className="squad-battle-reward-v11">
                   <strong>Por cada miembro aprobado</strong>
-                  <span>+25 DC · +50 XP · +100 Team Points</span>
+                  <span>+25 DC · +50 XP · +100 pts de Competitive Score</span>
                 </div>
                 <div className="challenge-modal-actions-v10">
                   <Link to="/squads">Ir a Squads</Link>
@@ -185,7 +185,7 @@ export function SquadChallengeButton({ exercise, reps, diceLevel }: Props) {
                   <div><span>Ejercicio</span><strong>{exercise.name}</strong></div>
                   <div><span>Repeticiones</span><strong>{reps}</strong></div>
                   <div><span>Batalla</span><strong>72 h</strong></div>
-                  <div><span>Por aprobación</span><strong>100 TP</strong></div>
+                  <div><span>Competitive Score por aprobación</span><strong>100 pts</strong></div>
                 </div>
 
                 {error && <div className="auth-error">{error}</div>}

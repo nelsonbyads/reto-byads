@@ -1,10 +1,11 @@
-import { Activity, Building2, CheckCircle2, CircleDollarSign, ClipboardCheck, Dice5, History, Megaphone, ShieldCheck, Swords, Tag, Trophy, UserCheck, UsersRound, XCircle } from 'lucide-react';
+import { Activity, Building2, CheckCircle2, CircleDollarSign, ClipboardCheck, Dice5, Gift, History, Megaphone, ShieldCheck, Swords, Tag, Trophy, UserCheck, UsersRound, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { canManageBrandRole } from '../lib/sponsoredRules';
 import { supabase } from '../lib/supabase';
+import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
 
 interface WorkspaceStats {
   members: number;
@@ -34,6 +35,14 @@ interface RecentReview {
   created_at: string;
 }
 
+interface DcBudgetView {
+  id: string; budget_dc: number; used_dc: number; remaining_dc: number; utilization_pct: number; status: string; starts_at: string | null; ends_at: string | null;
+}
+
+interface PartnerPointAnalytics {
+  emitted: number; spent: number; circulation: number; active_users: number; redemptions: number;
+}
+
 const EMPTY: WorkspaceStats = { members: 0, sponsorPoints: 0, activeChallenges: 0, activeBattles: 0, campaigns: 0, activeCampaigns: 0, sponsoredChallenges: 0, activeSponsoredChallenges: 0, participants: 0, pendingReview: 0, pendingAudit: 0, approved: 0, rejected: 0, coinsGranted: 0, xpGranted: 0 };
 
 function roleLabel(role: string | null) {
@@ -56,6 +65,9 @@ export function WorkspaceHomePage() {
   const [recent, setRecent] = useState<RecentReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [budgets, setBudgets] = useState<DcBudgetView[]>([]);
+  const [pointAnalytics, setPointAnalytics] = useState<PartnerPointAnalytics | null>(null);
+  const [pointConfigs, setPointConfigs] = useState<Map<string, PartnerPointConfig>>(new Map());
 
   const load = useCallback(async () => {
     if (!supabase || !activeWorkspace.organizationId) { setLoading(false); return; }
@@ -108,6 +120,24 @@ export function WorkspaceHomePage() {
   }, [activeWorkspace.kind, activeWorkspace.organizationId, activeWorkspace.role]);
 
   useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const orgId = activeWorkspace.organizationId;
+    const canReadEconomy = ['owner', 'admin'].includes(activeWorkspace.role ?? '');
+    if (!supabase || !orgId || !canReadEconomy) {
+      setBudgets([]);
+      setPointAnalytics(null);
+      return;
+    }
+    void Promise.all([
+      supabase.rpc('get_my_dc_budgets'),
+      supabase.rpc('get_partner_point_analytics', { p_organization_id: orgId }),
+      loadPartnerPointConfigs([orgId]),
+    ]).then(([budgetResult, analyticsResult, configs]) => {
+      setBudgets(budgetResult.error ? [] : ((budgetResult.data ?? []) as DcBudgetView[]).filter((item: any) => !item.organization_id || item.organization_id === orgId));
+      setPointAnalytics(analyticsResult.error ? null : (analyticsResult.data as PartnerPointAnalytics));
+      setPointConfigs(configs);
+    });
+  }, [activeWorkspace.organizationId, activeWorkspace.role]);
   if (activeWorkspace.kind === 'personal') return <Navigate to="/app" replace/>;
 
   const gym = activeWorkspace.kind === 'gym';
@@ -116,6 +146,7 @@ export function WorkspaceHomePage() {
   const verification = activeWorkspace.verificationStatus ?? 'pending_verification';
   const reviewed = stats.approved + stats.rejected;
   const approvalRate = useMemo(() => reviewed > 0 ? Math.round((stats.approved / reviewed) * 100) : 0, [reviewed, stats.approved]);
+  const pointConfig = resolvePartnerPointConfig(pointConfigs, activeWorkspace.organizationId, activeWorkspace.kind);
 
   return <div className="profile-shell-v9 workspace-shell-v122 workspace-shell-v133"><AppHeader/><main className="profile-page-v9 workspace-home-v122 workspace-home-v133">
     <section className="workspace-hero-v122 workspace-hero-v133">
@@ -124,14 +155,20 @@ export function WorkspaceHomePage() {
       <span className={`workspace-verification-pill-v133 ${verification}`}><ShieldCheck size={16}/>{verificationLabel(verification)}</span>
     </section>
     {error && <div className="auth-error">{error}</div>}
+    {['owner', 'admin'].includes(activeWorkspace.role ?? '') && <section className="workspace-section-v133"><div className="workspace-section-title-v133"><div><span className="eyebrow">ECONOMÍA PARTNER</span><h2>Presupuesto y {pointConfig.points_name}</h2><p>Información operativa de solo lectura.</p></div></div><div className="workspace-stats-v122 workspace-stats-v133">
+      <article><CircleDollarSign size={20}/><span>Budget autorizado</span><strong>{budgets.reduce((sum, item) => sum + Number(item.budget_dc || 0), 0).toLocaleString()} DC</strong><small>{budgets.length ? budgets.map((item) => item.status).join(' · ') : 'Sin budget configurado'}</small></article>
+      <article><CircleDollarSign size={20}/><span>DC emitidos</span><strong>{budgets.reduce((sum, item) => sum + Number(item.used_dc || 0), 0).toLocaleString()}</strong><small>{budgets.reduce((sum, item) => sum + Number(item.remaining_dc || 0), 0).toLocaleString()} restantes</small></article>
+      <article><Activity size={20}/><span>{pointConfig.points_name} emitidos</span><strong>{Number(pointAnalytics?.emitted ?? 0).toLocaleString()}</strong><small>{Number(pointAnalytics?.circulation ?? 0).toLocaleString()} en circulación</small></article>
+      <article><Gift size={20}/><span>{pointConfig.points_name} gastados</span><strong>{Number(pointAnalytics?.spent ?? 0).toLocaleString()}</strong><small>{Number(pointAnalytics?.redemptions ?? 0).toLocaleString()} redenciones · {Number(pointAnalytics?.active_users ?? 0).toLocaleString()} usuarios</small></article>
+    </div>{budgets.length > 0 && <div className="admin-table-wrap-v14"><table><thead><tr><th>Budget</th><th>Emitido</th><th>Restante</th><th>Uso</th><th>Estado</th><th>Vigencia</th></tr></thead><tbody>{budgets.map((item) => <tr key={item.id}><td>{item.budget_dc.toLocaleString()} DC</td><td>{item.used_dc.toLocaleString()} DC</td><td>{item.remaining_dc.toLocaleString()} DC</td><td>{item.utilization_pct}%</td><td>{item.status}</td><td>{formatDate(item.starts_at ?? '')} → {formatDate(item.ends_at ?? '')}</td></tr>)}</tbody></table></div>}</section>}
 
     {gym ? <>
-      <section className="workspace-stats-v122 workspace-stats-v133"><article><UsersRound size={20}/><span>Miembros</span><strong>{loading ? '…' : stats.members}</strong></article><article><Trophy size={20}/><span>Gym Points</span><strong>{loading ? '…' : `${stats.sponsorPoints.toLocaleString()} GP`}</strong></article><article><Swords size={20}/><span>Retos activos</span><strong>{loading ? '…' : stats.activeChallenges}</strong></article><article><Building2 size={20}/><span>Batallas activas</span><strong>{loading ? '…' : stats.activeBattles}</strong></article></section>
+      <section className="workspace-stats-v122 workspace-stats-v133"><article><UsersRound size={20}/><span>Miembros</span><strong>{loading ? '…' : stats.members}</strong></article><article><Trophy size={20}/><span>Competitive Score</span><strong>{loading ? '…' : `${stats.sponsorPoints.toLocaleString()} pts`}</strong></article><article><Swords size={20}/><span>Retos activos</span><strong>{loading ? '…' : stats.activeChallenges}</strong></article><article><Building2 size={20}/><span>Batallas activas</span><strong>{loading ? '…' : stats.activeBattles}</strong></article></section>
       <section className="workspace-section-v133"><div className="workspace-section-title-v133"><div><span className="eyebrow">OPERACIÓN</span><h2>Gestiona tu Gym</h2></div></div><div className="workspace-action-grid-v122 workspace-action-grid-v133">
         {gymManager && <Link to="/app"><Dice5 size={24}/><span><strong>Generar reto</strong><small>Usa los dados como creador institucional.</small></span></Link>}
         <Link to="/organization-challenges"><Swords size={24}/><span><strong>Retos del Gym</strong><small>{gymManager ? 'Publica, revisa y controla evidencias.' : 'Participa en los retos de tu Gym.'}</small></span></Link>
         <Link to="/gym-battles"><Trophy size={24}/><span><strong>Gym vs Gym</strong><small>Competencias entre organizaciones verificadas.</small></span></Link>
-        <Link to="/seasons"><Trophy size={24}/><span><strong>Temporadas & rankings</strong><small>Consulta GP, ranking de Gyms e invitaciones patrocinadas.</small></span></Link>
+        <Link to="/seasons"><Trophy size={24}/><span><strong>Temporadas & rankings</strong><small>Consulta Competitive Score, ranking de Gyms e invitaciones patrocinadas.</small></span></Link>
         <Link to="/organizations"><UsersRound size={24}/><span><strong>Miembros y roles</strong><small>Owner, Admin, Coach y Member.</small></span></Link>
       </div></section>
     </> : <>
@@ -148,7 +185,7 @@ export function WorkspaceHomePage() {
 
       <section className="workspace-section-v133"><div className="workspace-section-title-v133"><div><span className="eyebrow">OPERACIÓN</span><h2>Centro de Marca</h2><p>Campañas, control de calidad, equipo y trazabilidad.</p></div></div><div className="workspace-action-grid-v122 workspace-action-grid-v133 brand-actions-v133">
         <Link to="/brand-campaigns"><Megaphone size={24}/><span><strong>Campañas & Branded Challenges</strong><small>{brandManager ? 'Crea campañas, publica retos y realiza la revisión inicial.' : 'Consulta campañas y resultados de la Marca.'}</small></span></Link>
-        <Link to="/brand-competitions"><Trophy size={24}/><span><strong>Competencias Gym</strong><small>{brandManager ? 'Invita Gyms verificados y activa rankings patrocinados por GP.' : 'Consulta competencias patrocinadas de la Marca.'}</small></span></Link>
+        <Link to="/brand-competitions"><Trophy size={24}/><span><strong>Competencias Gym</strong><small>{brandManager ? 'Invita Gyms verificados y activa rankings de Competitive Score.' : 'Consulta competencias patrocinadas de la Marca.'}</small></span></Link>
         {brandManager && <Link to="/brand-audit" className="governance-action-v133"><ShieldCheck size={24}/><span><strong>Control & Auditoría</strong><small>Histórico, doble validación y segunda revisión independiente.</small></span>{stats.pendingAudit > 0 && <b>{stats.pendingAudit}</b>}</Link>}
         <Link to="/organizations"><UsersRound size={24}/><span><strong>Equipo de Marca</strong><small>Administra miembros y permisos del workspace.</small></span></Link>
       </div></section>

@@ -152,7 +152,7 @@ export function RewardValidationPage() {
       {result && <article className={`reward-validation-card-v152 ${result.status}`}>
         <div className="reward-validation-status-v152">{result.status === 'redeemed' ? <CheckCircle2/> : result.status === 'cancelled' ? <XCircle/> : <Clock3/>}<span>{result.status === 'issued' ? 'PENDIENTE DE ENTREGA' : result.status === 'redeemed' ? 'ENTREGADO' : result.status.toUpperCase()}</span></div>
         <div className="reward-validation-grid-v152">
-          <div><small>PREMIO</small><strong>{result.title}</strong><span>{fmt(result.payment_amount ?? result.coin_cost)} {(result.payment_currency ?? 'dc').toUpperCase()}</span></div>
+          <div><small>PREMIO</small><strong>{result.title}</strong><span>{fmt(result.payment_amount ?? result.coin_cost)} {(result.payment_currency ?? 'dc') === 'dc' ? 'DC' : 'Partner Points'}</span></div>
           <div><small>GYMBRO</small><strong><UserRound size={15}/>{result.user_name}</strong><span>{result.username ? `@${result.username}` : 'Usuario DadoFit'}</span></div>
           <div><small>REFERENCIA</small><strong className="mono">{result.redemption_reference || '—'}</strong><span>Emitido {dateTime(result.issued_at || result.created_at)}</span></div>
           <div><small>VIGENCIA</small><strong>{result.expires_at ? dateTime(result.expires_at) : 'Sin vencimiento'}</strong><span>{result.fulfilled_at ? `Entregado ${dateTime(result.fulfilled_at)}` : 'Aún no entregado'}</span></div>

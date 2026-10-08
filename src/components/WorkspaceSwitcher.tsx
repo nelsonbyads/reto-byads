@@ -1,5 +1,4 @@
 import { Building2, ChevronDown, ShieldCheck, Tag, UserRound } from 'lucide-react';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspace, workspaceHome, type WorkspaceOption } from '../context/WorkspaceContext';
 
@@ -15,27 +14,30 @@ function roleLabel(role: WorkspaceOption['role']) {
   return labels[role];
 }
 
-export function WorkspaceSwitcher() {
+interface WorkspaceSwitcherProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function WorkspaceSwitcher({ open, onOpenChange }: WorkspaceSwitcherProps) {
   const navigate = useNavigate();
   const { activeWorkspace, workspaces, selectWorkspace } = useWorkspace();
-  const [open, setOpen] = useState(false);
-
   const choose = (workspace: WorkspaceOption) => {
     selectWorkspace(workspace.id);
-    setOpen(false);
+    onOpenChange(false);
     navigate(workspaceHome(workspace));
   };
 
   return (
     <div className="workspace-switcher-v122">
-      <button type="button" className="workspace-trigger-v122" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+      <button type="button" className="workspace-trigger-v122" aria-expanded={open} aria-controls="workspace-menu" onClick={() => onOpenChange(!open)}>
         <WorkspaceIcon workspace={activeWorkspace}/>
         <span><strong>{activeWorkspace.label}</strong><small>{roleLabel(activeWorkspace.role)}</small></span>
         <ChevronDown size={14}/>
       </button>
 
       {open && (
-        <div className="workspace-menu-v122">
+        <div className="workspace-menu-v122" id="workspace-menu">
           <div className="workspace-menu-title-v122"><ShieldCheck size={14}/><span>Usar DadoFit como</span></div>
           {workspaces.map((workspace) => (
             <button key={workspace.id} type="button" className={workspace.id === activeWorkspace.id ? 'active' : ''} onClick={() => choose(workspace)}>

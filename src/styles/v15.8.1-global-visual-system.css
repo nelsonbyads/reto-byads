@@ -2395,9 +2395,12 @@ html[data-dadofit-theme="dark"] body .reward-validation-done-v152 {
 /* Mobile: same surfaces, only geometry changes. */
 @media (max-width: 720px) {
   html[data-dadofit-theme="dark"] body .site-footer-inner-v141,
-  html[data-dadofit-theme="dark"] body .site-footer-commercial-v141,
   html[data-dadofit-theme="dark"] body .site-footer-bottom-v141 {
-    width: calc(100% - 28px) !important;
+    width: 100% !important;
+  }
+
+  html[data-dadofit-theme="dark"] body .site-footer-commercial-v141 {
+    width: 100% !important;
   }
 }
 

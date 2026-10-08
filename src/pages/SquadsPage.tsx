@@ -310,7 +310,7 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
   };
 
   const decline = async () => {
-    if (!supabase || !canPrepare || !window.confirm('¿No participar en esta batalla? Tu Squad no recibirá Team Points por tu participación.')) return;
+    if (!supabase || !canPrepare || !window.confirm('¿No participar en esta batalla? Tu Squad no recibirá Competitive Score por tu participación.')) return;
     const client = supabase;
     setActing(true);
     setError('');
@@ -322,7 +322,7 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
 
   return (
     <section className="squad-my-participation-v11">
-      <div className="squad-section-head-v11"><div><span className="eyebrow">TU APORTE</span><h4>{participantStatusLabel(participant.status)}</h4></div><span>{participant.status === 'approved' ? participant.team_points_granted : challenge.team_points} TP</span></div>
+      <div className="squad-section-head-v11"><div><span className="eyebrow">TU APORTE</span><h4>{participantStatusLabel(participant.status)}</h4></div><span>{participant.status === 'approved' ? participant.team_points_granted : challenge.team_points} pts</span></div>
       {error && <div className="auth-error">{error}</div>}
       {message && <div className="auth-success">{message}</div>}
       {loading ? <p className="squad-muted-v11">Cargando evidencia…</p> : <EvidenceCards items={items}/>} 
@@ -337,7 +337,7 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
       )}
 
       {participant.status === 'submitted' && <p className="squad-waiting-v11">El capitán del Squad rival está revisando tu evidencia.</p>}
-      {participant.status === 'approved' && <div className="squad-approved-v11"><Trophy size={18}/><strong>¡Aporte aprobado!</strong><span>{participant.reward_block_reason ? `Anti-farming activo · +0 DC · +0 XP · +0 Team Points` : `+${participant.reward_coins_granted} DC · +${participant.reward_xp_granted} XP · +${participant.team_points_granted} Team Points`}</span></div>}
+      {participant.status === 'approved' && <div className="squad-approved-v11"><Trophy size={18}/><strong>¡Aporte aprobado!</strong><span>{participant.reward_block_reason ? `Anti-farming activo · +0 DC · +0 XP · +0 pts` : `+${participant.reward_coins_granted} DC · +${participant.reward_xp_granted} XP · +${participant.team_points_granted} pts`}</span></div>}
       {participant.status === 'declined' && <p className="squad-muted-v11">Decidiste no participar en esta batalla.</p>}
     </section>
   );
@@ -390,7 +390,7 @@ function ReviewSubmission({ participant, profile, challenge, onChanged }: { part
         <button className="reject" type="button" disabled={reviewing} onClick={() => { void review('rejected'); }}><X size={16}/> Pedir otra evidencia</button>
         <button className="approve" type="button" disabled={reviewing} onClick={() => { void review('approved'); }}><Check size={16}/>{reviewing ? 'Procesando…' : 'Aprobar aporte'}</button>
       </div>
-      <small><ShieldCheck size={13}/> DadoCoins, XP y Team Points dependen de las reglas anti-farming y nunca se duplican.</small>
+      <small><ShieldCheck size={13}/> DadoCoins, XP y Competitive Score dependen de las reglas anti-farming y nunca se duplican.</small>
     </article>
   );
 }
@@ -685,7 +685,7 @@ export function SquadsPage() {
 
   if (!cloudReady) {
     return (
-      <div className="profile-shell-v9"><AppHeader/><main className="profile-page-v9 squads-page-v11"><Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link><section className="profile-card-v9 profile-cloud-callout-v9"><h2>Squads necesita una cuenta cloud</h2><p>Crea una cuenta DadoFit para formar equipos, competir y acumular Team Points.</p><Link className="profile-primary-v9" to="/register">Crear cuenta</Link></section></main></div>
+      <div className="profile-shell-v9"><AppHeader/><main className="profile-page-v9 squads-page-v11"><Link className="profile-back-v9" to="/app"><ArrowLeft size={16}/> Volver a entrenar</Link><section className="profile-card-v9 profile-cloud-callout-v9"><h2>Squads necesita una cuenta cloud</h2><p>Crea una cuenta DadoFit para formar equipos, competir y acumular Competitive Score.</p><Link className="profile-primary-v9" to="/register">Crear cuenta</Link></section></main></div>
     );
   }
 
@@ -701,7 +701,7 @@ export function SquadsPage() {
 
         <section className="profile-hero-v9 squads-hero-v11">
           <div className="profile-avatar-v9"><Shield size={34}/></div>
-          <div><span className="eyebrow">DADOFIT TEAMS</span><h1>Squads</h1><p>Forma tu equipo, reta a otros Squads y convierte cada aprobación en Team Points.</p></div>
+          <div><span className="eyebrow">DADOFIT TEAMS</span><h1>Squads</h1><p>Forma tu equipo, reta a otros Squads y convierte cada aprobación en Competitive Score.</p></div>
           <div className="squads-hero-stats-v11"><div><strong>{activeMemberships.length}</strong><span>Squads</span></div><div><strong>{battles.filter((item) => item.battle.status === 'active').length}</strong><span>Batallas activas</span></div></div>
         </section>
 
@@ -773,14 +773,14 @@ export function SquadsPage() {
                   {view.battle.status === 'pending' && <div className="squad-pending-battle-v11"><Clock3 size={18}/><div><strong>{isChallengedAdmin ? 'Tu Squad fue retado.' : 'Esperando respuesta del Squad rival.'}</strong><span>La invitación vence {formatDate(view.battle.response_expires_at)}.</span></div>{isChallengedAdmin && <div><button className="secondary" onClick={() => { void respondBattle(view.battle.id, false); }} disabled={actingId === view.battle.id}><X size={16}/> Rechazar</button><button className="primary" onClick={() => { void respondBattle(view.battle.id, true); }} disabled={actingId === view.battle.id}><Check size={16}/> Aceptar batalla</button></div>}</div>}
 
                   {view.battle.status === 'active' && challenge && <>
-                    <div className="squad-battle-rules-v11"><div><Coins size={17}/><span>Por miembro aprobado</span><strong>Hasta +25 DC · +50 XP</strong></div><div><Trophy size={17}/><span>Para el Squad</span><strong>Hasta +{challenge.team_points} TP</strong></div><div><Clock3 size={17}/><span>Cierra</span><strong>{formatDate(view.battle.expires_at)}</strong></div></div>
+                    <div className="squad-battle-rules-v11"><div><Coins size={17}/><span>Por miembro aprobado</span><strong>Hasta +25 DC · +50 XP</strong></div><div><Trophy size={17}/><span>Para el Squad</span><strong>Hasta +{challenge.team_points} pts</strong></div><div><Clock3 size={17}/><span>Cierra</span><strong>{formatDate(view.battle.expires_at)}</strong></div></div>
                     {myParticipant && <MyBattleParticipation participant={myParticipant} challenge={challenge} onChanged={refreshAll}/>} 
                     {reviewQueue.length > 0 && <section className="squad-review-queue-v11"><div className="squad-section-head-v11"><div><span className="eyebrow">CAPITÁN RIVAL</span><h3>Evidencias por revisar</h3></div><span>{reviewQueue.length}</span></div>{reviewQueue.map((participant) => <ReviewSubmission key={participant.id} participant={participant} profile={view.profiles.get(participant.user_id) ?? null} challenge={challenge} onChanged={refreshAll}/>)}</section>}
                     {(isChallengerAdmin || isChallengedAdmin) && reviewQueue.length === 0 && <p className="squad-muted-v11 squad-captain-note-v11"><Crown size={15}/> Como capitán, revisarás únicamente las evidencias del Squad rival.</p>}
                     {canFinalize && <button className="squad-finalize-v11" type="button" onClick={() => { void finalizeBattle(view.battle.id); }} disabled={actingId === view.battle.id}><Trophy size={17}/> Finalizar batalla</button>}
                   </>}
 
-                  {view.battle.status === 'completed' && <div className="squad-battle-result-v11"><Trophy size={24}/><div><span>RESULTADO FINAL</span><strong>{winnerName ? `${winnerName} gana la batalla` : 'Empate entre Squads'}</strong><small>{challengerPoints} TP · {challengedPoints} TP</small></div></div>}
+                  {view.battle.status === 'completed' && <div className="squad-battle-result-v11"><Trophy size={24}/><div><span>RESULTADO FINAL</span><strong>{winnerName ? `${winnerName} gana la batalla` : 'Empate entre Squads'}</strong><small>{challengerPoints} pts · {challengedPoints} pts</small></div></div>}
                   {['declined', 'expired', 'cancelled'].includes(view.battle.status) && <p className="squad-muted-v11">Esta batalla ya no está activa.</p>}
                 </article>
               );

@@ -545,8 +545,13 @@ Milestone actual:
 DadoFit / Reto ByAds Reloaded 2.1
 ECO-4A — PARTNER ECONOMY FOUNDATION ✅
 ECO-4B — DC Budget Governance ✅
-ECO-4C — CHALLENGE REWARD BUDGET ENFORCEMENT
-SIGUIENTE PASO
+ECO-4C — CHALLENGE REWARD BUDGET ENFORCEMENT ✅
+ECO-4D — MARKETPLACE SPLIT ✅
+ECO-4E — FRONTEND ECONOMY UX ✅
+ECO-4F — ADMIN ANALYTICS / GOVERNANCE ✅
+ECO-4G — COMPATIBILITY + FINAL QA ✅
+DadoFit 2.1 Economy Migration
+IMPLEMENTED — FINAL QA COMPLETE
 ```
 
 Fuente de verdad para esta fase:
@@ -1800,7 +1805,11 @@ AGENT.md 2.1                ✅ este documento
 SPEC DE IMPLEMENTACIÓN      ✅ aprobada
 ECO-4A Partner Economy       ✅ implementado y probado
 ECO-4B DC Budget Governance  ✅
-ECO-4C Challenge Reward Budget Enforcement  ⏳ siguiente paso
+ECO-4C Challenge Reward Budget Enforcement  ✅
+ECO-4D Marketplace Split                      ✅
+ECO-4E Frontend Economy UX                    ✅
+ECO-4F Admin Analytics / Governance             ✅
+ECO-4G Compatibility + Final QA                 ✅
 QA 2.1                      ⏳ pendiente
 ```
 
@@ -2050,7 +2059,11 @@ Orden oficial recomendado para DadoFit 2.1:
 3. SPEC DadoFit 2.1 Economy                  ✅
 4. ECO-4A Partner Economy Foundation         ✅
 5. ECO-4B DC Budget Governance               ✅
-6. ECO-4C Challenge Reward Budget Enforcement     ⏳ siguiente paso
+6. ECO-4C Challenge Reward Budget Enforcement   ✅
+7. ECO-4D Marketplace Split                         ✅
+8. ECO-4E Frontend Economy UX                         ✅
+9. ECO-4F Admin Analytics / Governance             ✅
+10. ECO-4G Compatibility + Final QA                 ✅
 6. Challenge Reward Budget Enforcement       ⏳
 7. Marketplace DadoFit / Partner split       ⏳
 8. Frontend dynamic economy labels           ⏳
@@ -2223,7 +2236,11 @@ Estado inmediato:
 ```text
 ECO-4A Partner Economy Foundation   ✅
 ECO-4B DC Budget Governance         ✅
-ECO-4C Challenge Reward Budget Enforcement  ⏳ siguiente paso
+ECO-4C Challenge Reward Budget Enforcement  ✅
+ECO-4D Marketplace Split                      ✅
+ECO-4E Frontend Economy UX                    ✅
+ECO-4F Admin Analytics / Governance             ✅
+ECO-4G Compatibility + Final QA                 ✅
 ```
 
 Antes de ECO-4B recordar el contrato de producto:
@@ -2254,7 +2271,28 @@ Después:
 ECO-4B
 → QA
 → Git checkpoint
-→ ECO-4C Challenge Reward Budget Enforcement
+→ ECO-4G Compatibility + Final QA
 ```
 
-No avanzar a ECO-4C sin validar ECO-4B.
+DadoFit 2.1 implementado y validado en este build.
+
+---
+
+## Estado real del build final SDD 2.1 (2026-10-08)
+
+Implementado en el working tree:
+
+- ECO-4H (`20261008110000_eco4h_economy_operations.sql`): configuración Partner Points, validación de scope en `redeem_reward`, lectura de budgets Partner y analytics de Partner Points.
+- UX económica: XP como progreso, DC como moneda universal, Partner Points configurables y Competitive Score separado. Los códigos `gp`/`sp` y columnas históricas se conservan únicamente como compatibilidad interna.
+- Marketplace dividido: DadoFit usa `get_dadofit_marketplace()` y pago DC; comunidades usan `get_partner_marketplace(organization_id)` y los Partner Points propios.
+- Admin DC Budgets: creación explícita de budget Partner o interno DadoFit y acciones aprobar, pausar, reanudar y cancelar mediante RPCs SuperAdmin.
+- Workspace Partner: budgets en modo read-only y analytics de emitidos, gastados, circulación, usuarios activos y redenciones.
+- `dc_block_reason`: mensajes de producto para budget ausente, agotado, pausado, vencido, futuro o cancelado.
+- Pruebas unitarias: 102 pruebas pasan. Build TypeScript/Vite pasa.
+
+Validación pendiente o condicionada:
+
+- Las pruebas DB de concurrencia/Economy 2.1 hacen `SKIP` limpio si no existe `SUPABASE_SERVICE_ROLE_KEY`; no deben reportarse como PASS sin esa variable.
+- El healthcheck remoto confirma conectividad, pero la versión efectiva depende de ejecutar las migraciones pendientes con `supabase db push`.
+- El QA responsive automatizado confirmó ausencia de overflow en la pantalla de login a 375/768/1440/1920. Las rutas protegidas `/app`, `/profile`, `/rewards` y `/admin` requieren QA visual autenticado adicional.
+- No se instaló ni se conservó Puppeteer como dependencia permanente.

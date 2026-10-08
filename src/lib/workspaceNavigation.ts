@@ -14,16 +14,21 @@ export interface WorkspaceNavItem {
 const MANAGERS: readonly OrganizationRole[] = ['owner', 'admin'];
 const GYM_CREATORS: readonly OrganizationRole[] = ['owner', 'admin', 'coach'];
 
+export const CHALLENGE_NAVIGATION = [
+  { to: '/challenges', label: '1 vs 1', icon: 'swords' },
+  { to: '/organization-challenges', label: 'Del Gym', icon: 'building' },
+  { to: '/squads', label: 'Squads', icon: 'shield' },
+  { to: '/sponsored-challenges', label: 'Patrocinados', icon: 'sparkles' },
+  { to: '/seasons', label: 'Temporadas', icon: 'trophy' },
+] as const satisfies readonly Pick<WorkspaceNavItem, 'to' | 'label' | 'icon'>[];
+
 const NAVIGATION: Record<WorkspaceKind, readonly WorkspaceNavItem[]> = {
   personal: [
     { to: '/app', label: 'Entrenar', icon: 'dice', tier: 'primary' },
-    { to: '/challenges', label: 'Retos', icon: 'swords', tier: 'primary' },
+    { ...CHALLENGE_NAVIGATION[0], label: 'Retos', tier: 'primary' },
     { to: '/rewards', label: 'Premios', icon: 'gift', tier: 'primary' },
     { to: '/gymbros', label: 'Gymbros', icon: 'users', tier: 'secondary' },
-    { to: '/squads', label: 'Squads', icon: 'shield', tier: 'secondary' },
     { to: '/organizations', label: 'Organizaciones', icon: 'building', tier: 'secondary' },
-    { to: '/sponsored-challenges', label: 'Patrocinados', icon: 'sparkles', tier: 'secondary' },
-    { to: '/seasons', label: 'Temporadas', icon: 'trophy', tier: 'secondary' },
   ],
   gym: [
     { to: '/workspace', label: 'Dashboard', icon: 'trophy', tier: 'primary' },

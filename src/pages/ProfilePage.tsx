@@ -6,6 +6,7 @@ import { AppHeader } from '../components/AppHeader';
 import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabase';
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validateNewPassword, validatePasswordConfirmation } from '../lib/passwordRules';
+import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
 
 interface SponsorPointBalance { sponsor_organization_id: string; sponsor_name: string; logo_url: string | null; balance: number; lifetime_earned: number; lifetime_spent: number; }
 interface GymPointBalance { gym_organization_id: string; gym_name: string; logo_url: string | null; balance: number; lifetime_earned: number; lifetime_spent: number; membership_status: string | null; redeemable: boolean; }
@@ -33,6 +34,7 @@ export function ProfilePage() {
   const [stats, setStats] = useState<ProfileStats>(EMPTY_STATS);
   const [sponsorBalances, setSponsorBalances] = useState<SponsorPointBalance[]>([]);
   const [gymBalances, setGymBalances] = useState<GymPointBalance[]>([]);
+  const [ppConfigs, setPpConfigs] = useState<Map<string, PartnerPointConfig>>(new Map());
   const [loading, setLoading] = useState(user?.provider === 'supabase');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -72,6 +74,12 @@ export function ProfilePage() {
       });
       setSponsorBalances(sponsorPointsResult.error ? [] : ((sponsorPointsResult.data ?? []) as SponsorPointBalance[]));
       setGymBalances(gymPointsResult.error ? [] : ((gymPointsResult.data ?? []) as GymPointBalance[]));
+      const orgIds = [
+        ...((gymPointsResult.data ?? []) as GymPointBalance[]).map((b) => b.gym_organization_id),
+        ...((sponsorPointsResult.data ?? []) as SponsorPointBalance[]).map((b) => b.sponsor_organization_id),
+      ];
+      const configs = await loadPartnerPointConfigs(orgIds);
+      if (active) setPpConfigs(configs);
       setLoading(false);
     };
     void load();
@@ -136,13 +144,13 @@ export function ProfilePage() {
         </section>
 
         <section id="gym-points" className="profile-card-v9 sponsor-wallet-eco1">
-          <div className="sponsor-wallet-head-eco1"><div><span className="eyebrow">GYM POINTS</span><h2>Tus GP disponibles por Gym</h2><p>Este saldo sí es gastable dentro del mismo Gym. No se mezcla entre Gyms y gastarlo nunca reduce tu aporte histórico.</p></div><WalletCards size={24}/></div>
-          {gymBalances.length === 0 ? <div className="sponsor-wallet-empty-eco1"><strong>0 GP</strong><span>Aún no tienes GP disponibles. Completa retos aprobados de tus Gyms para obtenerlos.</span></div> : <div className="sponsor-wallet-grid-eco1">{gymBalances.map((item) => <article key={item.gym_organization_id}><div className="sponsor-wallet-logo-eco1">{item.logo_url ? <img src={item.logo_url} alt=""/> : <Building2 size={18}/>}</div><div><span>{item.gym_name}</span><strong>{Number(item.balance ?? 0).toLocaleString()} GP disponibles</strong><small>Ganados {Number(item.lifetime_earned ?? 0).toLocaleString()} · usados {Number(item.lifetime_spent ?? 0).toLocaleString()}{item.redeemable ? '' : ' · saldo congelado'}</small></div></article>)}</div>}
+          <div className="sponsor-wallet-head-eco1"><div><span className="eyebrow">PARTNER POINTS · GYM</span><h2>Tus puntos por Gym</h2><p>Cada Gym nombra sus propios puntos. Son locales a ese Gym: no se mezclan y gastarlos nunca reduce tu aporte histórico.</p></div><WalletCards size={24}/></div>
+          {gymBalances.length === 0 ? <div className="sponsor-wallet-empty-eco1"><strong>0 puntos</strong><span>Aún no tienes puntos de Gym. Completa retos aprobados de tus Gyms para obtenerlos.</span></div> : <div className="sponsor-wallet-grid-eco1">{gymBalances.map((item) => { const cfg = resolvePartnerPointConfig(ppConfigs, item.gym_organization_id, 'gym'); return <article key={item.gym_organization_id}><div className="sponsor-wallet-logo-eco1">{item.logo_url ? <img src={item.logo_url} alt=""/> : <Building2 size={18}/>}</div><div><span>{item.gym_name}</span><strong>{Number(item.balance ?? 0).toLocaleString()} {cfg.points_short_name} disponibles</strong><small>{cfg.points_name} · Ganados {Number(item.lifetime_earned ?? 0).toLocaleString()} · usados {Number(item.lifetime_spent ?? 0).toLocaleString()}{item.redeemable ? '' : ' · saldo congelado'}</small></div></article>; })}</div>}
         </section>
 
         <section id="sponsor-points" className="profile-card-v9 sponsor-wallet-eco1">
-          <div className="sponsor-wallet-head-eco1"><div><span className="eyebrow">SPONSOR POINTS</span><h2>Tus saldos por Marca</h2><p>Los SP son exclusivos de cada patrocinador: SP Nike no se pueden usar en Adidas, Gyms ni otros sponsors.</p></div><Sparkles size={24}/></div>
-          {sponsorBalances.length === 0 ? <div className="sponsor-wallet-empty-eco1"><strong>0 SP</strong><span>Aún no has ganado Sponsor Points. Participa en Branded Challenges para obtenerlos.</span></div> : <div className="sponsor-wallet-grid-eco1">{sponsorBalances.map((item) => <article key={item.sponsor_organization_id}><div className="sponsor-wallet-logo-eco1">{item.logo_url ? <img src={item.logo_url} alt=""/> : <Sparkles size={18}/>}</div><div><span>{item.sponsor_name}</span><strong>{Number(item.balance ?? 0).toLocaleString()} SP</strong><small>Ganados {Number(item.lifetime_earned ?? 0).toLocaleString()} · usados {Number(item.lifetime_spent ?? 0).toLocaleString()}</small></div></article>)}</div>}
+          <div className="sponsor-wallet-head-eco1"><div><span className="eyebrow">PARTNER POINTS · MARCA</span><h2>Tus puntos por Marca</h2><p>Cada patrocinador nombra sus propios puntos. Son exclusivos de esa Marca: no se pueden usar en Gyms ni en otras marcas.</p></div><Sparkles size={24}/></div>
+          {sponsorBalances.length === 0 ? <div className="sponsor-wallet-empty-eco1"><strong>0 puntos</strong><span>Aún no has ganado puntos de Marca. Participa en Branded Challenges para obtenerlos.</span></div> : <div className="sponsor-wallet-grid-eco1">{sponsorBalances.map((item) => { const cfg = resolvePartnerPointConfig(ppConfigs, item.sponsor_organization_id, 'brand'); return <article key={item.sponsor_organization_id}><div className="sponsor-wallet-logo-eco1">{item.logo_url ? <img src={item.logo_url} alt=""/> : <Sparkles size={18}/>}</div><div><span>{item.sponsor_name}</span><strong>{Number(item.balance ?? 0).toLocaleString()} {cfg.points_short_name}</strong><small>{cfg.points_name} · Ganados {Number(item.lifetime_earned ?? 0).toLocaleString()} · usados {Number(item.lifetime_spent ?? 0).toLocaleString()}</small></div></article>; })}</div>}
         </section>
 
         <section className="profile-grid-v9 profile-grid-v133">
@@ -153,8 +161,8 @@ export function ProfilePage() {
               <div><span>Gymbros</span><strong>{stats.gymbros}</strong></div>
               <div><span>Squads</span><strong>{stats.squads}</strong></div>
               <div><span>Retos pendientes</span><strong>{stats.pendingChallenges}</strong></div>
-              <div><span>Aporte a Squads</span><strong>{stats.squadPoints.toLocaleString()} TP</strong></div>
-              <div><span>Aporte histórico a Gym</span><strong>{stats.organizationPoints.toLocaleString()} GP</strong></div>
+              <div><span>Aporte a Squads</span><strong>{stats.squadPoints.toLocaleString()} pts</strong></div>
+              <div><span>Aporte histórico a Gym</span><strong>{stats.organizationPoints.toLocaleString()} pts</strong></div>
             </div>
             <div className="profile-action-links-v133">
               <WorkspaceActionLink to="/gymbros" workspaceId="personal"><UsersRound size={16}/> Gymbros</WorkspaceActionLink>

@@ -280,8 +280,8 @@ export function OrganizationsPage() {
 
         <section className="profile-hero-v9 organizations-hero-v12">
           <div className="profile-avatar-v9"><Building2 size={31}/></div>
-          <div><span className="eyebrow">DADOFIT ORGANIZATIONS</span><h1>Gyms & Organizations</h1><p>{allowedCreationTypes.length > 0 ? 'Crea o administra workspaces, suma miembros y convierte retos aprobados en Gym Points.' : 'Consulta tus organizaciones, invitaciones, miembros y actividad desde un solo lugar.'}</p></div>
-          {cloudReady && <div className="organizations-hero-stats-v12"><span><strong>{views.length}</strong> activas</span><span><strong>{totalSponsorPoints.toLocaleString()}</strong> GP</span></div>}
+          <div><span className="eyebrow">DADOFIT ORGANIZATIONS</span><h1>Gyms & Organizations</h1><p>{allowedCreationTypes.length > 0 ? 'Crea o administra workspaces, suma miembros y participa en el Competitive Score.' : 'Consulta tus organizaciones, invitaciones, miembros y actividad desde un solo lugar.'}</p></div>
+          {cloudReady && <div className="organizations-hero-stats-v12"><span><strong>{views.length}</strong> activas</span><span><strong>{totalSponsorPoints.toLocaleString()}</strong> pts</span></div>}
         </section>
 
         {!cloudReady ? (
@@ -325,7 +325,7 @@ export function OrganizationsPage() {
 
                       <div className="organization-stats-v12">
                         <div><span>Miembros</span><strong>{view.members.filter((item) => item.status === 'active').length}</strong></div>
-                        <div><span>Gym Points</span><strong>{view.sponsorPoints.toLocaleString()} GP</strong></div>
+                        <div><span>Competitive Score</span><strong>{view.sponsorPoints.toLocaleString()} pts</strong></div>
                         <div><span>Retos activos</span><strong>{view.activeChallenges}</strong></div>
                       </div>
 
