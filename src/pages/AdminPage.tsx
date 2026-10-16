@@ -4,19 +4,17 @@ import {
   BarChart3,
   Building2,
   CalendarDays,
+  ChevronDown,
   ClipboardList,
   Coins,
-  Copy,
-  ExternalLink,
+  Download,
   Eye,
   FileSearch,
   Gift,
   LayoutDashboard,
   Megaphone,
   MousePointerClick,
-  Pause,
   Pencil,
-  Play,
   RefreshCw,
   Search,
   ShieldCheck,
@@ -24,9 +22,11 @@ import {
   Trophy,
   UserRound,
   UsersRound,
+  Wallet,
   X,
 } from "lucide-react";
 import {
+  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -35,11 +35,39 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { supabase } from "../lib/supabase";
+import {
+  buildCsvContent,
+  buildDateRange,
+  buildReportFileName,
+  buildSummaryData,
+  buildTargetUrlById,
+  formatCtrDisplay,
+  selectRowsForScope,
+  toCampaignExportRows,
+  type AdAnalyticsSummary,
+  type AdMetricRow,
+  type AdsReportScopeSelector,
+  type CampaignExportRow,
+  type SummaryExportData,
+} from "../lib/adsReportExport";
+import {
+  AdminEmptyState,
+  AdminFilterBar,
+  AdminLoadingState,
+  AdminMetricCard,
+  AdminPageHeader,
+  AdminRowActions,
+  AdminStatusBadge,
+  AdminTable,
+  AdminTruncate,
+} from "../admin/components/AdminVisual";
 import "../styles/v14-admin.css";
 import "../styles/v14.5-ad-campaign-management.css";
+import "../styles/admin-tokens.css";
 
 type Row = Record<string, any>;
 const SECTIONS = [
@@ -100,20 +128,12 @@ function AdminShell({
           <strong>{user?.name}</strong>
           <small>{user?.email}</small>
           <Link to="/app">Volver a DadoFit</Link>
+          <Link to="/contact">Formulario de contacto</Link>
           <button onClick={() => void logout()}>Cerrar sesión</button>
         </div>
       </aside>
       <main className="admin-main-v14">
-        <header className="admin-top-v14">
-          <div>
-            <span className="eyebrow">BACKOFFICE DADOFIT</span>
-            <h1>{title}</h1>
-            <p>{subtitle}</p>
-          </div>
-          <Link to="/contact">
-            Ver formulario de contacto <ExternalLink size={14} />
-          </Link>
-        </header>
+        <AdminPageHeader title={title} subtitle={subtitle} />
         {children}
       </main>
     </div>
@@ -165,15 +185,9 @@ function Dashboard() {
         <RefreshCw size={15} /> Actualizar
       </button>
       {q.error && <div className="auth-error">{q.error}</div>}
-      <section className="admin-kpi-grid-v14">
-        {cards.map(([label, value, Icon]: any) => (
-          <article key={label}>
-            <Icon size={20} />
-            <span>{label}</span>
-            <strong>{fmt(value)}</strong>
-          </article>
-        ))}
-      </section>
+      {q.loading ? <AdminLoadingState rows={3}/> : <section className="admin-kpi-grid-v14">
+        {cards.map(([label, value, Icon]: any) => <AdminMetricCard key={label} icon={<Icon size={20}/>} label={label} value={fmt(value)}/>)}
+      </section>}
       <section className="admin-callouts-v14">
         <article>
           <span className="eyebrow">OPERACIÓN</span>
@@ -216,32 +230,32 @@ function Users() {
       subtitle="Consulta identidad, progreso, DadoCoins y estado de acceso."
     >
       <form
-        className="admin-search-v14"
         onSubmit={(e) => {
           e.preventDefault();
           setQuery(search);
         }}
       >
-        <Search size={16} />
-        <input
+        <AdminFilterBar><Search size={16} />
+        <input aria-label="Buscar usuarios"
           placeholder="Email, username, nombre o UUID"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <button>Buscar</button>
+        <button className="admin-primary-v14">Buscar</button>
+        <button type="button" className="admin-filter-spacer-v14" onClick={() => void q.load()}><RefreshCw size={14}/> Actualizar</button></AdminFilterBar>
       </form>
       {q.error && <div className="auth-error">{q.error}</div>}
-      <div className="admin-table-wrap-v14">
+      <AdminTable loading={q.loading} empty={!q.error && (q.data ?? []).length === 0 ? <AdminEmptyState icon={<UsersRound size={22}/>} title="No hay usuarios" description="Ajusta la búsqueda o vuelve a actualizar el listado."/> : undefined}>
         <table>
           <thead>
             <tr>
-              <th>Usuario</th>
-              <th>Estado</th>
-              <th>XP / Nivel</th>
-              <th>DadoCoins</th>
-              <th>Ecosistema</th>
-              <th>Registro</th>
-              <th />
+              <th scope="col">Usuario</th>
+              <th scope="col">Estado</th>
+              <th scope="col">XP / Nivel</th>
+              <th scope="col">DadoCoins</th>
+              <th scope="col">Ecosistema</th>
+              <th scope="col">Registro</th>
+              <th scope="col"><span className="sr-only">Acciones</span></th>
             </tr>
           </thead>
           <tbody>
@@ -250,14 +264,12 @@ function Users() {
                 <td>
                   <strong>{r.display_name || r.username || "Gymbro"}</strong>
                   <small>
-                    {r.email}
+                    <AdminTruncate value={r.email} />
                     <br />@{r.username || "—"}
                   </small>
                 </td>
                 <td>
-                  <span className={`admin-status-v14 ${r.platform_status}`}>
-                    {r.platform_status}
-                  </span>
+                  <AdminStatusBadge status={r.platform_status}/>
                 </td>
                 <td>
                   {fmt(r.xp)} XP · N{r.level}
@@ -268,38 +280,30 @@ function Users() {
                 </td>
                 <td>{date(r.created_at)}</td>
                 <td>
-                  <button
-                    className={
-                      r.platform_status === "suspended"
-                        ? "admin-ok-v14"
-                        : "admin-danger-v14"
-                    }
-                    onClick={() => void change(r)}
-                  >
-                    {r.platform_status === "suspended"
-                      ? "Reactivar"
-                      : "Suspender"}
-                  </button>
+                  <AdminRowActions actions={[{ label: r.platform_status === "suspended" ? "Reactivar" : "Suspender", danger: r.platform_status !== "suspended", onClick: () => void change(r) }]}/>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </AdminTable>
     </AdminShell>
   );
 }
 
 function Organizations({ brandsOnly = false }: { brandsOnly?: boolean }) {
   const q = useRpc("admin_list_organizations");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const rows = useMemo(
     () =>
       ((q.data ?? []) as Row[]).filter(
         (r) =>
-          !brandsOnly ||
-          ["brand", "sponsor", "company"].includes(r.organization_type),
+          (!brandsOnly || ["brand", "sponsor", "company"].includes(r.organization_type)) &&
+          (!statusFilter || r.verification_status === statusFilter) &&
+          (!search || `${r.name} ${r.owner_name} ${r.owner_email}`.toLowerCase().includes(search.toLowerCase())),
       ),
-    [q.data, brandsOnly],
+    [q.data, brandsOnly, search, statusFilter],
   );
   const verify = async (r: Row, status: string) => {
     if (!supabase) return;
@@ -332,16 +336,18 @@ function Organizations({ brandsOnly = false }: { brandsOnly?: boolean }) {
           : "Aprobación y control de Gyms, Marcas y organizaciones."
       }
     >
-      <div className="admin-table-wrap-v14">
+      <AdminFilterBar><Search size={16}/><input aria-label="Buscar organizaciones" placeholder="Nombre, owner o email" value={search} onChange={(event) => setSearch(event.target.value)}/><select aria-label="Filtrar por estado" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">Todos los estados</option><option value="verified">Verificadas</option><option value="pending_verification">Pendientes</option><option value="suspended">Suspendidas</option><option value="rejected">Rechazadas</option></select><button className="admin-filter-spacer-v14" onClick={() => void q.load()}><RefreshCw size={14}/> Actualizar</button></AdminFilterBar>
+      {q.error && <div className="auth-error">{q.error}</div>}
+      <AdminTable loading={q.loading} empty={!q.error && rows.length === 0 ? <AdminEmptyState icon={<Building2 size={22}/>} title={brandsOnly ? "No hay marcas" : "No hay organizaciones"} description="No hay resultados para los filtros seleccionados."/> : undefined}>
         <table>
           <thead>
             <tr>
-              <th>Organización</th>
-              <th>Tipo</th>
-              <th>Owner</th>
-              <th>Miembros</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th scope="col">Organización</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Owner</th>
+              <th scope="col">Miembros</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -354,86 +360,48 @@ function Organizations({ brandsOnly = false }: { brandsOnly?: boolean }) {
                 <td>{r.organization_type}</td>
                 <td>
                   {r.owner_name}
-                  <small>{r.owner_email}</small>
+                  <small><AdminTruncate value={r.owner_email} /></small>
                 </td>
                 <td>{r.members}</td>
                 <td>
-                  <span className={`admin-status-v14 ${r.verification_status}`}>
-                    {r.verification_status}
-                  </span>
+                  <AdminStatusBadge status={r.verification_status}/>
                 </td>
-                <td className="admin-actions-v14">
-                  {r.verification_status !== "verified" && (
-                    <button
-                      className="admin-ok-v14"
-                      onClick={() => void verify(r, "verified")}
-                    >
-                      {r.organization_type === "gym" ? "Aprobar" : "Verificar"}
-                    </button>
-                  )}
-                  {r.verification_status !== "pending_verification" && (
-                    <button
-                      onClick={() => void verify(r, "pending_verification")}
-                    >
-                      Pendiente
-                    </button>
-                  )}
-                  {r.verification_status !== "rejected" && (
-                    <button
-                      className="admin-danger-v14"
-                      onClick={() => void verify(r, "rejected")}
-                    >
-                      Rechazar
-                    </button>
-                  )}
-                  {r.verification_status !== "suspended" && (
-                    <button
-                      className="admin-danger-v14"
-                      onClick={() => void verify(r, "suspended")}
-                    >
-                      Suspender
-                    </button>
-                  )}
-                </td>
+                <td><AdminRowActions primary={r.verification_status !== "verified" ? { label: r.organization_type === "gym" ? "Aprobar" : "Verificar", onClick: () => void verify(r, "verified") } : undefined} actions={[
+                  ...(r.verification_status !== "pending_verification" ? [{ label: "Marcar pendiente", onClick: () => void verify(r, "pending_verification") }] : []),
+                  ...(r.verification_status !== "suspended" ? [{ label: "Suspender", danger: true, onClick: () => void verify(r, "suspended") }] : []),
+                  ...(r.verification_status !== "rejected" ? [{ label: "Rechazar", danger: true, onClick: () => void verify(r, "rejected") }] : []),
+                ]}/></td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </AdminTable>
     </AdminShell>
   );
 }
 
 function Campaigns() {
   const q = useRpc("admin_list_campaigns");
-  const rows = (q.data ?? []) as Row[];
+  const [statusFilter, setStatusFilter] = useState("");
+  const rows = ((q.data ?? []) as Row[]).filter((row) => !statusFilter || row.status === statusFilter);
   return (
     <AdminShell
       title="Campañas patrocinadas"
       subtitle="Histórico global de campañas, participación y recompensas."
     >
+      <AdminFilterBar><select aria-label="Filtrar campañas por estado" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">Todos los estados</option><option value="active">Activas</option><option value="paused">Pausadas</option><option value="completed">Completadas</option></select><button className="admin-filter-spacer-v14" onClick={() => void q.load()}><RefreshCw size={14}/> Actualizar</button></AdminFilterBar>
       {q.error && <div className="auth-error">{q.error}</div>}
-      {!q.loading && !q.error && rows.length === 0 && (
-        <div className="admin-empty-v142">
-          <Tag size={22} />
-          <strong>No hay campañas disponibles</strong>
-          <span>
-            Cuando una Marca cree una campaña patrocinada aparecerá aquí con sus
-            métricas globales.
-          </span>
-        </div>
-      )}
-      <div className="admin-table-wrap-v14">
+      <AdminTable loading={q.loading} empty={!q.error && rows.length === 0 ? <AdminEmptyState icon={<Tag size={22}/>} title="No hay campañas disponibles" description="Cuando una Marca cree una campaña patrocinada aparecerá aquí con sus métricas globales."/> : undefined}>
         <table>
           <thead>
             <tr>
-              <th>Marca / Campaña</th>
-              <th>Estado</th>
-              <th>Retos</th>
-              <th>Participantes</th>
-              <th>Aprobados / Rechazados</th>
-              <th>Rewards</th>
-              <th>Control</th>
+              <th scope="col">Marca / Campaña</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Retos</th>
+              <th scope="col">Participantes</th>
+              <th scope="col">Aprobados / Rechazados</th>
+              <th scope="col">Rewards</th>
+              <th scope="col">Control</th>
             </tr>
           </thead>
           <tbody>
@@ -444,9 +412,7 @@ function Campaigns() {
                   <small>{r.campaign_name}</small>
                 </td>
                 <td>
-                  <span className={`admin-status-v14 ${r.status}`}>
-                    {r.status}
-                  </span>
+                  <AdminStatusBadge status={r.status}/>
                 </td>
                 <td>{r.challenges}</td>
                 <td>{r.participants}</td>
@@ -463,7 +429,7 @@ function Campaigns() {
             ))}
           </tbody>
         </table>
-      </div>
+      </AdminTable>
     </AdminShell>
   );
 }
@@ -487,8 +453,8 @@ function Requests() {
       title="Solicitudes"
       subtitle="Soporte, pauta, alianzas y requerimientos recibidos desde Contáctanos."
     >
-      <div className="admin-filter-v14">
-        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+      <AdminFilterBar>
+        <select aria-label="Filtrar solicitudes por estado" value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="">Todos</option>
           <option value="new">Nuevos</option>
           <option value="reviewing">En revisión</option>
@@ -496,17 +462,12 @@ function Requests() {
           <option value="responded">Respondidos</option>
           <option value="closed">Cerrados</option>
         </select>
-      </div>
+        <button className="admin-filter-spacer-v14" onClick={() => void q.load()}><RefreshCw size={14}/> Actualizar</button>
+      </AdminFilterBar>
       {q.error && <div className="auth-error">{q.error}</div>}
+      {q.loading && <AdminLoadingState rows={3}/>}
       {!q.loading && !q.error && (q.data ?? []).length === 0 && (
-        <div className="admin-empty-v142">
-          <ClipboardList size={22} />
-          <strong>No hay solicitudes en este estado</strong>
-          <span>
-            Los mensajes enviados desde Contáctanos, pauta, soporte y alianzas
-            aparecerán aquí.
-          </span>
-        </div>
+        <AdminEmptyState icon={<ClipboardList size={22}/>} title="No hay solicitudes en este estado" description="Los mensajes enviados desde Contáctanos, pauta, soporte y alianzas aparecerán aquí."/>
       )}
       <section className="admin-request-list-v14">
         {(q.data ?? []).map((r: Row) => (
@@ -520,24 +481,13 @@ function Requests() {
                   {r.company ? ` · ${r.company}` : ""}
                 </p>
               </div>
-              <span className={`admin-status-v14 ${r.status}`}>{r.status}</span>
+              <AdminStatusBadge status={r.status}/>
             </header>
             <p>{r.message}</p>
             {r.admin_notes && <blockquote>{r.admin_notes}</blockquote>}
             <footer>
               <small>{date(r.created_at)}</small>
-              <div>
-                <button onClick={() => void update(r, "reviewing")}>
-                  Revisar
-                </button>
-                <button onClick={() => void update(r, "in_progress")}>
-                  En proceso
-                </button>
-                <button onClick={() => void update(r, "responded")}>
-                  Respondido
-                </button>
-                <button onClick={() => void update(r, "closed")}>Cerrar</button>
-              </div>
+              <AdminRowActions primary={r.status === "new" ? { label: "Revisar", onClick: () => void update(r, "reviewing") } : undefined} actions={[{ label: "En proceso", onClick: () => void update(r, "in_progress") }, { label: "Respondido", onClick: () => void update(r, "responded") }, { label: "Cerrar", danger: true, onClick: () => void update(r, "closed") }]}/>
             </footer>
           </article>
         ))}
@@ -616,125 +566,157 @@ function RewardsAnalyticsAdmin() {
       title="Rewards Analytics"
       subtitle="Economía de DadoCoins, canjes, partners y salud del inventario de premios."
     >
-      <div className="admin-reward-toolbar-v154">
-        <div>
-          <button
-            className={days === 7 ? "active" : ""}
-            onClick={() => setDays(7)}
-          >
-            7 días
-          </button>
-          <button
-            className={days === 30 ? "active" : ""}
-            onClick={() => setDays(30)}
-          >
-            30 días
-          </button>
-          <button
-            className={days === 90 ? "active" : ""}
-            onClick={() => setDays(90)}
-          >
-            90 días
+      <div className="admin-rewards-view-v1582">
+        <div className="admin-reward-toolbar-v154">
+          <div>
+            <button
+              className={days === 7 ? "active" : ""}
+              onClick={() => setDays(7)}
+            >
+              7 días
+            </button>
+            <button
+              className={days === 30 ? "active" : ""}
+              onClick={() => setDays(30)}
+            >
+              30 días
+            </button>
+            <button
+              className={days === 90 ? "active" : ""}
+              onClick={() => setDays(90)}
+            >
+              90 días
+            </button>
+          </div>
+          <button className="admin-refresh-v14" onClick={() => void q.load()}>
+            <RefreshCw size={15} /> Actualizar
           </button>
         </div>
-        <button className="admin-refresh-v14" onClick={() => void q.load()}>
-          <RefreshCw size={15} /> Actualizar
-        </button>
-      </div>
-      {q.error && <div className="auth-error">{q.error}</div>}
-      <div className="admin-reward-note-v154">
-        “DC en circulación” es la suma de saldos actuales de wallets dentro del
-        ecosistema DadoFit; no representa dinero, cash-out ni una valoración
-        monetaria.
-      </div>
-      <section className="admin-reward-economy-v154">
-        <article>
-          <span>DC emitidos</span>
-          <strong>{fmt(summary.dc_issued)}</strong>
-          <small>Créditos positivos del ledger en el periodo</small>
-        </article>
-        <article>
-          <span>DC consumidos en Rewards</span>
-          <strong>{fmt(summary.dc_consumed)}</strong>
-          <small>DadoCoins usados en canjes del periodo</small>
-        </article>
-        <article>
-          <span>DC en circulación</span>
-          <strong>{fmt(summary.dc_circulation)}</strong>
-          <small>Saldo actual agregado de wallets</small>
-        </article>
-      </section>
-      <section className="admin-kpi-grid-v14 admin-reward-kpis-v154">
-        {[
-          ["Canjes", summary.redemptions, Gift],
-          ["Gymbros únicos", summary.unique_users, UsersRound],
-          ["Entregados", summary.redeemed, BadgeCheck],
-          ["Pendientes entrega", summary.pending_delivery, Activity],
-          ["Ofertas activas", summary.active_rewards, Tag],
-          ["Partners con Rewards", summary.providers, Building2],
-          ["Stock bajo", summary.low_stock_offers, Activity],
-        ].map(([label, value, Icon]: any) => (
-          <article key={label}>
-            <Icon size={20} />
-            <span>{label}</span>
-            <strong>{fmt(value)}</strong>
-          </article>
-        ))}
-      </section>
-      <section className="admin-card-v14 reward-trend-card-v154">
-        <header>
-          <div>
-            <span className="eyebrow">TENDENCIA</span>
-            <h2>Canjes diarios</h2>
-          </div>
-          <small>Últimos {days} días</small>
-        </header>
-        {trend.every((row: Row) => Number(row.redemptions ?? 0) === 0) ? (
-          <div className="reward-analytics-empty-v154">
-            Sin canjes en este periodo.
-          </div>
-        ) : (
-          <div className="reward-trend-v154">
-            {trend.map((row: Row) => (
-              <div
-                key={String(row.day)}
-                className="reward-trend-column-v154"
-                title={`${shortDay(row.day)} · ${fmt(row.redemptions)} canjes · ${fmt(row.dc_consumed)} DC consumidos · ${fmt(row.dc_issued)} DC emitidos`}
-              >
-                <div className="reward-trend-bar-wrap-v154">
-                  <div
-                    className="reward-trend-bar-v154"
-                    style={{
-                      height: `${Math.max(4, (Number(row.redemptions ?? 0) / maxTrend) * 100)}%`,
-                    }}
-                  />
-                </div>
-                <span>{shortDay(row.day)}</span>
+        {q.error && <div className="auth-error">{q.error}</div>}
+
+        <section className="admin-rewards-section-v1582">
+          <header className="admin-rewards-section-head-v1582">
+            <span className="eyebrow">RESUMEN ECONÓMICO</span>
+            <h2>Economía de DadoCoins</h2>
+            <p>
+              Emisión, consumo y saldo vivo de DC dentro del ecosistema en el
+              periodo seleccionado.
+            </p>
+          </header>
+          <div className="admin-reward-economy-v154">
+            <article>
+              <div className="admin-reward-economy-head-v1582">
+                <Coins size={18} />
+                <span>DC emitidos</span>
               </div>
+              <strong>{fmt(summary.dc_issued)}</strong>
+              <small>Créditos positivos del ledger en el periodo</small>
+            </article>
+            <article>
+              <div className="admin-reward-economy-head-v1582">
+                <Gift size={18} />
+                <span>DC consumidos en Rewards</span>
+              </div>
+              <strong>{fmt(summary.dc_consumed)}</strong>
+              <small>DadoCoins usados en canjes del periodo</small>
+            </article>
+            <article>
+              <div className="admin-reward-economy-head-v1582">
+                <Wallet size={18} />
+                <span>DC en circulación</span>
+              </div>
+              <strong>{fmt(summary.dc_circulation)}</strong>
+              <small>Saldo actual agregado de wallets</small>
+            </article>
+          </div>
+          <div className="admin-reward-note-v154">
+            “DC en circulación” es la suma de saldos actuales de wallets dentro
+            del ecosistema DadoFit; no representa dinero, cash-out ni una
+            valoración monetaria.
+          </div>
+        </section>
+
+        <section className="admin-rewards-section-v1582">
+          <header className="admin-rewards-section-head-v1582">
+            <span className="eyebrow">OPERACIÓN</span>
+            <h2>Operación de rewards</h2>
+            <p>
+              Canjes, entregas e inventario de partners para el seguimiento
+              operativo diario.
+            </p>
+          </header>
+          <div className="admin-kpi-grid-v14 admin-reward-kpis-v154">
+            {[
+              ["Canjes", summary.redemptions, Gift],
+              ["Gymbros únicos", summary.unique_users, UsersRound],
+              ["Entregados", summary.redeemed, BadgeCheck],
+              ["Pendientes entrega", summary.pending_delivery, Activity],
+              ["Ofertas activas", summary.active_rewards, Tag],
+              ["Partners con Rewards", summary.providers, Building2],
+              ["Stock bajo", summary.low_stock_offers, Activity],
+            ].map(([label, value, Icon]: any) => (
+              <article key={label}>
+                <Icon size={16} />
+                <span>{label}</span>
+                <strong>{fmt(value)}</strong>
+              </article>
             ))}
           </div>
-        )}
-      </section>
-      <section className="admin-card-v14">
-        <span className="eyebrow">PARTNERS</span>
-        <h2>Rendimiento por organización</h2>
-        {providers.length === 0 ? (
-          <div className="admin-empty-v142">
-            <Coins size={22} />
-            <strong>No hay partners con Rewards.</strong>
+        </section>
+
+        <section className="admin-card-v14 reward-trend-card-v154">
+          <header>
+            <div>
+              <span className="eyebrow">TENDENCIA</span>
+              <h2>Canjes diarios</h2>
+            </div>
+            <small>Últimos {days} días</small>
+          </header>
+          {trend.every((row: Row) => Number(row.redemptions ?? 0) === 0) ? (
+            <div className="reward-analytics-empty-v154">
+              Sin canjes en este periodo.
+            </div>
+          ) : (
+            <div className="reward-trend-v154">
+              {trend.map((row: Row) => (
+                <div
+                  key={String(row.day)}
+                  className="reward-trend-column-v154"
+                  title={`${shortDay(row.day)} · ${fmt(row.redemptions)} canjes · ${fmt(row.dc_consumed)} DC consumidos · ${fmt(row.dc_issued)} DC emitidos`}
+                >
+                  <div className="reward-trend-bar-wrap-v154">
+                    <div
+                      className="reward-trend-bar-v154"
+                      style={{
+                        height: `${Math.max(4, (Number(row.redemptions ?? 0) / maxTrend) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <span>{shortDay(row.day)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+        <section className="admin-card-v14">
+          <div className="admin-rewards-card-head-v1582">
+            <span className="eyebrow">PARTNERS</span>
+            <h2>Rendimiento por organización</h2>
           </div>
+        {providers.length === 0 ? (
+          <AdminEmptyState icon={<Coins size={22}/>} title="No hay partners con Rewards." description="Cuando un partner publique ofertas de canje aparecerán aquí."/>
         ) : (
           <div className="admin-table-wrap-v14">
             <table>
               <thead>
                 <tr>
-                  <th>Partner</th>
-                  <th>Tipo</th>
-                  <th>Ofertas activas</th>
-                  <th>Canjes</th>
-                  <th>Usuarios</th>
-                  <th>DC consumidos</th>
-                  <th>Stock bajo</th>
+                  <th scope="col">Partner</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Ofertas activas</th>
+                  <th scope="col">Canjes</th>
+                  <th scope="col">Usuarios</th>
+                  <th scope="col">DC consumidos</th>
+                  <th scope="col">Stock bajo</th>
                 </tr>
               </thead>
               <tbody>
@@ -755,124 +737,120 @@ function RewardsAnalyticsAdmin() {
             </table>
           </div>
         )}
-      </section>
-      <section className="admin-card-v14">
-        <span className="eyebrow">DC BUDGETS</span>
-        <h2>Presupuestos DadoCoins</h2>
-        <form className="admin-season-form-v157" onSubmit={(event) => void createBudget(event)}>
-          <label><input type="checkbox" checked={internalBudget} onChange={(event) => setInternalBudget(event.target.checked)}/> Budget interno DadoFit</label>
-          {!internalBudget && <label>Partner<select required value={budgetOrg} onChange={(event) => setBudgetOrg(event.target.value)}><option value="">Seleccionar organización</option>{(oq.data ?? []).map((org: Row) => <option key={org.id} value={org.id}>{org.name} · {org.organization_type}</option>)}</select></label>}
-          <label>Budget total DC<input type="number" required min="1" step="1" value={budgetDc} onChange={(event) => setBudgetDc(event.target.value)}/></label>
-          <label>Inicio<input type="datetime-local" value={budgetStart} onChange={(event) => setBudgetStart(event.target.value)}/></label>
-          <label>Fin<input type="datetime-local" value={budgetEnd} onChange={(event) => setBudgetEnd(event.target.value)}/></label>
-          <button type="submit" disabled={Boolean(budgetActing)}>Crear budget</button>
-        </form>
-        {budgetError && <div className="auth-error">{budgetError}</div>}
-        {budgetMessage && <div className="auth-success">{budgetMessage}</div>}
-        {bq.error ? (
-          <div className="auth-error">{bq.error}</div>
-        ) : (
-          <div className="admin-table-wrap-v14">
-            <table>
-              <thead>
-                <tr>
-                  <th>Partner / Campaña</th>
-                  <th>Budget</th>
-                  <th>Usado</th>
-                  <th>Restante</th>
-                  <th>Uso</th>
-                  <th>Estado</th>
-                  <th>Vigencia</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(bq.data ?? []).map((r: Row) => (
-                  <tr key={r.id}>
-                    <td>
-                      {r.is_dadofit_internal
-                        ? "DadoFit interno"
-                        : r.organization_name}
-                    </td>
-                    <td>{fmt(r.budget_dc)} DC</td>
-                    <td>{fmt(r.used_dc)} DC</td>
-                    <td>{fmt(r.remaining_dc)} DC</td>
-                    <td>{r.utilization_pct}%</td>
-                    <td>
-                      <span className={`admin-status-v14 ${r.status}`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td>
-                      {date(r.starts_at)} → {date(r.ends_at)}
-                    </td>
-                    <td><div className="admin-request-actions-v14">
-                      {r.status === "draft" && <button disabled={Boolean(budgetActing)} onClick={() => void setBudgetStatus(r.id, "approve")}>Aprobar</button>}
-                      {r.status === "active" && <button disabled={Boolean(budgetActing)} onClick={() => void setBudgetStatus(r.id, "pause")}>Pausar</button>}
-                      {r.status === "paused" && <button disabled={Boolean(budgetActing)} onClick={() => void setBudgetStatus(r.id, "resume")}>Reanudar</button>}
-                      {["draft", "active", "paused"].includes(r.status) && <button disabled={Boolean(budgetActing)} onClick={() => void setBudgetStatus(r.id, "cancel")}>Cancelar</button>}
-                    </div></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </section>
+        <section className="admin-card-v14">
+          <div className="admin-rewards-card-head-v1582">
+            <span className="eyebrow">DC BUDGETS</span>
+            <h2>Presupuestos DadoCoins</h2>
           </div>
-        )}
-      </section>
+          <form className="admin-season-form-v157" onSubmit={(event) => void createBudget(event)}>
+            <label className="admin-rewards-budget-flag-v1582"><input type="checkbox" checked={internalBudget} onChange={(event) => setInternalBudget(event.target.checked)}/> Budget interno DadoFit</label>
+            {!internalBudget && <label>Partner<select required value={budgetOrg} onChange={(event) => setBudgetOrg(event.target.value)}><option value="">Seleccionar organización</option>{(oq.data ?? []).map((org: Row) => <option key={org.id} value={org.id}>{org.name} · {org.organization_type}</option>)}</select></label>}
+            <label>Budget total DC<input type="number" required min="1" step="1" value={budgetDc} onChange={(event) => setBudgetDc(event.target.value)}/></label>
+            <label>Inicio<input type="datetime-local" value={budgetStart} onChange={(event) => setBudgetStart(event.target.value)}/></label>
+            <label>Fin<input type="datetime-local" value={budgetEnd} onChange={(event) => setBudgetEnd(event.target.value)}/></label>
+            <button type="submit" disabled={Boolean(budgetActing)}>Crear budget</button>
+          </form>
+          {budgetError && <div className="auth-error">{budgetError}</div>}
+          {budgetMessage && <div className="auth-success">{budgetMessage}</div>}
+          {bq.error ? (
+            <div className="auth-error">{bq.error}</div>
+          ) : (
+            <div className="admin-table-wrap-v14">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Partner / Campaña</th>
+                    <th scope="col">Budget</th>
+                    <th scope="col">Usado</th>
+                    <th scope="col">Restante</th>
+                    <th scope="col">Uso</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Vigencia</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(bq.data ?? []).map((r: Row) => (
+                    <tr key={r.id}>
+                      <td>
+                        {r.is_dadofit_internal
+                          ? "DadoFit interno"
+                          : r.organization_name}
+                      </td>
+                      <td>{fmt(r.budget_dc)} DC</td>
+                      <td>{fmt(r.used_dc)} DC</td>
+                      <td>{fmt(r.remaining_dc)} DC</td>
+                      <td>{r.utilization_pct}%</td>
+                      <td>
+                        <AdminStatusBadge status={r.status}/>
+                      </td>
+                      <td>
+                        {date(r.starts_at)} → {date(r.ends_at)}
+                      </td>
+                      <td><AdminRowActions primary={r.status === "draft" ? { label: "Aprobar", disabled: Boolean(budgetActing), onClick: () => void setBudgetStatus(r.id, "approve") } : r.status === "paused" ? { label: "Reanudar", disabled: Boolean(budgetActing), onClick: () => void setBudgetStatus(r.id, "resume") } : undefined} actions={[
+                        ...(r.status === "active" ? [{ label: "Pausar", disabled: Boolean(budgetActing), onClick: () => void setBudgetStatus(r.id, "pause") }] : []),
+                        ...(["draft", "active", "paused"].includes(r.status) ? [{ label: "Cancelar", danger: true, disabled: Boolean(budgetActing), onClick: () => void setBudgetStatus(r.id, "cancel") }] : []),
+                      ]}/></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
 
-      <section className="admin-card-v14">
-        <span className="eyebrow">TOP REWARDS</span>
-        <h2>Premios con más actividad</h2>
-        {topRewards.length === 0 ? (
-          <div className="admin-empty-v142">
-            <Gift size={22} />
-            <strong>Sin canjes en este periodo.</strong>
+        <section className="admin-card-v14">
+          <div className="admin-rewards-card-head-v1582">
+            <span className="eyebrow">TOP REWARDS</span>
+            <h2>Premios con más actividad</h2>
           </div>
-        ) : (
-          <div className="admin-table-wrap-v14">
-            <table>
-              <thead>
-                <tr>
-                  <th>Premio</th>
-                  <th>Partner</th>
-                  <th>Estado</th>
-                  <th>Canjes</th>
-                  <th>Usuarios</th>
-                  <th>DC</th>
-                  <th>Stock actual</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topRewards.map((r: Row) => (
-                  <tr key={r.reward_id}>
-                    <td>
-                      <strong>{r.title}</strong>
-                      <small>{fmt(r.coin_cost)} DC por canje</small>
-                    </td>
-                    <td>
-                      {r.organization_name}
-                      <small>{r.organization_type}</small>
-                    </td>
-                    <td>
-                      <span className={`admin-status-v14 ${r.status}`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td>{fmt(r.redemptions)}</td>
-                    <td>{fmt(r.unique_users)}</td>
-                    <td>{fmt(r.dc_consumed)}</td>
-                    <td>
-                      {r.remaining_stock === null
-                        ? "Abierto"
-                        : fmt(r.remaining_stock)}
-                    </td>
+          {topRewards.length === 0 ? (
+            <AdminEmptyState icon={<Gift size={22}/>} title="Sin canjes en este periodo." description="Prueba otro rango de fechas o espera a que haya actividad de canjes."/>
+          ) : (
+            <div className="admin-table-wrap-v14">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Premio</th>
+                    <th scope="col">Partner</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Canjes</th>
+                    <th scope="col">Usuarios</th>
+                    <th scope="col">DC</th>
+                    <th scope="col">Stock actual</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                </thead>
+                <tbody>
+                  {topRewards.map((r: Row) => (
+                    <tr key={r.reward_id}>
+                      <td>
+                        <strong>{r.title}</strong>
+                        <small>{fmt(r.coin_cost)} DC por canje</small>
+                      </td>
+                      <td>
+                        {r.organization_name}
+                        <small>{r.organization_type}</small>
+                      </td>
+                      <td>
+                        <AdminStatusBadge status={r.status}/>
+                      </td>
+                      <td>{fmt(r.redemptions)}</td>
+                      <td>{fmt(r.unique_users)}</td>
+                      <td>{fmt(r.dc_consumed)}</td>
+                      <td>
+                        {r.remaining_stock === null
+                          ? "Abierto"
+                          : fmt(r.remaining_stock)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+        </div>
     </AdminShell>
   );
 }
@@ -1150,12 +1128,9 @@ function SeasonsAdmin() {
             </button>
           </div>
           {q.loading ? (
-            <div className="admin-empty-v142">Cargando…</div>
+            <AdminLoadingState rows={4}/>
           ) : rows.length === 0 ? (
-            <div className="admin-empty-v142">
-              <CalendarDays size={22} />
-              <strong>No hay temporadas.</strong>
-            </div>
+            <AdminEmptyState icon={<CalendarDays size={22}/>} title="No hay temporadas." description="Crea una ventana competitiva para empezar a medir Competitive Score."/>
           ) : (
             <div className="admin-season-list-v157">
               {rows.map((r) => (
@@ -1185,9 +1160,7 @@ function SeasonsAdmin() {
                     </div>
                   </div>
                   <footer>
-                    <span className={`admin-status-v14 ${r.status}`}>
-                      {r.status}
-                    </span>
+                    <AdminStatusBadge status={r.status}/>
                     {r.status === "upcoming" && (
                       <small className="admin-season-auto-v157">
                         Se activa automáticamente al iniciar
@@ -1222,10 +1195,264 @@ function SeasonsAdmin() {
   );
 }
 
+type AdsExportScope =
+  | { type: "general" }
+  | { type: "brand"; brand: string }
+  | { type: "campaign"; campaignId: string };
+
+async function buildAdsReportXlsxBlob(
+  summary: SummaryExportData,
+  campaignRows: CampaignExportRow[],
+): Promise<Blob> {
+  const { default: writeXlsxFile } = await import("write-excel-file/universal");
+  const toXlsxDate = (iso: string) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+  };
+  const bold = (value: string) => ({ value, fontWeight: "bold" as const });
+  const numCell = (value: number, format?: string) => ({
+    value: Number(value) || 0,
+    type: Number,
+    ...(format ? { format } : {}),
+  });
+  const dateCell = (iso: string) => ({
+    value: toXlsxDate(iso),
+    type: Date,
+    format: "yyyy-mm-dd",
+  });
+
+  const summarySheet = [
+    [bold(summary.report_name)],
+    [bold("Período desde"), dateCell(summary.period_from)],
+    [bold("Período hasta"), dateCell(summary.period_to)],
+    [
+      bold("Fecha de generación"),
+    {
+      value: summary.generated_at,
+      type: Date,
+      format: "yyyy-mm-dd hh:mm",
+    },
+    ],
+    [bold("Impresiones totales"), numCell(summary.impressions, "#,##0")],
+    [bold("Clics totales"), numCell(summary.clicks, "#,##0")],
+    [bold("CTR global"), numCell(summary.ctr, "0.00%")],
+    summary.identified_clickers === null || summary.identified_clickers === undefined
+      ? [
+          bold("Usuarios identificados"),
+          {
+            value:
+              "No disponible como total por marca (no agregable sin duplicidad de usuarios)",
+          },
+        ]
+      : [bold("Usuarios identificados"), numCell(summary.identified_clickers, "#,##0")],
+    [bold("Cantidad de campañas"), numCell(summary.campaign_count)],
+  ];
+
+  const headers = [
+    "Marca",
+    "Campaña",
+    "Estado",
+    "Pieza / URL destino",
+    "Impresiones",
+    "Clics",
+    "CTR",
+    "Usuarios identificados",
+    "Período desde",
+    "Período hasta",
+  ].map((h) => bold(h));
+
+  const campaignsSheet = [
+    headers,
+    ...campaignRows.map((row) => [
+      row.brand_name,
+      row.campaign_name,
+      row.status,
+      row.target_url,
+      numCell(row.impressions, "#,##0"),
+      numCell(row.clicks, "#,##0"),
+      numCell(row.ctr, "0.00%"),
+      numCell(row.identified_clickers, "#,##0"),
+      dateCell(row.period_from),
+      dateCell(row.period_to),
+    ]),
+  ];
+
+  const blob = await writeXlsxFile(
+    [
+      {
+        data: summarySheet,
+        sheet: "Resumen",
+        columns: [{ width: 30 }, { width: 26 }],
+      },
+      {
+        data: campaignsSheet,
+        sheet: "Campañas",
+        stickyRowsCount: 1,
+        columns: [
+          { width: 22 },
+          { width: 30 },
+          { width: 12 },
+          { width: 28 },
+          { width: 14 },
+          { width: 10 },
+          { width: 10 },
+          { width: 18 },
+          { width: 14 },
+          { width: 14 },
+        ],
+      },
+    ],
+  ).toBlob();
+  return blob;
+}
+
+function AdsExportMenu({
+  id,
+  label,
+  items,
+  align = "right",
+  triggerAriaLabel,
+  disabled = false,
+}: {
+  id: string;
+  label: ReactNode;
+  items: Array<{ key: string; label: string; onSelect: () => void; separator?: boolean }>;
+  align?: "right" | "left";
+  triggerAriaLabel?: string;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const internalTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+
+  const positionMenu = useCallback(() => {
+    const trigger = internalTriggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    const menuWidth = menuRef.current?.offsetWidth ?? 220;
+    const menuHeight = menuRef.current?.offsetHeight ?? 0;
+    const left = Math.max(8, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8));
+    const fitsBelow = rect.bottom + 6 + menuHeight <= window.innerHeight - 8;
+    setMenuPosition({
+      left,
+      top: fitsBelow || !menuHeight ? rect.bottom + 6 : Math.max(8, rect.top - menuHeight - 6),
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocClick = (event: MouseEvent) => {
+      if (
+        !menuRef.current?.contains(event.target as Node) &&
+        !internalTriggerRef.current?.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        internalTriggerRef.current?.focus();
+      }
+    };
+    const onViewportChange = () => positionMenu();
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onViewportChange);
+    window.addEventListener("scroll", onViewportChange, true);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onViewportChange);
+      window.removeEventListener("scroll", onViewportChange, true);
+    };
+  }, [open, positionMenu]);
+
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => {
+        positionMenu();
+        menuRef.current
+          ?.querySelector<HTMLElement>('[role="menuitem"]')
+          ?.focus();
+      });
+    }
+  }, [open, positionMenu]);
+
+  useEffect(() => {
+    if (disabled) setOpen(false);
+  }, [disabled]);
+
+  const onMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    const nodes = Array.from(
+      menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [],
+    );
+    if (!nodes.length) return;
+    event.preventDefault();
+    const current = nodes.indexOf(document.activeElement as HTMLElement);
+    let next = 0;
+    if (event.key === "ArrowDown") next = current < 0 || current === nodes.length - 1 ? 0 : current + 1;
+    if (event.key === "ArrowUp") next = current <= 0 ? nodes.length - 1 : current - 1;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = nodes.length - 1;
+    nodes[next]?.focus();
+  };
+
+  return (
+    <div className="admin-ad-export-wrap-v144">
+      <button
+        type="button"
+        data-export-trigger={id}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={`${id}-menu`}
+        aria-label={triggerAriaLabel}
+        ref={internalTriggerRef}
+        disabled={disabled}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {label}
+      </button>
+      {open && createPortal(
+        <div
+          id={`${id}-menu`}
+          ref={menuRef}
+          role="menu"
+          aria-label="Formato de exportación"
+          className={`admin-ad-export-menu-v144 ${align}`}
+          style={menuPosition}
+          onKeyDown={onMenuKeyDown}
+        >
+          {items.map((item) => (
+            <Fragment key={item.key}>
+              {item.separator && <span className="admin-ad-export-separator-v144" role="separator" />}
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  item.onSelect();
+                  internalTriggerRef.current?.focus();
+                }}
+              >
+                {item.label}
+              </button>
+            </Fragment>
+          ))}
+        </div>,
+        document.body,
+      )}
+    </div>
+  );
+}
+
 function Ads() {
   const [placements, setPlacements] = useState<Row[]>([]);
   const [campaigns, setCampaigns] = useState<Row[]>([]);
   const [links, setLinks] = useState<Row[]>([]);
+  const [inventoryLoading, setInventoryLoading] = useState(true);
   const emptyForm = {
     brand: "",
     campaign: "",
@@ -1239,6 +1466,9 @@ function Ads() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [analyticsDays, setAnalyticsDays] = useState(30);
+  const [exportStatus, setExportStatus] = useState("");
+  const [exportError, setExportError] = useState("");
+  const [exporting, setExporting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   const toLocalInput = (value: any) => {
@@ -1305,6 +1535,7 @@ function Ads() {
 
   const load = useCallback(async () => {
     if (!supabase) return;
+    setInventoryLoading(true);
     setError("");
     const [p, c, l] = await Promise.all([
       supabase.from("ad_placements").select("*").order("placement_key"),
@@ -1315,6 +1546,7 @@ function Ads() {
       supabase.from("ad_campaign_placements").select("*"),
     ]);
     if (p.error || c.error || l.error) {
+      setInventoryLoading(false);
       setError(
         p.error?.message || c.error?.message || l.error?.message || "Error",
       );
@@ -1323,6 +1555,7 @@ function Ads() {
     setPlacements(p.data ?? []);
     setCampaigns(c.data ?? []);
     setLinks(l.data ?? []);
+    setInventoryLoading(false);
   }, []);
 
   useEffect(() => {
@@ -1433,6 +1666,108 @@ function Ads() {
     void recentClicks.load();
   };
 
+  const analyticsLoading = analyticsSummary.loading || campaignMetrics.loading;
+  const analyticsRangeReady = Number(analytics.days) === analyticsDays;
+  const analyticsExportError = analyticsSummary.error || campaignMetrics.error;
+  const exportDisabled =
+    analyticsLoading ||
+    !analyticsRangeReady ||
+    Boolean(analyticsExportError) ||
+    metricRows.length === 0 ||
+    exporting;
+  const exportDisabledReason = analyticsLoading
+    ? "Cargando datos…"
+    : !analyticsRangeReady
+      ? "Cargando datos…"
+      : analyticsExportError
+        ? "No se pudieron cargar los datos para exportar"
+    : metricRows.length === 0
+      ? "No hay datos para exportar"
+      : exporting
+        ? "Generando archivo…"
+        : "";
+
+  const downloadBlob = (blob: Blob, fileName: string) => {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  };
+
+  const runExport = async (scope: AdsExportScope, format: "xlsx" | "csv") => {
+    if (exportDisabled) return;
+    setExportStatus("");
+    setExportError("");
+    setExporting(true);
+    try {
+      const snapshotRows = metricRows.map((row) => ({ ...row })) as AdMetricRow[];
+      const snapshotSummary: AdAnalyticsSummary = {
+        days: analyticsDays,
+        impressions: Number(analytics.impressions) || 0,
+        clicks: Number(analytics.clicks) || 0,
+        identified_clickers: Number(analytics.identified_clickers) || 0,
+        unique_click_sessions: Number(analytics.unique_click_sessions) || 0,
+        ctr: Number(analytics.ctr) || 0,
+      };
+      const snapshotCampaigns = campaigns.map((c) => ({
+        id: String(c.id),
+        target_url: (c.target_url as string | null) ?? null,
+      }));
+      const now = new Date();
+      const dateRange = buildDateRange(analyticsDays, now);
+      const targetUrlById = buildTargetUrlById(snapshotCampaigns);
+      const selector: AdsReportScopeSelector =
+        scope.type === "brand"
+          ? { type: "brand", brand: scope.brand }
+          : scope.type === "campaign"
+            ? { type: "campaign", campaignId: scope.campaignId }
+            : { type: "general" };
+      const scopedRows = selectRowsForScope(snapshotRows, selector);
+      if (scopedRows.length === 0) {
+        setExportError("No hay datos para exportar.");
+        return;
+      }
+      const first = scopedRows[0];
+      const fileName = buildReportFileName({
+        scope: scope.type,
+        brand: first?.brand_name ?? "",
+        campaign: first?.campaign_name ?? "",
+        date: now,
+        format,
+      });
+      if (format === "csv") {
+        const csv = buildCsvContent(scopedRows, { dateRange, targetUrlById });
+        downloadBlob(
+          new Blob([csv], { type: "text/csv;charset=utf-8" }),
+          fileName,
+        );
+      } else {
+        const summary = buildSummaryData({
+          selector,
+          rows: scopedRows,
+          globalSummary: snapshotSummary,
+          dateRange,
+          generatedAt: now,
+        });
+        const campaignExportRows = toCampaignExportRows(scopedRows, {
+          dateRange,
+          targetUrlById,
+        });
+        const blob = await buildAdsReportXlsxBlob(summary, campaignExportRows);
+        downloadBlob(blob, fileName);
+      }
+      setExportStatus(`Archivo generado: ${fileName}`);
+    } catch {
+      setExportError("No pudimos generar el archivo. Intenta de nuevo.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <AdminShell
       title="Publicidad"
@@ -1460,11 +1795,47 @@ function Ads() {
               <option value={30}>Últimos 30 días</option>
               <option value={90}>Últimos 90 días</option>
             </select>
+            <AdsExportMenu
+              id="ad-export-general"
+              disabled={exportDisabled}
+              label={
+                <>
+                  <Download size={14} /> Exportar <ChevronDown size={13} />
+                </>
+              }
+              items={[
+                {
+                  key: "xlsx",
+                  label: "Excel (.xlsx)",
+                  onSelect: () => void runExport({ type: "general" }, "xlsx"),
+                },
+                {
+                  key: "csv",
+                  label: "CSV (.csv)",
+                  onSelect: () => void runExport({ type: "general" }, "csv"),
+                },
+              ]}
+            />
             <button type="button" onClick={refreshAnalytics}>
               <RefreshCw size={14} /> Actualizar
             </button>
           </div>
         </header>
+        {exportStatus && (
+          <p className="admin-ad-export-status-v144" role="status" aria-live="polite">
+            {exportStatus}
+          </p>
+        )}
+        {exportError && (
+          <div className="auth-error" role="alert">
+            {exportError}
+          </div>
+        )}
+        {exportDisabled && exportDisabledReason && !exportStatus && !exportError && (
+          <p className="admin-ad-export-status-v144" aria-live="polite">
+            {exportDisabledReason}
+          </p>
+        )}
         {(analyticsSummary.error ||
           campaignMetrics.error ||
           recentClicks.error) && (
@@ -1474,7 +1845,7 @@ function Ads() {
               recentClicks.error}
           </div>
         )}
-        <div className="admin-ad-kpis-v144">
+        {analyticsSummary.loading ? <AdminLoadingState rows={2}/> : <div className="admin-ad-kpis-v144">
           <article>
             <Eye size={19} />
             <span>Impresiones</span>
@@ -1488,19 +1859,14 @@ function Ads() {
           <article>
             <BarChart3 size={19} />
             <span>CTR</span>
-            <strong>
-              {Number(analytics.ctr ?? 0).toLocaleString("es-CO", {
-                maximumFractionDigits: 2,
-              })}
-              %
-            </strong>
+            <strong>{formatCtrDisplay(analytics.ctr)}</strong>
           </article>
           <article>
             <UsersRound size={19} />
             <span>Usuarios identificados</span>
             <strong>{fmt(analytics.identified_clickers)}</strong>
           </article>
-        </div>
+        </div>}
         <div className="admin-ad-analytics-grid-v144">
           <div className="admin-card-v14 admin-ad-metrics-card-v144">
             <div className="admin-ad-card-title-v144">
@@ -1510,7 +1876,7 @@ function Ads() {
               </div>
               <small>{analyticsDays} días</small>
             </div>
-            {metricRows.length === 0 ? (
+            {campaignMetrics.loading ? <AdminLoadingState rows={4}/> : metricRows.length === 0 ? (
               <div className="admin-ad-analytics-empty-v144">
                 Aún no hay eventos de pauta registrados.
               </div>
@@ -1519,11 +1885,14 @@ function Ads() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Campaña</th>
-                      <th>Impresiones</th>
-                      <th>Clics</th>
-                      <th>CTR</th>
-                      <th>Usuarios</th>
+                      <th scope="col">Campaña</th>
+                      <th scope="col">Impresiones</th>
+                      <th scope="col">Clics</th>
+                      <th scope="col">CTR</th>
+                      <th scope="col">Usuarios</th>
+                      <th scope="col" className="admin-ad-export-actions-th-v144">
+                        <span className="admin-ad-export-sr-v144">Exportar</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1535,13 +1904,55 @@ function Ads() {
                         </td>
                         <td>{fmt(r.impressions)}</td>
                         <td>{fmt(r.clicks)}</td>
-                        <td>
-                          {Number(r.ctr ?? 0).toLocaleString("es-CO", {
-                            maximumFractionDigits: 2,
-                          })}
-                          %
-                        </td>
+                        <td>{formatCtrDisplay(r.ctr)}</td>
                         <td>{fmt(r.identified_clickers)}</td>
+                        <td className="admin-ad-export-actions-td-v144">
+                          <AdsExportMenu
+                            id={`ad-export-row-${r.campaign_id}`}
+                            triggerAriaLabel={`Exportar opciones de ${r.brand_name || ""} — ${r.campaign_name || ""}`}
+                            disabled={exportDisabled}
+                            label={<Download size={14} />}
+                            items={[
+                              {
+                                key: "campaign-xlsx",
+                                label: "Campaña — Excel (.xlsx)",
+                                onSelect: () =>
+                                  void runExport(
+                                    { type: "campaign", campaignId: r.campaign_id },
+                                    "xlsx",
+                                  ),
+                              },
+                              {
+                                key: "campaign-csv",
+                                label: "Campaña — CSV (.csv)",
+                                onSelect: () =>
+                                  void runExport(
+                                    { type: "campaign", campaignId: r.campaign_id },
+                                    "csv",
+                                  ),
+                              },
+                              {
+                                key: "brand-xlsx",
+                                label: `Marca ${r.brand_name} — Excel (.xlsx)`,
+                                separator: true,
+                                onSelect: () =>
+                                  void runExport(
+                                    { type: "brand", brand: r.brand_name },
+                                    "xlsx",
+                                  ),
+                              },
+                              {
+                                key: "brand-csv",
+                                label: `Marca ${r.brand_name} — CSV (.csv)`,
+                                onSelect: () =>
+                                  void runExport(
+                                    { type: "brand", brand: r.brand_name },
+                                    "csv",
+                                  ),
+                              },
+                            ]}
+                          />
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1557,7 +1968,7 @@ function Ads() {
               </div>
               <small>{clickRows.length} eventos</small>
             </div>
-            {clickRows.length === 0 ? (
+            {recentClicks.loading ? <AdminLoadingState rows={4}/> : clickRows.length === 0 ? (
               <div className="admin-ad-analytics-empty-v144">
                 Todavía no hay clics registrados en este periodo.
               </div>
@@ -1609,7 +2020,7 @@ function Ads() {
         </p>
       </section>
 
-      <section className="admin-ad-inventory-v14">
+      {inventoryLoading ? <AdminLoadingState rows={3}/> : placements.length === 0 ? <AdminEmptyState icon={<Megaphone size={22}/>} title="No hay placements publicitarios" description="El inventario aparecerá aquí cuando esté disponible."/> : <section className="admin-ad-inventory-v14">
         {placements.map((p) => {
           const active = activeForPlacement(p.placement_key);
           const seconds = Number(p.rotation_seconds ?? 12);
@@ -1664,7 +2075,7 @@ function Ads() {
             </article>
           );
         })}
-      </section>
+      </section>}
 
       <aside className="admin-ad-creative-guide-v142">
         <Megaphone size={18} />
@@ -1789,6 +2200,7 @@ function Ads() {
           <span className="eyebrow">CAMPAÑAS</span>
           <h2>Control de pauta</h2>
           <div className="admin-ad-campaign-list-v14">
+            {!inventoryLoading && campaigns.length === 0 && <AdminEmptyState icon={<Megaphone size={22}/>} title="No hay campañas publicitarias" description="Crea una pauta en el formulario para comenzar."/>}
             {campaigns.map((c) => {
               const editable = !["completed", "cancelled"].includes(c.status);
               return (
@@ -1800,47 +2212,17 @@ function Ads() {
                     <strong>{c.brand_name}</strong>
                     <span>{c.campaign_name}</span>
                     <small>
-                      {c.status} ·{" "}
+                      <AdminStatusBadge status={c.status}/> {" "}
                       {links
                         .filter((l) => l.campaign_id === c.id)
                         .map((l) => l.placement_key)
                         .join(", ") || "sin placement"}
                     </small>
                   </div>
-                  <div className="admin-ad-campaign-actions-v145">
-                    {editable && (
-                      <button
-                        type="button"
-                        className="admin-ad-secondary-v145"
-                        onClick={() => editCampaign(c)}
-                      >
-                        <Pencil size={13} /> Editar
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className="admin-ad-secondary-v145"
-                      onClick={() => duplicateCampaign(c)}
-                    >
-                      <Copy size={13} /> Duplicar
-                    </button>
-                    {c.status !== "active" ? (
-                      <button
-                        type="button"
-                        className="admin-ok-v14"
-                        onClick={() => void setStatus(c.id, "active")}
-                      >
-                        <Play size={13} /> Activar
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => void setStatus(c.id, "paused")}
-                      >
-                        <Pause size={13} /> Pausar
-                      </button>
-                    )}
-                  </div>
+                  <AdminRowActions primary={c.status !== "active" ? { label: "Activar", onClick: () => void setStatus(c.id, "active") } : { label: "Pausar", onClick: () => void setStatus(c.id, "paused") }} actions={[
+                    ...(editable ? [{ label: "Editar", onClick: () => editCampaign(c) }] : []),
+                    { label: "Duplicar", onClick: () => duplicateCampaign(c) },
+                  ]}/>
                 </article>
               );
             })}
@@ -1853,17 +2235,23 @@ function Ads() {
 function Audit() {
   const platform = useRpc("admin_list_audit", { p_limit: 200 });
   const reviews = useRpc("admin_list_challenge_reviews", { p_limit: 150 });
+  const [search, setSearch] = useState("");
+  const matches = (row: Row) => !search || JSON.stringify(row).toLowerCase().includes(search.toLowerCase());
+  const platformRows = ((platform.data ?? []) as Row[]).filter(matches);
+  const reviewRows = ((reviews.data ?? []) as Row[]).filter(matches);
   return (
     <AdminShell
       title="Auditoría global"
       subtitle="Trazabilidad de decisiones administrativas y revisiones de evidencias."
     >
+      <AdminFilterBar><Search size={16}/><input aria-label="Buscar en auditoría" placeholder="Evento, entidad, usuario o referencia" value={search} onChange={(event) => setSearch(event.target.value)}/><button className="admin-filter-spacer-v14" onClick={() => { void platform.load(); void reviews.load(); }}><RefreshCw size={14}/> Actualizar</button></AdminFilterBar>
+      {(platform.error || reviews.error) && <div className="auth-error">{platform.error || reviews.error}</div>}
       <section className="admin-audit-grid-v14">
         <div className="admin-card-v14">
           <span className="eyebrow">ADMINISTRACIÓN</span>
           <h2>Acciones SuperAdmin</h2>
-          <div className="admin-timeline-v14">
-            {(platform.data ?? []).map((r: Row) => (
+          {platform.loading ? <AdminLoadingState rows={5}/> : platformRows.length === 0 ? <AdminEmptyState icon={<FileSearch size={22}/>} title="Sin acciones administrativas" description="No hay eventos que coincidan con la búsqueda."/> : <div className="admin-timeline-v14">
+            {platformRows.map((r: Row) => (
               <article key={r.id}>
                 <span>{date(r.created_at)}</span>
                 <strong>{r.action}</strong>
@@ -1872,13 +2260,13 @@ function Audit() {
                 </p>
               </article>
             ))}
-          </div>
+          </div>}
         </div>
         <div className="admin-card-v14">
           <span className="eyebrow">EVIDENCIAS</span>
           <h2>Revisiones globales</h2>
-          <div className="admin-timeline-v14">
-            {(reviews.data ?? []).map((r: Row) => (
+          {reviews.loading ? <AdminLoadingState rows={5}/> : reviewRows.length === 0 ? <AdminEmptyState icon={<Activity size={22}/>} title="Sin revisiones de evidencia" description="No hay revisiones que coincidan con la búsqueda."/> : <div className="admin-timeline-v14">
+            {reviewRows.map((r: Row) => (
               <article key={r.review_id}>
                 <span>{date(r.created_at)}</span>
                 <strong>
@@ -1890,7 +2278,7 @@ function Audit() {
                 </p>
               </article>
             ))}
-          </div>
+          </div>}
         </div>
       </section>
     </AdminShell>
