@@ -2,10 +2,12 @@
 
 La imagen usa un build multi-stage:
 
-1. Node 20 Alpine instala dependencias y ejecuta `npm run build`.
+1. Node 22.23.4 Alpine instala dependencias y ejecuta `npm run build`.
 2. Nginx sirve `dist/` en producción.
 3. React Router usa fallback a `index.html`.
 4. `/images` y `/videos` se cachean durante 30 días.
+
+Node solo existe en la etapa de compilación; la imagen final no contiene Node ni PHP.
 
 ## Levantar
 

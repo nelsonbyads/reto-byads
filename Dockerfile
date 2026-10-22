@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:22.23.4-alpine AS build
 
 WORKDIR /app
 
@@ -15,8 +15,8 @@ RUN npm ci --ignore-scripts
 
 COPY . .
 
-# Fail fast if the Vite/Supabase build configuration was not provided.
-RUN test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+# Fail fast without expanding configuration values into the build log.
+RUN node -e "for (const name of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY']) { if (!process.env[name]) throw new Error(name + ' is required') }"
 
 RUN npm run build
 

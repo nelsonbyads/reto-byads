@@ -100,7 +100,7 @@ Un usuario personal puede crear un Squad. Crear un Gym o una Brand requiere la c
 
 ## Requisitos
 
-- Node.js 22 recomendado
+- Node.js 22.23.4 (LTS) o posterior dentro de la rama 22.x
 - npm
 - Git
 - Docker Desktop para produccion local
