@@ -1,3 +1,5 @@
+name: reto-byads-web
+
 services:
   dadofit-web:
     build:

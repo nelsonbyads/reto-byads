@@ -157,6 +157,51 @@ html[data-dadofit-theme="dark"] .workout-layout .topbar.topbar-v7.topbar-v122.to
   backdrop-filter: blur(16px);
 }
 
+/* AppHeader is shared by both workout-layout and profile-shell pages. Keep the
+   brand name and workspace tagline stacked regardless of the parent shell. */
+.topbar.topbar-v133 .brand-copy-v7 {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 3px;
+  min-width: 0;
+  line-height: 1;
+}
+
+.topbar.topbar-v133 .brand-copy-v7 strong {
+  display: block;
+  margin: 0;
+  color: var(--dfg-text, var(--df-text, var(--text, #f2f1ec)));
+  font-size: 1.08rem !important;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.025em !important;
+  white-space: nowrap;
+}
+
+.topbar.topbar-v133 .brand-copy-v7 span {
+  display: block;
+  margin: 0;
+  color: var(--dfg-text-soft, var(--df-soft, var(--text-soft, #b5bac0)));
+  font-size: 11px !important;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 1240px) {
+  .topbar.topbar-v133 .brand-copy-v7 span {
+    display: none;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 920px) {
+  .topbar.topbar-v133 .brand-copy-v7 {
+    display: none;
+  }
+}
+
 html[data-dadofit-theme="dark"] :where(
   .app-nav-v133,
   .app-nav-v151,
@@ -994,6 +1039,17 @@ html[data-dadofit-theme="dark"] .challenge-center-shell-v1577 {
   max-width: var(--dfg-content) !important;
   padding-top: 10px !important;
   margin: 0 auto !important;
+}
+
+/* Non-personal workspaces render challenge navigation in AppHeader. An empty
+   legacy shell must never reserve a colored strip below the header. */
+html[data-dadofit-theme="dark"] .challenge-center-shell-v1577:empty {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
 }
 
 html[data-dadofit-theme="dark"] .challenge-center-nav-v157 {
@@ -1941,6 +1997,34 @@ html[data-dadofit-theme="dark"] body .workout-layout .filter-panel select {
 }
 
 /* /workspace ----------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-home-v122.workspace-home-v133 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* /app in Gym workspace: institutional training is operational, not
+   monetized. Keep the canonical workout width without empty ad columns. */
+html[data-dadofit-theme="dark"] body .workout-layout .monetized-page-v8.workout-operational-v1591 {
+  width: min(1180px, calc(100% - 32px)) !important;
+  display: block !important;
+  grid-template-columns: none !important;
+  margin: 0 auto !important;
+}
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-section-v133 {
+  width: 100%;
+  padding: 20px !important;
+  box-sizing: border-box;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 18px !important;
+  background: var(--dfg-v1591-primary) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-section-v133 > .workspace-stats-v133 {
+  margin-bottom: 0 !important;
+}
+
 html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-v122,
 html[data-dadofit-theme="dark"] body .workspace-shell-v122 .profile-card-v9,
 html[data-dadofit-theme="dark"] body .workspace-shell-v122 .brand-health-card-v133,
@@ -1950,6 +2034,93 @@ html[data-dadofit-theme="dark"] body .workspace-shell-v122 .brand-recent-v133 {
   color: var(--dfg-v1591-text) !important;
   box-shadow: none !important;
 }
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-v122.workspace-hero-v133 {
+  width: 100%;
+  min-width: 0;
+  min-height: 108px;
+  margin: 0 0 14px !important;
+  padding: 22px 24px !important;
+  display: grid !important;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 18px !important;
+  background: var(--dfg-v1591-primary) !important;
+}
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-icon-v122 {
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--dfg-v1591-line-strong);
+  border-radius: 16px;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-lime) !important;
+  box-shadow: none;
+}
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-copy-v133 {
+  min-width: 0;
+}
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-copy-v133 h1 {
+  margin: 4px 0 5px !important;
+  color: var(--dfg-v1591-text) !important;
+  font-size: clamp(1.7rem, 3vw, 2.45rem) !important;
+  line-height: 1.05;
+  letter-spacing: -.035em;
+}
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-copy-v133 p {
+  margin: 0;
+  color: var(--dfg-v1591-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-verification-pill-v133 {
+  flex: 0 0 auto;
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-verification-pill-v133.verified {
+  border-color: var(--dfg-v1591-line-strong) !important;
+  background: rgba(200,255,25,.08) !important;
+  color: var(--dfg-v1591-lime) !important;
+}
+
+@media (max-width: 720px) {
+  html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-section-v133 {
+    padding: 16px !important;
+  }
+
+  html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-v122.workspace-hero-v133 {
+    min-height: 0;
+    padding: 18px !important;
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: start;
+    gap: 13px;
+  }
+
+  html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-icon-v122 {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+
+  html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-hero-icon-v122 svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-verification-pill-v133 {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+}
+
 html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-stats-v122 > *,
 html[data-dadofit-theme="dark"] body .workspace-shell-v122 .workspace-action-grid-v122 > *,
 html[data-dadofit-theme="dark"] body .workspace-shell-v122 .brand-health-grid-v133 > *,
@@ -2023,6 +2194,15 @@ html[data-dadofit-theme="dark"] body .profile-shell-v9 .gymbros-page-v9 .gymbro-
 }
 
 /* /challenges + /organization-challenges + /squads + /sponsored-challenges */
+html[data-dadofit-theme="dark"] body .challenge-center-shell-v1577:empty {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
 html[data-dadofit-theme="dark"] body .profile-shell-v9 .challenges-page-v10 .profile-card-v9,
 html[data-dadofit-theme="dark"] body .profile-shell-v9 .challenges-page-v10 .challenge-card-v10,
 html[data-dadofit-theme="dark"] body .profile-shell-v9 .organization-challenges-page-v12 .profile-card-v9,
@@ -2163,7 +2343,107 @@ html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-invi
   box-shadow: none !important;
 }
 
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organizations-topline-v12 > button,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-links-v12 a,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-section-links-v121 a,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-invites-v12 button.secondary,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-invite-gymbros-v12 button {
+  border: 1px solid var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organizations-topline-v12 > button:hover:not(:disabled),
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-links-v12 a:hover,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-section-links-v121 a:hover,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-invites-v12 button.secondary:hover:not(:disabled),
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-invite-gymbros-v12 button:hover:not(:disabled) {
+  border-color: var(--dfg-v1591-line-strong) !important;
+  background: var(--dfg-v1591-nested) !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-invites-v12 button:not(.secondary),
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-create-v12 .profile-primary-v9 {
+  border: 1px solid var(--dfg-v1591-lime) !important;
+  background: var(--dfg-v1591-lime) !important;
+  color: #090b08 !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-member-actions-v12 select,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-create-v12 input,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-create-v12 select,
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-create-v12 textarea {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  color-scheme: dark;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-icon-action-v12 {
+  border: 1px solid color-mix(in srgb, var(--dfg-danger) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--dfg-danger) 12%, var(--dfg-v1591-raised)) !important;
+  color: var(--dfg-danger) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-icon-action-v12:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--dfg-danger) 68%, transparent) !important;
+  background: color-mix(in srgb, var(--dfg-danger) 20%, var(--dfg-v1591-raised)) !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 .organization-leave-v12 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 8px 11px;
+  border: 1px solid color-mix(in srgb, var(--dfg-danger) 36%, transparent) !important;
+  border-radius: 9px;
+  background: transparent !important;
+  color: var(--dfg-danger) !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-shell-v12 button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
 /* /gym-battles --------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-page-v121 {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-topline-v121 {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-topline-v121 > .profile-back-v9,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-topline-v121 > button {
+  min-height: 40px;
+  margin: 0 !important;
+  padding: 0 13px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 999px !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+  text-decoration: none;
+}
+
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-topline-v121 > .profile-back-v9:hover,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-topline-v121 > button:hover:not(:disabled) {
+  border-color: var(--dfg-v1591-line-strong) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-lime) !important;
+}
+
 html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-hero-v121,
 html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .profile-card-v9,
 html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-card-v121,
@@ -2172,6 +2452,24 @@ html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-review-
   background: var(--dfg-v1591-primary) !important;
   color: var(--dfg-v1591-text) !important;
   box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-hero-v121 .profile-avatar-v9 {
+  border: 1px solid var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-lime) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-hero-stats-v121 > span {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-soft) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-hero-stats-v121 > span strong {
+  color: var(--dfg-v1591-text) !important;
 }
 html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-evidence-v121,
 html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-evidence-list-v121 > *,
@@ -2184,7 +2482,58 @@ html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-approve
   box-shadow: none !important;
 }
 
+/* Gym operational navigation uses real localized copy. Disable the legacy
+   pseudo-copy that duplicated the hero title after global typography won. */
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-hero-v12 h1,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-hero-v12 .eyebrow,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-topline-v12 .profile-back-v9 {
+  font-size: inherit !important;
+}
+
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-hero-v12 h1::after,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-hero-v12 .eyebrow::after,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-topline-v12 .profile-back-v9::after {
+  content: none !important;
+  display: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-hero-v12 .eyebrow {
+  font-size: 10px !important;
+}
+
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-hero-v12 h1 {
+  font-size: clamp(1.7rem, 3vw, 2.45rem) !important;
+}
+
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-topline-v12 > .profile-back-v9,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-topline-v12 > button {
+  min-height: 40px;
+  margin: 0 !important;
+  padding: 0 13px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 999px !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+  text-decoration: none;
+}
+
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-topline-v12 > .profile-back-v9:hover,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organizations-topline-v12 > button:hover:not(:disabled) {
+  border-color: var(--dfg-v1591-line-strong) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-lime) !important;
+}
+
 /* /brand-campaigns ----------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-campaigns-page-v13 {
+  background: transparent !important;
+  background-image: none !important;
+}
+
 html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-hero-v13,
 html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .profile-card-v9,
 html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-campaign-card-v13,
@@ -2207,6 +2556,11 @@ html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-review-ev
 }
 
 /* /brand-competitions -------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-page-v157 {
+  background: transparent !important;
+  background-image: none !important;
+}
+
 html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-hero-v157,
 html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .profile-card-v9,
 html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-form-v157,
@@ -2226,6 +2580,11 @@ html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-compet
 }
 
 /* /brand-audit --------------------------------------------------------- */
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .brand-audit-page-v133 {
+  background: transparent !important;
+  background-image: none !important;
+}
+
 html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .brand-audit-hero-v133,
 html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .profile-card-v9,
 html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-card-v133,
@@ -2376,6 +2735,162 @@ html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 textarea {
   background: var(--dfg-v1591-raised) !important;
   color: var(--dfg-v1591-text) !important;
   box-shadow: none !important;
+  color-scheme: dark;
+}
+
+/* Shared action contract. Legacy feature sheets still contain light-theme
+   fallbacks, so every recurring action family gets an explicit dark role. */
+html[data-dadofit-theme="dark"] body .notifications-page-v113 .notifications-topline-v113 > button,
+html[data-dadofit-theme="dark"] body .notifications-page-v113 .notifications-mark-all-v113,
+html[data-dadofit-theme="dark"] body .notifications-page-v113 .notifications-load-more-v113,
+html[data-dadofit-theme="dark"] body .notifications-page-v113 .notifications-list-v113 article > button,
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenges-topline-v10 > button,
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-tabs-v10 button:not(.active),
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-evidence-head-v10 > button,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-challenge-tabs-v12 button:not(.active),
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-evidence-head-v12 button,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squads-topline-v11 > button,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squads-tabs-v11 button:not(.active),
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-participant-actions-v11 button:not(.primary):not(.text-danger),
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-invitations-v11 button.secondary,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-pending-battle-v11 button.secondary,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battles-topline-v121 > button,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-tabs-v121 button:not(.active),
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-evidence-head-v121 button,
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-refresh-v9,
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-row-actions-v9 button.secondary,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-editor-head-v15 button,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .provider-rewards-v15 > header button,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .provider-reward-actions-v15 button:not(.primary),
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-validator-v152 > header button,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-pending-list-v152 button,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-analytics-hero-actions-v154 button,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-analytics-toolbar-v154 button:not(.active),
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-topline-v13 > button,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-edit-button-v15712,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-edit-actions-v15712 .secondary,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-form-actions-v157 > button.secondary,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-card-actions-v157 > button,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .brand-audit-topline-v133 > button,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .governance-campaign-list-v133 button,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .history-filter-v133 button:not(.active),
+html[data-dadofit-theme="dark"] body .season-shell-v157 .season-hero-v157 > button,
+html[data-dadofit-theme="dark"] body .season-shell-v157 .season-invites-v157 button.decline {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-topline-v13,
+html[data-dadofit-theme="dark"] body .sponsored-shell-v13 .brand-topline-v13 {
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-topline-v13::before,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-topline-v13::after,
+html[data-dadofit-theme="dark"] body .sponsored-shell-v13 .brand-topline-v13::before,
+html[data-dadofit-theme="dark"] body .sponsored-shell-v13 .brand-topline-v13::after {
+  content: none !important;
+  display: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-topline-v13 > .profile-back-v9,
+html[data-dadofit-theme="dark"] body .sponsored-shell-v13 .brand-topline-v13 > .profile-back-v9 {
+  min-height: 40px;
+  margin: 0 !important;
+  padding: 0 13px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 999px !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+  text-decoration: none;
+}
+
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-topline-v13 > .profile-back-v9:hover,
+html[data-dadofit-theme="dark"] body .sponsored-shell-v13 .brand-topline-v13 > .profile-back-v9:hover {
+  border-color: var(--dfg-v1591-line-strong) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-lime) !important;
+}
+
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-accept-v10,
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-approve-v10,
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-submit-v10,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-response-v12 button:not(.reject),
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-submit-v12,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-review-v12 button:not(.reject),
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-finalize-v12,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-invitations-v11 button:not(.secondary),
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-pending-battle-v11 button.primary,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-participant-actions-v11 button.primary,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-review-actions-v11 .approve,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-send-battle-v11,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-finalize-v11,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-send-v121,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-response-v121 button:not(.reject),
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-submit-v121,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-review-v121 button:not(.reject),
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-finalize-v121,
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-search-v9 > button,
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-row-actions-v9 button:not(.secondary),
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-save-v15,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .provider-reward-actions-v15 button.primary,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-lookup-v152 > button,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-validation-confirm-v152 button,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-edit-actions-v15712 > button[type="submit"],
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-review-actions-v13 button:not(.reject),
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 .brand-competition-form-actions-v157 > button[type="submit"],
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-approve-v133,
+html[data-dadofit-theme="dark"] body .business-setup-shell-v122 .business-setup-form-v122 button {
+  border-color: var(--dfg-v1591-lime) !important;
+  background: var(--dfg-v1591-lime) !important;
+  color: #090b08 !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-decline-v10,
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-reject-v10,
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-evidence-remove-v10,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-response-v12 button.reject,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-review-v12 button.reject,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 .organization-evidence-list-v12 article > button,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-leave-v11,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-participant-actions-v11 button.text-danger,
+html[data-dadofit-theme="dark"] body .squads-page-v11 .squad-review-actions-v11 .reject,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-response-v121 button.reject,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-review-v121 button.reject,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 .gym-battle-evidence-list-v121 article > button,
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-text-action-v9.danger,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 .brand-review-actions-v13 button.reject,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 .audit-reject-v133 {
+  border-color: color-mix(in srgb, var(--dfg-danger) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--dfg-danger) 12%, var(--dfg-v1591-raised)) !important;
+  color: var(--dfg-danger) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .notifications-page-v113 button:disabled,
+html[data-dadofit-theme="dark"] body .challenges-page-v10 button:disabled,
+html[data-dadofit-theme="dark"] body .organization-challenges-page-v12 button:disabled,
+html[data-dadofit-theme="dark"] body .squads-page-v11 button:disabled,
+html[data-dadofit-theme="dark"] body .gym-battles-shell-v121 button:disabled,
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 button:disabled,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 button:disabled,
+html[data-dadofit-theme="dark"] body .brand-campaigns-shell-v13 button:disabled,
+html[data-dadofit-theme="dark"] body .brand-competition-shell-v157 button:disabled,
+html[data-dadofit-theme="dark"] body .brand-audit-shell-v133 button:disabled,
+html[data-dadofit-theme="dark"] body .business-setup-shell-v122 button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 
 /* Semantic success may tint; it must never become a second visual system. */
@@ -2458,4 +2973,620 @@ html[data-dadofit-theme="dark"] .exercise-results-v131 > button {
 
 html[data-dadofit-theme="dark"] .exercise-results-v131 > button:hover {
   background: rgba(200, 255, 25, .08) !important;
+}
+
+/* =========================================================
+   DadoFit V15.9.3 — Container orbit identity
+   ---------------------------------------------------------
+   The workout cards established a cropped circular mass and a fine lime
+   orbit in the lower-right corner. Reuse that signature as a background
+   layer so it never covers content or consumes pseudo-elements needed by
+   legacy components.
+   ========================================================= */
+
+:root {
+  --dfg-container-orbit:
+    radial-gradient(
+      circle at calc(100% + 24px) calc(100% + 30px),
+      transparent 0 82px,
+      rgba(200, 255, 25, .105) 83px 84px,
+      transparent 85px
+    ),
+    radial-gradient(
+      circle at calc(100% + 24px) calc(100% + 30px),
+      rgba(200, 255, 25, .028) 0 83px,
+      transparent 84px
+    );
+  --dfg-container-orbit-compact:
+    radial-gradient(
+      circle at calc(100% + 16px) calc(100% + 20px),
+      transparent 0 52px,
+      rgba(200, 255, 25, .09) 53px 54px,
+      transparent 55px
+    ),
+    radial-gradient(
+      circle at calc(100% + 16px) calc(100% + 20px),
+      rgba(200, 255, 25, .022) 0 53px,
+      transparent 54px
+    );
+}
+
+/* Main surfaces across every protected product family. Attribute anchors
+   cover versioned cards/heroes without coupling the motif to one feature. */
+html[data-dadofit-theme="dark"] body :is(
+  .profile-shell-v9,
+  .notifications-shell-v113,
+  .challenges-shell-v10,
+  .organization-challenges-shell-v12,
+  .sponsored-shell-v13,
+  .season-shell-v157,
+  .organizations-shell-v12,
+  .gym-battles-shell-v121,
+  .rewards-page-v15,
+  .brand-campaigns-shell-v13,
+  .brand-competition-shell-v157,
+  .brand-audit-shell-v133,
+  .workspace-shell-v122,
+  .business-setup-shell-v122,
+  .admin-shell-v14
+) :is(
+  [class*="-hero-v"],
+  [class*="-card-v"],
+  [class*="-panel-v"],
+  .workspace-section-v133,
+  .season-invites-v157,
+  .admin-rewards-section-v1582,
+  .admin-table-wrap-v14,
+  .reward-editor-v15,
+  .reward-validator-v152,
+  .reward-analytics-toolbar-v154
+) {
+  background-image: var(--dfg-container-orbit) !important;
+  background-repeat: no-repeat !important;
+  background-attachment: scroll !important;
+}
+
+/* Repeated KPI tiles receive the same signature at a quieter scale. */
+html[data-dadofit-theme="dark"] body :is(
+  .profile-shell-v9,
+  .rewards-page-v15,
+  .workspace-shell-v122,
+  .admin-shell-v14,
+  .brand-campaigns-shell-v13,
+  .brand-competition-shell-v157,
+  .brand-audit-shell-v133
+) :is(
+  [class*="-stats-v"],
+  [class*="-kpis-v"]
+) > :is(article, div) {
+  background-image: var(--dfg-container-orbit-compact) !important;
+  background-repeat: no-repeat !important;
+}
+
+/* =========================================================
+   DadoFit V15.9.4 — Rewards marketplace composition
+   ========================================================= */
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .social-summary-v112 {
+  margin-top: 0 !important;
+  margin-bottom: 14px !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .social-summary-stats-v112 {
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  background-image: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .social-summary-stats-v112 > a {
+  min-width: 0;
+  min-height: 54px;
+  padding: 9px 10px !important;
+  border-color: var(--dfg-v1591-line) !important;
+  background-color: var(--dfg-v1591-nested) !important;
+  background-image: var(--dfg-container-orbit-compact) !important;
+  background-repeat: no-repeat !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-shell-v15 {
+  padding-top: 0 !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-hero-v15 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 24px !important;
+  margin: 0 0 14px !important;
+  padding: 24px !important;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 18px !important;
+  background-color: var(--dfg-v1591-primary) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-hero-v15::after {
+  content: none !important;
+  display: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-hero-v15 h1 {
+  margin: 5px 0 7px !important;
+  font-size: clamp(1.85rem, 3.1vw, 2.55rem) !important;
+  line-height: 1 !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-hero-v15 p {
+  color: var(--dfg-v1591-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-wallet-chip-v158 {
+  min-width: 160px;
+  padding: 12px 14px !important;
+  border: 1px solid var(--dfg-v1591-line-strong) !important;
+  border-radius: 14px !important;
+  background: var(--dfg-v1591-nested) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .marketplace-destinations {
+  margin: 0 0 12px !important;
+  padding: 5px !important;
+  gap: 5px !important;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 15px !important;
+  background: var(--dfg-v1591-primary) !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .marketplace-destinations button {
+  min-height: 46px !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--dfg-v1591-soft) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .marketplace-destinations button.active {
+  border-color: var(--dfg-v1591-lime) !important;
+  background: var(--dfg-v1591-lime) !important;
+  color: #090b08 !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-tab-row {
+  align-items: center !important;
+  margin: 0 0 12px !important;
+  padding: 5px !important;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 14px !important;
+  background: var(--dfg-v1591-primary) !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-tabs-v15 {
+  gap: 4px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-tabs-v15 button,
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-refresh-v15 {
+  min-height: 40px !important;
+  border-radius: 9px !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-refresh-v15 {
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .auth-error {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  min-height: 44px;
+  margin: 0 0 12px !important;
+  padding: 10px 13px !important;
+  border: 1px solid color-mix(in srgb, var(--dfg-danger) 40%, transparent) !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--dfg-danger) 10%, var(--dfg-v1591-primary)) !important;
+  color: #ff8b7a !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .auth-error svg {
+  flex: 0 0 auto;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-toolbar-v15 {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0 !important;
+  margin-bottom: 12px !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-toolbar-v15 label {
+  min-height: 46px;
+  border-color: var(--dfg-v1591-line) !important;
+  border-radius: 12px !important;
+  background: var(--dfg-v1591-nested) !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-empty-v15 {
+  min-height: 180px !important;
+  padding: 28px !important;
+  border: 1px dashed var(--dfg-v1591-line-strong) !important;
+  border-radius: 16px !important;
+  background-color: var(--dfg-v1591-primary) !important;
+  background-image: var(--dfg-container-orbit) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-empty-v15 > svg {
+  color: var(--dfg-v1591-lime) !important;
+}
+
+@media (max-width: 1180px) {
+  html[data-dadofit-theme="dark"] body .rewards-page-v15 .social-summary-stats-v112 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  html[data-dadofit-theme="dark"] body .rewards-page-v15 .social-summary-stats-v112 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-hero-v15 {
+    grid-template-columns: 1fr !important;
+    padding: 19px !important;
+  }
+
+  html[data-dadofit-theme="dark"] body .rewards-page-v15 .reward-wallet-chip-v158 {
+    width: 100%;
+  }
+
+  html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-tab-row {
+    align-items: stretch !important;
+    flex-wrap: wrap;
+  }
+
+  html[data-dadofit-theme="dark"] body .rewards-page-v15 .rewards-tabs-v15 {
+    flex: 1 1 100%;
+  }
+}
+
+/* Public support, legal and account surfaces share the same product DNA. */
+html[data-dadofit-theme="dark"] body :is(
+  .contact-panel-v14,
+  .legal-hero-v141,
+  .legal-content-v141,
+  .legal-help-v141,
+  .legal-safety-v141,
+  .auth-form-wrap,
+  .password-recovery-sent-v15713,
+  .password-recovery-invalid-v15713
+) {
+  background-image: var(--dfg-container-orbit) !important;
+  background-repeat: no-repeat !important;
+}
+
+/* =========================================================
+   DadoFit V15.9.5 — Core personal routes audit
+   /app · /challenges · /rewards · /gymbros · /organizations
+   ========================================================= */
+
+/* The workout is the reference surface: extend its orbit deliberately to
+   summary/result/history panels without touching controls or media. */
+html[data-dadofit-theme="dark"] body .workout-layout .session-summary {
+  background-image: var(--dfg-container-orbit-compact) !important;
+  background-repeat: no-repeat !important;
+}
+
+html[data-dadofit-theme="dark"] body .workout-layout .result-card,
+html[data-dadofit-theme="dark"] body .workout-layout .history-card-v7,
+html[data-dadofit-theme="dark"] body .workout-layout .history-card {
+  background-image: var(--dfg-container-orbit) !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Shared top controls on social and organization routes. */
+html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+  .challenges-topline-v10,
+  .gymbros-topline-v9,
+  .organizations-topline-v12
+) {
+  min-height: 40px;
+  margin: 0 0 12px !important;
+  align-items: center;
+}
+
+html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+  .challenges-topline-v10,
+  .gymbros-topline-v9,
+  .organizations-topline-v12
+) > :is(.profile-back-v9, button) {
+  min-height: 40px;
+  margin: 0 !important;
+  padding: 0 13px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 999px !important;
+  background: var(--dfg-v1591-raised) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+  text-decoration: none;
+  font-size: 12px !important;
+  font-weight: 850;
+}
+
+html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+  .challenges-topline-v10,
+  .gymbros-topline-v9,
+  .organizations-topline-v12
+) > :is(.profile-back-v9, button):hover:not(:disabled) {
+  border-color: var(--dfg-v1591-line-strong) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-lime) !important;
+}
+
+/* Real localized JSX always wins over obsolete generated copy. */
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-hero-v12 :is(.eyebrow, h1),
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-topline-v12 .profile-back-v9 {
+  font-size: inherit !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-hero-v12 .eyebrow {
+  font-size: 10px !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-hero-v12 h1 {
+  font-size: clamp(1.7rem, 3vw, 2.45rem) !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-hero-v12 .eyebrow::after,
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-hero-v12 h1::after,
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-topline-v12 .profile-back-v9::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* One hero geometry for the three profile-based routes. */
+html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+  .challenges-hero-v10,
+  .gymbros-hero-v9,
+  .organizations-hero-v12
+) {
+  width: 100%;
+  min-width: 0;
+  min-height: 108px;
+  margin: 0 0 14px !important;
+  padding: 22px 24px !important;
+  display: grid !important;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center !important;
+  gap: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 18px !important;
+  background-color: var(--dfg-v1591-primary) !important;
+  background-image: var(--dfg-container-orbit) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+  .challenges-hero-v10,
+  .gymbros-hero-v9,
+  .organizations-hero-v12
+) > .profile-avatar-v9 {
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--dfg-v1591-line-strong) !important;
+  border-radius: 16px !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-lime) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+  .challenges-hero-v10,
+  .gymbros-hero-v9,
+  .organizations-hero-v12
+) h1 {
+  margin: 4px 0 5px !important;
+  color: var(--dfg-v1591-text) !important;
+  line-height: 1.04;
+}
+
+html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+  .challenges-hero-v10,
+  .gymbros-hero-v9,
+  .organizations-hero-v12
+) p {
+  color: var(--dfg-v1591-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-total-v9,
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-hero-stats-v12 > span,
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-pending-total-v10 {
+  border: 1px solid var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-nested) !important;
+  color: var(--dfg-v1591-text) !important;
+  box-shadow: none !important;
+}
+
+/* Challenges: segmented tabs and compact empty/error states. */
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-tabs-v10 {
+  width: fit-content;
+  margin: 0 0 12px !important;
+  padding: 4px !important;
+  gap: 4px !important;
+  border: 1px solid var(--dfg-v1591-line) !important;
+  border-radius: 13px !important;
+  background: var(--dfg-v1591-primary) !important;
+}
+
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-tabs-v10 button {
+  min-height: 38px;
+  border: 1px solid transparent !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  color: var(--dfg-v1591-soft) !important;
+}
+
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-tabs-v10 button.active {
+  border-color: var(--dfg-v1591-lime) !important;
+  background: var(--dfg-v1591-lime) !important;
+  color: #090b08 !important;
+}
+
+html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-empty-page-v10 {
+  min-height: 190px !important;
+  padding: 28px !important;
+  border: 1px dashed var(--dfg-v1591-line-strong) !important;
+  background-color: var(--dfg-v1591-primary) !important;
+  background-image: var(--dfg-container-orbit) !important;
+}
+
+html[data-dadofit-theme="dark"] body :is(
+  .challenges-page-v10,
+  .gymbros-page-v9,
+  .organizations-page-v12
+) .auth-error,
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .auth-success,
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .auth-success {
+  margin: 0 0 12px !important;
+  padding: 11px 13px !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body :is(
+  .challenges-page-v10,
+  .gymbros-page-v9,
+  .organizations-page-v12
+) .auth-error {
+  border: 1px solid color-mix(in srgb, var(--dfg-danger) 40%, transparent) !important;
+  background: color-mix(in srgb, var(--dfg-danger) 10%, var(--dfg-v1591-primary)) !important;
+  color: #ff8b7a !important;
+}
+
+html[data-dadofit-theme="dark"] body :is(.gymbros-page-v9, .organizations-page-v12) .auth-success {
+  border: 1px solid rgba(200,255,25,.28) !important;
+  background: rgba(200,255,25,.075) !important;
+  color: var(--dfg-v1591-text) !important;
+}
+
+/* Gymbros: nested lists stay clean; only their parent card owns a surface. */
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 :is(
+  .gymbro-search-results-v9,
+  .gymbro-list-v9,
+  .gymbro-empty-v9
+) {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-row-v9 {
+  background: transparent !important;
+  border-bottom-color: var(--dfg-v1591-line) !important;
+}
+
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-search-v9 > div {
+  min-height: 44px;
+  border-color: var(--dfg-v1591-line) !important;
+  background: var(--dfg-v1591-raised) !important;
+  box-shadow: none !important;
+}
+
+html[data-dadofit-theme="dark"] body .gymbros-page-v9 .gymbro-search-v9 > div:focus-within {
+  border-color: var(--dfg-v1591-line-strong) !important;
+  box-shadow: 0 0 0 3px rgba(200,255,25,.08) !important;
+}
+
+/* Organizations: reduce visual nesting and keep management readable. */
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-layout-v12 {
+  grid-template-columns: minmax(0, 1.55fr) minmax(290px, .7fr) !important;
+  gap: 16px !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organization-stats-v12 > div {
+  background-color: var(--dfg-v1591-nested) !important;
+  background-image: var(--dfg-container-orbit-compact) !important;
+  border-color: var(--dfg-v1591-line) !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organization-member-row-v12 {
+  background: transparent !important;
+  background-image: none !important;
+  border-bottom-color: var(--dfg-v1591-line) !important;
+}
+
+html[data-dadofit-theme="dark"] body .organizations-page-v12 .organization-empty-v12 {
+  min-height: 190px;
+  background-color: var(--dfg-v1591-primary) !important;
+  background-image: var(--dfg-container-orbit) !important;
+}
+
+@media (max-width: 1000px) {
+  html[data-dadofit-theme="dark"] body .organizations-page-v12 .organizations-layout-v12 {
+    grid-template-columns: 1fr !important;
+  }
+
+  html[data-dadofit-theme="dark"] body .organizations-page-v12 .organization-create-v12 {
+    position: static !important;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+    .challenges-hero-v10,
+    .gymbros-hero-v9,
+    .organizations-hero-v12
+  ) {
+    min-height: 0;
+    padding: 18px !important;
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 13px;
+  }
+
+  html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+    .challenges-hero-v10,
+    .gymbros-hero-v9,
+    .organizations-hero-v12
+  ) > :is(.challenge-hero-actions-v157, .gymbro-total-v9, .organizations-hero-stats-v12) {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 520px) {
+  html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+    .challenges-topline-v10,
+    .gymbros-topline-v9,
+    .organizations-topline-v12
+  ) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  html[data-dadofit-theme="dark"] body .profile-shell-v9 :is(
+    .challenges-topline-v10,
+    .gymbros-topline-v9,
+    .organizations-topline-v12
+  ) > :is(.profile-back-v9, button) {
+    width: 100%;
+  }
+
+  html[data-dadofit-theme="dark"] body .challenges-page-v10 .challenge-tabs-v10 {
+    width: 100%;
+  }
 }

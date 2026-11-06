@@ -1,0 +1,48 @@
+import { Edit3, Gift, Pause, Play, Plus, RefreshCw, Save, X } from 'lucide-react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { supabase } from '../lib/supabase';
+import '../styles/v15.10-admin-dadofit-marketplace.css';
+
+type Mode = 'generated_code'|'shared_code'|'code_pool'|'redemption_url'|'instructions_only';
+type Kind = 'digital_code'|'digital_benefit'|'physical_product'|'in_person';
+type Reward = Record<string, any>;
+const blank = {title:'',description:'',rewardType:'discount',coinCost:'100',inventory:'',maxPerUser:'1',imageUrl:'',kind:'digital_code' as Kind,mode:'generated_code' as Mode,sharedCode:'',redemptionUrl:'',codes:'',instructions:'',terms:'',start:'',end:''};
+const inputDate=(value:string|null)=>{if(!value)return '';const d=new Date(value);const p=(n:number)=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`};
+const modes=(kind:Kind):Mode[]=>kind==='digital_code'?['generated_code','shared_code','code_pool']:kind==='digital_benefit'?['redemption_url','shared_code','code_pool','instructions_only']:['instructions_only'];
+const labels:Record<Mode,string>={generated_code:'Código generado por DadoFit',shared_code:'Código compartido',code_pool:'Pool de códigos únicos',redemption_url:'URL de redención',instructions_only:'Solo instrucciones'};
+
+export function AdminDadoFitMarketplace({onChanged}:{onChanged:()=>void}){
+  const [rows,setRows]=useState<Reward[]>([]),[form,setForm]=useState(blank),[editing,setEditing]=useState<string|null>(null);
+  const [loading,setLoading]=useState(true),[acting,setActing]=useState(''),[error,setError]=useState(''),[message,setMessage]=useState('');
+  const load=useCallback(async()=>{if(!supabase)return;setLoading(true);const {data,error:e}=await supabase.rpc('admin_list_dadofit_rewards');setLoading(false);if(e)setError(e.message);else setRows((data??[]) as Reward[])},[]);
+  useEffect(()=>{void load()},[load]);
+  const reset=()=>{setEditing(null);setForm(blank)};
+  const edit=(r:Reward)=>{setEditing(r.id);setForm({title:r.title,description:r.description??'',rewardType:r.reward_type,coinCost:String(r.coin_cost),inventory:r.inventory===null?'':String(r.inventory),maxPerUser:String(r.max_per_user),imageUrl:r.image_url??'',kind:r.fulfillment_type,mode:r.fulfillment_mode,sharedCode:r.shared_code??'',redemptionUrl:r.redemption_url??'',codes:'',instructions:r.fulfillment_instructions??'',terms:r.terms??'',start:inputDate(r.starts_at),end:inputDate(r.ends_at)});document.getElementById('dadofit-reward-editor')?.scrollIntoView({behavior:'smooth'})};
+  const submit=async(e:FormEvent)=>{e.preventDefault();if(!supabase)return;setActing('save');setError('');setMessage('');const args={p_title:form.title,p_description:form.description||null,p_reward_type:form.rewardType,p_coin_cost:Number(form.coinCost),p_inventory:form.inventory===''?null:Number(form.inventory),p_max_per_user:Number(form.maxPerUser),p_image_url:form.imageUrl||null,p_fulfillment_type:form.kind,p_fulfillment_instructions:form.instructions||null,p_terms:form.terms||null,p_starts_at:form.start?new Date(form.start).toISOString():null,p_ends_at:form.end?new Date(form.end).toISOString():null,p_fulfillment_mode:form.mode,p_shared_code:form.mode==='shared_code'?form.sharedCode||null:null,p_redemption_url:form.mode==='redemption_url'?form.redemptionUrl||null:null,p_coupon_codes:form.mode==='code_pool'?form.codes||null:null};const result=editing?await supabase.rpc('admin_update_dadofit_reward',{p_reward_id:editing,...args}):await supabase.rpc('admin_create_dadofit_reward',args);setActing('');if(result.error){setError(result.error.message);return}setMessage(editing?'Oferta DadoFit actualizada.':'Oferta DadoFit creada como borrador.');reset();await load();onChanged()};
+  const status=async(id:string,next:string)=>{if(!supabase)return;setActing(`${next}:${id}`);setError('');const {error:e}=await supabase.rpc('admin_set_dadofit_reward_status',{p_reward_id:id,p_status:next});setActing('');if(e){setError(e.message);return}setMessage(`Estado actualizado: ${next}.`);await load();onChanged()};
+  const setKind=(kind:Kind)=>setForm({...form,kind,mode:modes(kind)[0]});
+  return <section className="admin-card-v14 admin-dadofit-marketplace" id="dadofit-reward-editor">
+    <header><div><span className="eyebrow">MARKETPLACE DADOFIT</span><h2>Ofertas universales en DadoCoins</h2><p>Estos premios pertenecen a DadoFit, no a un Partner, y solo se pagan con DC.</p></div><button type="button" onClick={()=>void load()}><RefreshCw size={15}/>Actualizar</button></header>
+    {error&&<div className="auth-error">{error}</div>}{message&&<div className="auth-success">{message}</div>}
+    <div className="admin-dadofit-marketplace-grid">
+      <form onSubmit={e=>void submit(e)}>
+        <div className="admin-dadofit-form-head"><h3>{editing?'Editar oferta':'Nueva oferta'}</h3>{editing&&<button type="button" onClick={reset}><X size={14}/>Cancelar</button>}</div>
+        <label>Nombre<input required minLength={3} maxLength={160} value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label>
+        <label>Descripción<textarea rows={3} value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></label>
+        <div className="admin-dadofit-fields"><label>Tipo<select value={form.rewardType} onChange={e=>setForm({...form,rewardType:e.target.value})}><option value="discount">Descuento</option><option value="product">Producto</option><option value="gym_pass">Pase de Gym</option><option value="subscription">Suscripción</option><option value="experience">Experiencia</option><option value="other">Otro</option></select></label><label>Costo DC<input type="number" min="1" required value={form.coinCost} onChange={e=>setForm({...form,coinCost:e.target.value})}/></label></div>
+        <div className="admin-dadofit-fields"><label>Stock<input type="number" min="0" placeholder="Vacío = ilimitado" value={form.inventory} onChange={e=>setForm({...form,inventory:e.target.value})}/></label><label>Máx. por usuario<input type="number" min="1" max="1000" required value={form.maxPerUser} onChange={e=>setForm({...form,maxPerUser:e.target.value})}/></label></div>
+        <label>Imagen URL<input type="url" value={form.imageUrl} onChange={e=>setForm({...form,imageUrl:e.target.value})}/></label>
+        <div className="admin-dadofit-fields"><label>Tipo de entrega<select value={form.kind} onChange={e=>setKind(e.target.value as Kind)}><option value="digital_code">Código digital</option><option value="digital_benefit">Beneficio digital</option><option value="physical_product">Producto físico</option><option value="in_person">Canje presencial</option></select></label><label>Modo<select value={form.mode} onChange={e=>setForm({...form,mode:e.target.value as Mode})}>{modes(form.kind).map(m=><option key={m} value={m}>{labels[m]}</option>)}</select></label></div>
+        {form.mode==='shared_code'&&<label>Código compartido<input value={form.sharedCode} onChange={e=>setForm({...form,sharedCode:e.target.value})}/></label>}
+        {form.mode==='redemption_url'&&<label>URL de redención<input type="url" value={form.redemptionUrl} onChange={e=>setForm({...form,redemptionUrl:e.target.value})}/></label>}
+        {form.mode==='code_pool'&&<label>Códigos nuevos<textarea rows={4} placeholder={'DADOFIT-001\nDADOFIT-002'} value={form.codes} onChange={e=>setForm({...form,codes:e.target.value})}/><small>Al editar, agrega únicamente códigos nuevos.</small></label>}
+        <label>Instrucciones<textarea rows={2} value={form.instructions} onChange={e=>setForm({...form,instructions:e.target.value})}/></label><label>Términos<textarea rows={2} value={form.terms} onChange={e=>setForm({...form,terms:e.target.value})}/></label>
+        <div className="admin-dadofit-fields"><label>Inicio<input type="datetime-local" value={form.start} onChange={e=>setForm({...form,start:e.target.value})}/></label><label>Fin<input type="datetime-local" value={form.end} onChange={e=>setForm({...form,end:e.target.value})}/></label></div>
+        <button className="admin-primary-v14" type="submit" disabled={Boolean(acting)}>{editing?<Save size={15}/>:<Plus size={15}/>} {editing?'Guardar cambios':'Crear borrador'}</button>
+      </form>
+      <div className="admin-dadofit-offers"><h3>Catálogo DadoFit</h3>{loading?<p>Cargando…</p>:rows.length===0?<div className="admin-dadofit-empty"><Gift/><strong>Sin ofertas DadoFit.</strong><span>Crea el primer borrador para activar el catálogo universal.</span></div>:rows.map(r=><article key={r.id}><div>{r.image_url?<img src={r.image_url} alt=""/>:<Gift/>}</div><section><AdminStatus status={r.status}/><h4>{r.title}</h4><p>{Number(r.coin_cost).toLocaleString('es-CO')} DC · {r.remaining_stock===null?'stock abierto':`${r.remaining_stock} disponibles`} · {r.redemptions} canjes</p>{r.fulfillment_mode==='code_pool'&&<small>{r.code_pool_available} códigos disponibles / {r.code_pool_total} cargados</small>}</section><footer><button onClick={()=>edit(r)}><Edit3 size={14}/>Editar</button>{r.status==='active'?<button onClick={()=>void status(r.id,'paused')} disabled={Boolean(acting)}><Pause size={14}/>Pausar</button>:r.status!=='ended'?<button className="admin-primary-v14" onClick={()=>void status(r.id,'active')} disabled={Boolean(acting)}><Play size={14}/>Publicar</button>:null}{r.status!=='ended'&&<button onClick={()=>void status(r.id,'ended')} disabled={Boolean(acting)}>Finalizar</button>}</footer></article>)}</div>
+    </div>
+  </section>
+}
+
+function AdminStatus({status}:{status:string}){return <span className={`admin-status-v14 ${status}`}>{status}</span>}

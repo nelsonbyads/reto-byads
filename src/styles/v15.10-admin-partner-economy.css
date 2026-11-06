@@ -1,0 +1,127 @@
+.admin-economy-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid var(--admin-border-neutral);
+  border-radius: 999px;
+  color: var(--admin-muted);
+  font-size: 10px;
+  font-weight: 900;
+}
+.admin-economy-state.active { border-color: rgba(200,255,25,.38); background: rgba(200,255,25,.08); color: var(--admin-accent); }
+.admin-economy-state.suspended { color: #ffb3a8; }
+
+.admin-partner-economy-backdrop {
+  --admin-surface: #070907;
+  --admin-surface-elevated: #0d100e;
+  --admin-surface-nested: #111511;
+  --admin-surface-raised: #151916;
+  --admin-border: rgba(221,255,92,.22);
+  --admin-border-neutral: rgba(255,255,255,.11);
+  --admin-text: #f5f7ef;
+  --admin-muted: #9aa594;
+  --admin-accent: #c8ff19;
+  --admin-success: #9ed8ad;
+  --admin-danger: #ff7868;
+  position: fixed;
+  z-index: 150;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2,5,3,.82);
+  backdrop-filter: blur(6px);
+  color-scheme: dark;
+}
+.admin-partner-economy-dialog {
+  width: min(620px,100%);
+  max-height: 92dvh;
+  overflow: auto;
+  border: 1px solid var(--admin-border-neutral);
+  border-radius: 20px;
+  background: var(--admin-surface-elevated);
+  color: var(--admin-text);
+  box-shadow: 0 30px 100px rgba(0,0,0,.55);
+}
+.admin-partner-economy-dialog > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--admin-border-neutral);
+}
+.admin-partner-economy-dialog h2,
+.admin-partner-economy-dialog p { margin: 3px 0; }
+.admin-partner-economy-dialog header p { color: var(--admin-muted); font-size: 12px; }
+.admin-partner-economy-dialog header > button {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--admin-border-neutral);
+  border-radius: 50%;
+  background: var(--admin-surface-raised);
+  color: var(--admin-text);
+}
+.admin-partner-economy-dialog form { display: grid; gap: 14px; padding: 20px 22px; }
+.admin-partner-economy-fields { display: grid; grid-template-columns: minmax(0,1fr) 150px; gap: 12px; }
+.admin-partner-economy-dialog label { display: grid; gap: 6px; color: var(--admin-muted); font-size: 11px; font-weight: 850; }
+.admin-partner-economy-dialog input,
+.admin-partner-economy-dialog select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--admin-border-neutral);
+  border-radius: 10px;
+  padding: 9px 11px;
+  background: var(--admin-surface-raised);
+  color: var(--admin-text);
+  font: inherit;
+}
+.admin-partner-economy-dialog input:focus-visible,
+.admin-partner-economy-dialog select:focus-visible,
+.admin-partner-economy-dialog button:focus-visible { outline: 2px solid var(--admin-accent); outline-offset: 2px; }
+.admin-partner-economy-dialog input[type="color"] { padding: 5px; cursor: pointer; }
+.admin-partner-economy-toggle {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px !important;
+  padding: 14px;
+  border: 1px solid var(--admin-border-neutral);
+  border-radius: 12px;
+  background: var(--admin-surface-nested);
+  cursor: pointer;
+}
+.admin-partner-economy-toggle input { width: 20px; height: 20px; min-height: 0; accent-color: var(--admin-accent); }
+.admin-partner-economy-toggle strong { display: block; color: var(--admin-text); font-size: 13px; }
+.admin-partner-economy-toggle small { display: block; margin-top: 3px; color: var(--admin-muted); font-weight: 500; }
+.admin-partner-economy-note { padding: 10px 12px; border-left: 3px solid var(--admin-accent); background: rgba(200,255,25,.05); color: var(--admin-muted); font-size: 11px; }
+.admin-partner-economy-dialog .auth-error,
+.admin-partner-economy-dialog .auth-success { margin: 0; padding: 11px 13px; border: 1px solid; border-radius: 10px; font-size: 12px; }
+.admin-partner-economy-dialog .auth-error { border-color: rgba(255,120,104,.35); background: rgba(255,120,104,.09); color: var(--admin-danger); }
+.admin-partner-economy-dialog .auth-success { border-color: rgba(158,216,173,.35); background: rgba(158,216,173,.09); color: var(--admin-success); }
+.admin-partner-economy-dialog footer { display: flex; justify-content: flex-end; gap: 9px; padding-top: 2px; }
+.admin-partner-economy-dialog footer button {
+  min-height: 43px;
+  padding: 0 16px;
+  border: 1px solid var(--admin-border-neutral);
+  border-radius: 10px;
+  background: var(--admin-surface-raised);
+  color: var(--admin-text);
+  font-weight: 850;
+  cursor: pointer;
+}
+.admin-partner-economy-dialog footer .admin-primary-v14 { border-color: var(--admin-accent); background: var(--admin-accent); color: #080a08; }
+.admin-partner-economy-dialog footer button:disabled { opacity: .55; cursor: wait; }
+
+@media(max-width:560px) {
+  .admin-partner-economy-backdrop { align-items: end; padding: 0; }
+  .admin-partner-economy-dialog { max-height: 94dvh; border-radius: 20px 20px 0 0; }
+  .admin-partner-economy-fields { grid-template-columns: 1fr; }
+  .admin-partner-economy-dialog footer { display: grid; }
+  .admin-partner-economy-dialog footer button { width: 100%; }
+}

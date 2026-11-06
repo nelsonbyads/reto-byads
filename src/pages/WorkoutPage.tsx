@@ -9,6 +9,7 @@ import { FilterPanel } from '../components/FilterPanel';
 import { RepDice } from '../components/RepDice';
 import { RollHistory } from '../components/RollHistory';
 import { SessionSummary } from '../components/SessionSummary';
+import { useWorkspace } from '../context/WorkspaceContext';
 import { useExercises } from '../hooks/useExercises';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { useWorkoutRoll } from '../hooks/useWorkoutRoll';
@@ -21,6 +22,8 @@ interface SessionState { exercises: number; reps: number; }
 type FilterKey = keyof ExerciseFilters;
 
 export function WorkoutPage() {
+  const { activeWorkspace } = useWorkspace();
+  const personalWorkspace = activeWorkspace.kind === 'personal';
   const [filters, setFilters] = usePersistentState<ExerciseFilters>('dadofit:filters:v2', EMPTY_FILTERS);
   const [diceLevel, setDiceLevel] = usePersistentState<DiceLevel>('dadofit:dice-level', 'amateur');
   const [session, setSession] = usePersistentState<SessionState>('dadofit:session', { exercises: 0, reps: 0 });
@@ -55,8 +58,8 @@ export function WorkoutPage() {
 
   return (
     <div className="workout-layout workout-layout-v7">
-      <div className="monetized-page-v8">
-        <AdRail side="left" />
+      <div className={`monetized-page-v8${personalWorkspace ? '' : ' workout-operational-v1591'}`}>
+        {personalWorkspace && <AdRail side="left" />}
         <div className="workout-center-v8">
           <AppHeader/>
           <div className="app-shell">
@@ -96,7 +99,7 @@ export function WorkoutPage() {
             <FilterPanel open={filtersOpen} onClose={() => setFiltersOpen(false)} filters={filters} onChange={setFilters} equipment={equipment} bodyParts={bodyParts} targets={targets} count={filtered.length}/>
           </div>
         </div>
-        <AdRail side="right" />
+        {personalWorkspace && <AdRail side="right" />}
       </div>
     </div>
   );

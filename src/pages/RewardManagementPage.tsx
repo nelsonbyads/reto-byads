@@ -1,10 +1,11 @@
-import { BarChart3, Building2, Coins, Edit3, FileUp, Gift, KeyRound, Link2, Pause, Play, Plus, QrCode, RefreshCw, Save, Sparkles, Store, X } from 'lucide-react';
-import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { BarChart3, Building2, Coins, Edit3, FileUp, Gift, KeyRound, Link2, Palette, Pause, Play, Plus, QrCode, RefreshCw, Save, Sparkles, Store, X } from 'lucide-react';
+import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
 import { supabase } from '../lib/supabase';
+import { managementErrorMessage, normalizePartnerIcon, normalizePartnerWorkspaceKind, PARTNER_ICON_KEYS, PARTNER_MARKETPLACE_RPCS, safeRpcInteger } from '../lib/partnerMarketplace';
 
 type FulfillmentType = 'digital_code' | 'digital_benefit' | 'physical_product' | 'in_person';
 type FulfillmentMode = 'generated_code' | 'shared_code' | 'code_pool' | 'redemption_url' | 'instructions_only';
@@ -40,7 +41,6 @@ type RewardForm = {
   title: string;
   description: string;
   rewardType: string;
-  coinCost: string;
   nativeCost: string;
   inventory: string;
   maxPerUser: string;
@@ -60,7 +60,6 @@ const empty: RewardForm = {
   title: '',
   description: '',
   rewardType: 'discount',
-  coinCost: '250',
   nativeCost: '250',
   inventory: '50',
   maxPerUser: '1',
@@ -122,16 +121,26 @@ export function RewardManagementPage() {
   const orgId = activeWorkspace.organizationId;
   const manager = activeWorkspace.role === 'owner' || activeWorkspace.role === 'admin';
   const verified = activeWorkspace.verificationStatus === 'verified';
-  const NativeIcon = activeWorkspace.kind === 'gym' ? Building2 : Sparkles;
+  const partnerWorkspaceKind = normalizePartnerWorkspaceKind(activeWorkspace.kind, activeWorkspace.organizationType);
+  const NativeIcon = partnerWorkspaceKind === 'gym' ? Building2 : Sparkles;
   const [pointConfigs, setPointConfigs] = useState<Map<string, PartnerPointConfig>>(new Map());
-  const pointConfig = resolvePartnerPointConfig(pointConfigs, orgId, activeWorkspace.kind);
+  const pointConfig = resolvePartnerPointConfig(pointConfigs, orgId, partnerWorkspaceKind);
   const [rows, setRows] = useState<RewardRow[]>([]);
   const [form, setForm] = useState<RewardForm>(empty);
   const [editing, setEditing] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [presentation, setPresentation] = useState({ pointsName: '', shortName: '', icon: '', color: '#526073' });
+  const loadGeneration = useRef(0);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+
+  const revealFeedback = () => {
+    requestAnimationFrame(() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  };
 
   const load = useCallback(async () => {
+    const generation = ++loadGeneration.current;
     if (!supabase || !orgId || !manager) {
       setLoading(false);
       return;
@@ -139,7 +148,8 @@ export function RewardManagementPage() {
     setLoading(true);
     setError('');
     const { data, error: e } = await supabase.rpc('provider_list_rewards', { p_organization_id: orgId });
-    if (e) setError(e.message);
+    if (generation !== loadGeneration.current) return;
+    if (e) setError(managementErrorMessage('load'));
     else setRows((data ?? []) as RewardRow[]);
     setLoading(false);
   }, [manager, orgId]);
@@ -147,8 +157,15 @@ export function RewardManagementPage() {
   useEffect(() => { void load(); }, [load]);
   useEffect(() => {
     if (!orgId) return;
-    void loadPartnerPointConfigs([orgId]).then(setPointConfigs);
-  }, [orgId]);
+    let cancelled = false;
+    void loadPartnerPointConfigs([orgId]).then((configs) => {
+      if (cancelled) return;
+      setPointConfigs(configs);
+      const config = resolvePartnerPointConfig(configs, orgId, partnerWorkspaceKind);
+      setPresentation({ pointsName: config.points_name, shortName: config.points_short_name, icon: normalizePartnerIcon(config.points_icon) ?? '', color: config.points_color ?? '#526073' });
+    });
+    return () => { cancelled = true; };
+  }, [orgId, partnerWorkspaceKind]);
 
   const editingRow = useMemo(() => rows.find((row) => row.id === editing) ?? null, [editing, rows]);
   const modeOptions = modesForType(form.fulfillmentType);
@@ -164,7 +181,6 @@ export function RewardManagementPage() {
       title: r.title,
       description: r.description ?? '',
       rewardType: r.reward_type,
-      coinCost: String(r.coin_cost),
       nativeCost: r.native_cost === null ? '' : String(r.native_cost),
       inventory: r.inventory === null ? '' : String(r.inventory),
       maxPerUser: String(r.max_per_user),
@@ -201,16 +217,29 @@ export function RewardManagementPage() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!supabase || !orgId) return;
-    setError('');
+    setError(''); setNotice('');
 
+    let nativeCost: number;
+    let inventory: number | null;
+    let maxPerUser: number;
+    try {
+      nativeCost = safeRpcInteger(form.nativeCost);
+      inventory = form.inventory === '' ? null : safeRpcInteger(form.inventory);
+      maxPerUser = safeRpcInteger(form.maxPerUser);
+    } catch {
+      setError('Los importes y límites deben ser enteros dentro del rango permitido.');
+      revealFeedback();
+      return;
+    }
     const args = {
       p_title: form.title,
       p_description: form.description || null,
       p_reward_type: form.rewardType,
-      p_coin_cost: Number(form.coinCost),
-      p_native_cost: Number(form.nativeCost),
-      p_inventory: form.inventory === '' ? null : Number(form.inventory),
-      p_max_per_user: Number(form.maxPerUser),
+      // Firma legacy requerida por el RPC vigente; no es un precio DC editable ni se usa para cobrar Partner rewards.
+      p_coin_cost: nativeCost,
+      p_native_cost: nativeCost,
+      p_inventory: inventory,
+      p_max_per_user: maxPerUser,
       p_image_url: form.imageUrl || null,
       p_fulfillment_type: form.fulfillmentType,
       p_fulfillment_instructions: form.instructions || null,
@@ -228,17 +257,44 @@ export function RewardManagementPage() {
       : await supabase.rpc('provider_create_reward', { p_organization_id: orgId, ...args });
 
     if (res.error) {
-      setError(res.error.message);
+      setError(`${managementErrorMessage('save')} Detalle: ${res.error.message}`);
+      revealFeedback();
       return;
     }
+    const wasEditing = Boolean(editing);
     reset();
     await load();
+    setNotice(wasEditing ? 'Oferta actualizada correctamente.' : 'Oferta creada correctamente como borrador.');
+    revealFeedback();
+  };
+
+  const savePresentation = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!supabase || !orgId) return;
+    setError(''); setNotice('');
+    const shortName = presentation.shortName.trim().toUpperCase();
+    if (['DC', 'TP', 'XP'].includes(shortName)) {
+      setError(`${shortName} es una abreviatura reservada. Usa GP, SP u otra abreviatura propia.`);
+      revealFeedback();
+      return;
+    }
+    const { error: rpcError } = await supabase.rpc(PARTNER_MARKETPLACE_RPCS.updatePresentation, {
+      p_organization_id: orgId,
+      p_points_name: presentation.pointsName,
+      p_points_short_name: shortName,
+      p_points_icon: presentation.icon || null,
+      p_points_color: presentation.color,
+    });
+    if (rpcError) { setError(managementErrorMessage('presentation')); return; }
+    setNotice('Presentación de Partner Points actualizada.');
+    const configs = await loadPartnerPointConfigs([orgId]);
+    setPointConfigs(configs);
   };
 
   const status = async (id: string, next: string) => {
     if (!supabase) return;
     const { error: e } = await supabase.rpc('provider_set_reward_status', { p_reward_id: id, p_status: next });
-    if (e) alert(e.message);
+    if (e) setError(managementErrorMessage('status'));
     else await load();
   };
 
@@ -252,7 +308,16 @@ export function RewardManagementPage() {
       <div className="provider-hero-actions-v152"><Link to="/rewards/analytics" className="provider-validate-link-v152"><BarChart3 size={17}/> Analytics</Link><Link to="/rewards/validate" className="provider-validate-link-v152"><QrCode size={17}/> Validar canjes</Link><div className="provider-status-v15"><Store size={19}/><span>Estado</span><strong>{verified ? 'VERIFICADO' : 'SIN VERIFICAR'}</strong></div></div>
     </section>
     {!verified && <div className="reward-warning-v15">Puedes preparar borradores, pero la organización debe estar verificada para publicar premios.</div>}
-    {error && <div className="auth-error">{error}</div>}
+    {verified && !pointConfig.enabled && <div className="reward-warning-v15">La organización está verificada, pero su economía Partner está suspendida. Un SuperAdmin puede activarla desde Admin → Organizaciones → Activar economía.</div>}
+    <div ref={feedbackRef}>
+      {error && <div className="auth-error" role="alert">{error}</div>}
+      {notice && <div className="rewards-success-v15" role="status">{notice}</div>}
+    </div>
+
+    <form className="partner-presentation-editor" onSubmit={(event) => void savePresentation(event)}>
+      <header><Palette size={20}/><div><span className="eyebrow">PRESENTACIÓN</span><h2>Identidad de Partner Points</h2><p>Estos cambios no activan ni suspenden la economía.</p></div></header>
+      <div><label>Nombre<input required maxLength={48} value={presentation.pointsName} onChange={(event) => setPresentation({ ...presentation, pointsName: event.target.value })}/></label><label>Abreviatura<input required maxLength={8} value={presentation.shortName} onChange={(event) => setPresentation({ ...presentation, shortName: event.target.value })}/></label><label>Icono permitido<select value={presentation.icon} onChange={(event) => setPresentation({ ...presentation, icon: event.target.value })}><option value="">Predeterminado</option>{PARTNER_ICON_KEYS.map((icon) => <option key={icon} value={icon}>{icon}</option>)}</select></label><label>Color<input type="color" value={presentation.color} onChange={(event) => setPresentation({ ...presentation, color: event.target.value })}/></label><button type="submit"><Save size={16}/>Guardar presentación</button></div>
+    </form>
 
     <div className="reward-management-grid-v15">
       <form className="reward-editor-v15" onSubmit={(e) => void submit(e)}>
@@ -266,7 +331,6 @@ export function RewardManagementPage() {
 
         <div className="reward-form-row-v15">
           <label>Tipo<select value={form.rewardType} onChange={(e) => setForm({ ...form, rewardType: e.target.value })}><option value="discount">Descuento</option><option value="product">Producto</option><option value="gym_pass">Pase de Gym</option><option value="subscription">Suscripción</option><option value="experience">Experiencia</option><option value="other">Otro</option></select></label>
-          <input type="hidden" value={form.coinCost} readOnly/>
         </div>
         <div className="reward-native-cost-eco3"><NativeIcon size={18}/><label>Costo {pointConfig.points_name}<input type="number" min="1" required value={form.nativeCost} onChange={(e) => setForm({ ...form, nativeCost: e.target.value })}/><small>Solo se aceptan {pointConfig.points_name} emitidos por esta organización; los puntos de otras comunidades no aplican.</small></label></div>
 

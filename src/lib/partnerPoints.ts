@@ -15,14 +15,14 @@ export interface PartnerPointFallback {
   points_short_name: string;
   points_icon: null;
   points_color: null;
-  enabled: true;
+  enabled: false;
   competitive_score_name: null;
 }
 
 /** Fallback definido por ECO-4A para organizaciones sin config. */
 export function partnerPointFallback(organizationType?: string | null): PartnerPointFallback {
   void organizationType;
-  return { points_name: 'Partner Points', points_short_name: 'PP', points_icon: null, points_color: null, enabled: true, competitive_score_name: null };
+  return { points_name: 'Partner Points', points_short_name: 'PP', points_icon: null, points_color: null, enabled: false, competitive_score_name: null };
 }
 
 export type ResolvedPartnerPoints = Pick<PartnerPointConfig, 'points_name' | 'points_short_name' | 'points_icon' | 'points_color' | 'enabled' | 'competitive_score_name'>;
@@ -41,19 +41,23 @@ export function resolvePartnerPointConfig(
     const legacyShortNames = new Set(['GP', 'SP', 'TP']);
     const legacyNames = new Set(['Gym Points', 'Sponsor Points', 'Team Points']);
     if (!legacyShortNames.has(config.points_short_name.toUpperCase()) && !legacyNames.has(config.points_name)) return config;
+    const fallback = partnerPointFallback(organizationType);
+    return { ...config, points_name: fallback.points_name, points_short_name: fallback.points_short_name };
   }
   return partnerPointFallback(organizationType);
 }
 
-/** Carga configs en lote para un conjunto de organizaciones. Devuelve un Map vacío si falla. */
+/** Carga únicamente la presentación pública autorizada de cada organización. */
 export async function loadPartnerPointConfigs(organizationIds: string[]): Promise<Map<string, PartnerPointConfig>> {
   const map = new Map<string, PartnerPointConfig>();
   if (!supabase || organizationIds.length === 0) return map;
   const unique = Array.from(new Set(organizationIds.filter(Boolean)));
   if (unique.length === 0) return map;
-  const { data, error } = await supabase.rpc('get_partner_point_configs', { p_organization_ids: unique });
-  if (error || !Array.isArray(data)) return map;
-  for (const row of data as PartnerPointConfig[]) map.set(row.organization_id, row);
+  const results = await Promise.all(unique.map((organizationId) => supabase!.rpc('get_partner_point_config', { p_organization_id: organizationId })));
+  for (const result of results) {
+    if (result.error || !Array.isArray(result.data)) continue;
+    for (const row of result.data as PartnerPointConfig[]) map.set(row.organization_id, row);
+  }
   return map;
 }
 

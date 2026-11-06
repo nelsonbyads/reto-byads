@@ -682,13 +682,15 @@ export function OrganizationChallengesPage() {
   return (
     <div className="profile-shell-v9 organization-challenges-shell-v12">
       <AppHeader />
-      <div className="challenge-center-shell-v1577">
-        <ChallengeCenterNav />
-      </div>
+      {activeWorkspace.kind === "personal" && (
+        <div className="challenge-center-shell-v1577">
+          <ChallengeCenterNav />
+        </div>
+      )}
       <main className="profile-page-v9 organization-challenges-page-v12 challenge-center-main-v1577">
         <div className="organizations-topline-v12">
           <Link className="profile-back-v9" to="/organizations">
-            <ArrowLeft size={16} /> Organizations
+            <ArrowLeft size={16} /> Organizaciones
           </Link>
           {cloudReady && (
             <button
@@ -707,7 +709,7 @@ export function OrganizationChallengesPage() {
             <ShieldCheck size={31} />
           </div>
           <div>
-            <span className="eyebrow">GYM CHALLENGES</span>
+            <span className="eyebrow">RETOS DEL GYM</span>
             <h1>Retos de organizaciones</h1>
             <p>
               Miembros entrenan, managers revisan y cada aprobación puede sumar

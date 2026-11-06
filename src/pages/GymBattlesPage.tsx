@@ -702,8 +702,8 @@ export function GymBattlesPage() {
       <AppHeader />
       <main className="profile-page-v9 gym-battles-page-v121">
         <div className="gym-battles-topline-v121">
-          <Link className="profile-back-v9" to="/app">
-            <ArrowLeft size={16} /> Volver a entrenar
+          <Link className="profile-back-v9" to="/workspace">
+            <ArrowLeft size={16} /> Dashboard del Gym
           </Link>
           {cloudReady && (
             <button

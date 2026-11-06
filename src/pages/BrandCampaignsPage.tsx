@@ -144,6 +144,7 @@ export function BrandCampaignsPage() {
   const [acting, setActing] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const feedbackRef = useRef<HTMLDivElement>(null);
 
   const [campaignName, setCampaignName] = useState('');
   const [campaignDescription, setCampaignDescription] = useState('');
@@ -364,18 +365,30 @@ export function BrandCampaignsPage() {
   };
 
   const closeChallenge = async (challengeId: string) => {
-    if (!supabase || !canManage || !window.confirm('¿Cerrar este Branded Challenge? Los participantes que aún no enviaron evidencia quedarán expirados.')) return;
-    setActing(`close:${challengeId}`); setError('');
+    if (!supabase || !canManage) return;
+    const affected = participants.filter((participant) => participant.challenge_id === challengeId && ['invited', 'accepted', 'rejected', 'submitted', 'pending_audit'].includes(participant.status));
+    const pendingEvidence = affected.filter((participant) => participant.status === 'submitted' || participant.status === 'pending_audit').length;
+    const warning = pendingEvidence > 0
+      ? `\n\nHay ${pendingEvidence} evidencia(s) pendiente(s). Se cancelarán sin revisión y no generarán recompensas.`
+      : '';
+    if (!window.confirm(`¿Cerrar definitivamente este Branded Challenge?${warning}\n\n${affected.length} participación(es) pendiente(s) quedarán expiradas. Las recompensas ya aprobadas se conservarán.`)) return;
+    setActing(`close:${challengeId}`); setError(''); setMessage('');
     const { error: rpcError } = await supabase.rpc('close_sponsored_challenge', { p_challenge_id: challengeId });
     setActing(null);
-    if (rpcError) setError(rpcError.message); else await load();
+    if (rpcError) {
+      setError(`No fue posible cerrar el Branded Challenge: ${rpcError.message}`);
+    } else {
+      setMessage(`Branded Challenge cerrado. ${affected.length} participación(es) pendiente(s) quedaron expiradas.`);
+      await load();
+    }
+    requestAnimationFrame(() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   };
 
   return <div className="profile-shell-v9 brand-campaigns-shell-v13"><AppHeader/><main className="profile-page-v9 brand-campaigns-page-v13">
     <div className="brand-topline-v13"><Link className="profile-back-v9" to="/workspace"><ArrowLeft size={16}/> Dashboard Marca</Link><button type="button" onClick={() => { void load(); }} disabled={loading}><RefreshCw size={15}/> Actualizar</button></div>
     <section className="brand-hero-v13"><div><Megaphone size={32}/></div><span><span className="eyebrow">BRANDS & SPONSORS</span><h1>{activeWorkspace.label}</h1><p>Campañas, retos patrocinados, evidencia y recompensas en un solo workspace.</p></span><ShieldCheck size={24}/></section>
     {!verified && <section className="brand-verification-v13"><ShieldCheck size={20}/><div><strong>Workspace pendiente de verificación</strong><p>Puedes crear borradores, pero activar campañas y publicar retos requiere una Marca verificada.</p></div></section>}
-    {error && <div className="auth-error">{error}</div>}{message && <div className="auth-success">{message}</div>}
+    <div ref={feedbackRef}>{error && <div className="auth-error">{error}</div>}{message && <div className="auth-success">{message}</div>}</div>
 
     <section className="brand-summary-v13 brand-summary-eco1"><article><Megaphone/><span>Campañas</span><strong>{summary.campaigns}</strong></article><article><Play/><span>Activas</span><strong>{summary.active_campaigns}</strong></article><article><Sparkles/><span>Branded Challenges</span><strong>{summary.sponsored_challenges}</strong></article><article><UsersRound/><span>Participantes</span><strong>{summary.participants}</strong></article><article><CheckCircle2/><span>Aprobados</span><strong>{summary.approved}</strong></article><article><Coins/><span>DC entregados</span><strong>{summary.coins_granted.toLocaleString()}</strong></article><article><Sparkles/><span>Partner Points entregados</span><strong>{summary.sp_granted.toLocaleString()}</strong></article></section>
     {canManage && <Link className="brand-governance-shortcut-v133" to="/brand-audit"><ShieldCheck size={19}/><span><strong>Control & Auditoría</strong><small>Configura doble validación, revisa la cola de auditoría y consulta el histórico.</small></span><span>Administrar →</span></Link>}

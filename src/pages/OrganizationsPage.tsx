@@ -280,7 +280,7 @@ export function OrganizationsPage() {
 
         <section className="profile-hero-v9 organizations-hero-v12">
           <div className="profile-avatar-v9"><Building2 size={31}/></div>
-          <div><span className="eyebrow">DADOFIT ORGANIZATIONS</span><h1>Gyms & Organizations</h1><p>{allowedCreationTypes.length > 0 ? 'Crea o administra workspaces, suma miembros y participa en el Competitive Score.' : 'Consulta tus organizaciones, invitaciones, miembros y actividad desde un solo lugar.'}</p></div>
+          <div><span className="eyebrow">DADOFIT · ORGANIZACIONES</span><h1>Organizaciones</h1><p>{allowedCreationTypes.length > 0 ? 'Crea o administra workspaces, suma miembros y participa en el Competitive Score.' : 'Consulta tus organizaciones, invitaciones, miembros y actividad desde un solo lugar.'}</p></div>
           {cloudReady && <div className="organizations-hero-stats-v12"><span><strong>{views.length}</strong> activas</span><span><strong>{totalSponsorPoints.toLocaleString()}</strong> pts</span></div>}
         </section>
 

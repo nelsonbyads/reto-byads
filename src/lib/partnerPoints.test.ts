@@ -8,7 +8,7 @@ import {
 
 describe("Partner Points config", () => {
   it("uses a neutral fallback without exposing legacy currencies", () => {
-    expect(partnerPointFallback("gym")).toMatchObject({ points_name: "Partner Points", points_short_name: "PP" });
+    expect(partnerPointFallback("gym")).toMatchObject({ points_name: "Partner Points", points_short_name: "PP", enabled: false });
   });
 
   it("resolves each organization independently", () => {
@@ -19,8 +19,8 @@ describe("Partner Points config", () => {
   });
 
   it("neutralizes legacy visible currency names", () => {
-    const legacy: PartnerPointConfig = { organization_id: "legacy", points_name: "Sponsor Points", points_short_name: "SP", points_icon: null, points_color: null, enabled: true, competitive_score_name: null };
-    expect(resolvePartnerPointConfig(new Map([[legacy.organization_id, legacy]]), "legacy", "brand")).toMatchObject({ points_name: "Partner Points", points_short_name: "PP" });
+    const legacy: PartnerPointConfig = { organization_id: "legacy", points_name: "Sponsor Points", points_short_name: "SP", points_icon: "star", points_color: "#123456", enabled: true, competitive_score_name: null };
+    expect(resolvePartnerPointConfig(new Map([[legacy.organization_id, legacy]]), "legacy", "brand")).toMatchObject({ points_name: "Partner Points", points_short_name: "PP", enabled: true, points_icon: "star", points_color: "#123456" });
   });
 
   it("formats labels from the resolved configuration", () => {
