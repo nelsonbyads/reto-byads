@@ -18,7 +18,7 @@ const EXPOSED_PG_CLASSES = ['P0', '23', '22', '42501', '40001', '40P01'];
 
 export async function buildApp(config, overrides = {}) {
   const app = Fastify({
-    trustProxy: createTrustProxy(config.trustProxy),
+    trustProxy: createTrustProxy(config.trustProxy, { publicProxies: config.trustPublicProxies }),
     bodyLimit: 1024 * 1024,
     logger: overrides.logger ?? {
       level: process.env.LOG_LEVEL ?? 'info',

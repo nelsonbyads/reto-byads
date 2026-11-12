@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import Fastify from 'fastify';
 import { createTrustProxy, isPrivateAddress } from '../src/trustProxy.js';
 
-async function clientIp(hops, remoteAddress, forwardedFor) {
-  const app = Fastify({ trustProxy: createTrustProxy(hops) });
+async function clientIp(hops, remoteAddress, forwardedFor, options) {
+  const app = Fastify({ trustProxy: createTrustProxy(hops, options) });
   app.get('/ip', (request) => ({ ip: request.ip }));
   const res = await app.inject({
     method: 'GET',
@@ -39,6 +39,15 @@ describe('trustProxy', () => {
 
   it('never trusts more hops than configured', async () => {
     assert.equal(await clientIp(1, '172.18.0.5', '10.0.0.8, 172.18.0.9'), '172.18.0.9');
+  });
+
+  it('behind managed public proxies (Vercel → Render) only when enabled', async () => {
+    // Socket peer = Render's balancer (private); next hop = Vercel's edge (public).
+    const chain = ['10.10.0.2', '198.51.100.9, 76.76.21.21'];
+    assert.equal(await clientIp(2, ...chain), '76.76.21.21');
+    assert.equal(await clientIp(2, ...chain, { publicProxies: true }), '198.51.100.9');
+    // Still bounded by the hop count: a spoofed first entry is not trusted.
+    assert.equal(await clientIp(2, '10.10.0.2', '1.1.1.1, 198.51.100.9, 76.76.21.21', { publicProxies: true }), '198.51.100.9');
   });
 
   it('trusts nothing with 0 hops', async () => {

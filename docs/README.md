@@ -12,6 +12,7 @@ Estos documentos describen el sistema tal como está hoy y deben mantenerse al d
 | [`../DOCKER.md`](../DOCKER.md) | Uso diario de Docker: servicios, comandos, volúmenes y problemas frecuentes |
 | [`DEPLOYMENT.md`](DEPLOYMENT.md) | Configuración, despliegue, AWS, backups, importación desde Supabase y observabilidad |
 | [`DECISIONES_PRODUCCION.md`](DECISIONES_PRODUCCION.md) | Checklist de decisiones para producción en AWS |
+| [`DEPLOY_PILOTO.md`](DEPLOY_PILOTO.md) | Despliegue gratuito del piloto: Vercel + Render + Neon + R2 |
 | [`TESTING.md`](TESTING.md) | Suites de pruebas, CI, datos demo, integridad y carga |
 | [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) | Verificaciones antes de liberar una versión |
 | [`SPEC_MIGRACION_BACKEND_PROPIO.md`](SPEC_MIGRACION_BACKEND_PROPIO.md) | Migración de Supabase al backend propio y registro de cambios posteriores |

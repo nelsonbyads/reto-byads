@@ -64,7 +64,8 @@ describe('loadConfig', () => {
     setEnv({ ...BASE, DATABASE_SSL: 'require' });
     assert.deepEqual(loadConfig().database.ssl, { rejectUnauthorized: false });
     setEnv({ DATABASE_SSL: 'verify-full' });
-    assert.throws(() => loadConfig(), /DATABASE_SSL_CA_FILE is required/);
+    // No CA file: verify against the system trust store (Neon and similar).
+    assert.deepEqual(loadConfig().database.ssl, { rejectUnauthorized: true });
     setEnv({ DATABASE_SSL_CA_FILE: ca });
     const { ssl } = loadConfig().database;
     assert.equal(ssl.rejectUnauthorized, true);

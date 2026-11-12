@@ -62,6 +62,10 @@ export function loadConfig() {
     // from X-Forwarded-For skipping exactly that many trusted hops, so a client
     // cannot spoof it.
     trustProxy: int('API_TRUST_PROXY_HOPS', 1),
+    // Managed platforms (e.g. Vercel → Render) put proxies with PUBLIC
+    // addresses in front of the API; set this to trust the first
+    // API_TRUST_PROXY_HOPS peers regardless of their address.
+    trustPublicProxies: bool('API_TRUST_PUBLIC_PROXIES', false),
     database: {
       connectionString: required('DATABASE_URL'),
       max: int('DATABASE_POOL_MAX', 10),
@@ -72,7 +76,11 @@ export function loadConfig() {
         ? false
         : {
           rejectUnauthorized: databaseSsl === 'verify-full',
-          ...(databaseSsl === 'verify-full' ? { ca: readFileSync(required('DATABASE_SSL_CA_FILE'), 'utf8') } : {}),
+          // Without a CA file the system trust store is used (Neon, managed
+          // providers with public certificates); RDS needs its CA bundle.
+          ...(databaseSsl === 'verify-full' && optional('DATABASE_SSL_CA_FILE', '')
+            ? { ca: readFileSync(required('DATABASE_SSL_CA_FILE'), 'utf8') }
+            : {}),
         },
     },
     auth: {

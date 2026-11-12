@@ -27,7 +27,10 @@ export function isPrivateAddress(address) {
  * proxies. The client IP is then the first untrusted address in
  * X-Forwarded-For, so a client cannot spoof it from the Internet.
  */
-export function createTrustProxy(hops) {
+export function createTrustProxy(hops, { publicProxies = false } = {}) {
   const max = Number.isInteger(hops) && hops > 0 ? hops : 0;
+  // On managed platforms (Vercel in front of Render) the proxies have public
+  // addresses; there the first `hops` peers are trusted whatever their address.
+  if (publicProxies) return (_address, hop) => hop < max;
   return (address, hop) => hop < max && isPrivateAddress(address);
 }

@@ -1,0 +1,64 @@
+# Render Blueprint — DadoFit API for the pilot (frontend on Vercel, database on
+# Neon, files on Cloudflare R2). Render → New → Blueprint → this repository.
+# Values marked `sync: false` are asked for on creation (copy them from
+# infra/.env.pilot); they are never stored in the repository.
+services:
+  - type: web
+    name: dadofit-api
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render routes traffic to $PORT (10000 by default).
+      - key: PORT
+        value: "10000"
+      - key: API_PORT
+        value: "10000"
+      # Public URL of the Vercel frontend (e-mail links, secure cookies).
+      - key: APP_PUBLIC_URL
+        sync: false
+      # postgresql://dadofit_api:<API_DB_PASSWORD>@<neon-host>/neondb?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: verify-full
+      - key: API_JWT_SECRET
+        sync: false
+      # Vercel's edge → Render's balancer → API.
+      - key: API_TRUST_PROXY_HOPS
+        value: "2"
+      - key: API_TRUST_PUBLIC_PROXIES
+        value: "true"
+      # Pilot: accounts work without e-mail confirmation. No SMTP provider yet,
+      # so password-recovery e-mails are not delivered (they are logged).
+      - key: AUTH_REQUIRE_EMAIL_CONFIRMATION
+        value: "false"
+      - key: SMTP_HOST
+        value: localhost
+      - key: SMTP_PORT
+        value: "25"
+      - key: SMTP_FROM
+        value: DadoFit Piloto <no-reply@dadofit.local>
+      # Files on Cloudflare R2 (S3-compatible).
+      - key: STORAGE_DRIVER
+        value: s3
+      - key: S3_REGION
+        value: auto
+      - key: S3_FORCE_PATH_STYLE
+        value: "true"
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
