@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import { useAuth } from '../auth/AuthContext';
 
 export function PlatformAdminRoute({ children }: { children: ReactNode }) {
@@ -11,11 +11,11 @@ export function PlatformAdminRoute({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     const check = async () => {
-      if (!user || user.provider !== 'supabase' || !supabase) {
+      if (!user || user.provider !== 'cloud' || !backend) {
         if (active) { setAllowed(false); setLoading(false); }
         return;
       }
-      const { data, error } = await supabase.rpc('is_platform_admin', { p_user_id: user.id });
+      const { data, error } = await backend.rpc('is_platform_admin', { p_user_id: user.id });
       if (active) { setAllowed(!error && data === true); setLoading(false); }
     };
     void check();

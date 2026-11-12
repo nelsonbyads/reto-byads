@@ -19,7 +19,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { ChallengeCenterNav } from '../components/ChallengeCenterNav';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
+import { formatShortDateTime as formatDate, formatFileSize as formatBytes } from '../lib/format';
 
 interface ChallengeRow {
   id: string;
@@ -100,23 +101,6 @@ function isExpired(view: ChallengeView) {
   );
 }
 
-function formatDate(value: string | null) {
-  if (!value) return '—';
-  try {
-    return new Intl.DateTimeFormat('es-CO', {
-      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
-function formatBytes(bytes: number | null) {
-  if (!bytes) return '';
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function initials(profile: PublicProfile | null) {
   const name = profile?.display_name?.trim() || profile?.username || 'DF';
   return name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'DF';
@@ -144,8 +128,8 @@ function ChallengeEvidence({ view, onChanged }: { view: ChallengeView; onChanged
   const canReview = view.direction === 'sent' && participant.status === 'submitted';
 
   const loadEvidence = useCallback(async () => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     setLoading(true);
     setError('');
 
@@ -177,7 +161,7 @@ function ChallengeEvidence({ view, onChanged }: { view: ChallengeView; onChanged
   const upload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
-    if (!file || !user || user.provider !== 'supabase' || !supabase || !canUpload) return;
+    if (!file || !user || user.provider !== 'cloud' || !backend || !canUpload) return;
 
     if (file.size > 50 * 1024 * 1024) {
       setError('El archivo supera el límite de 50 MB.');
@@ -191,7 +175,7 @@ function ChallengeEvidence({ view, onChanged }: { view: ChallengeView; onChanged
       return;
     }
 
-    const client = supabase;
+    const client = backend;
     setUploading(true);
     setError('');
     setMessage('');
@@ -231,8 +215,8 @@ function ChallengeEvidence({ view, onChanged }: { view: ChallengeView; onChanged
   };
 
   const removeEvidence = async (item: EvidenceView) => {
-    if (!supabase || !canUpload || !window.confirm('¿Eliminar esta evidencia antes de enviarla?')) return;
-    const client = supabase;
+    if (!backend || !canUpload || !window.confirm('¿Eliminar esta evidencia antes de enviarla?')) return;
+    const client = backend;
     setError('');
     const { error: dbError } = await client.from('challenge_evidence').delete().eq('id', item.id);
     if (dbError) {
@@ -244,8 +228,8 @@ function ChallengeEvidence({ view, onChanged }: { view: ChallengeView; onChanged
   };
 
   const submit = async () => {
-    if (!supabase || !canSubmit) return;
-    const client = supabase;
+    if (!backend || !canSubmit) return;
+    const client = backend;
     setSubmitting(true);
     setError('');
     setMessage('');
@@ -260,8 +244,8 @@ function ChallengeEvidence({ view, onChanged }: { view: ChallengeView; onChanged
   };
 
   const review = async (decision: 'approved' | 'rejected') => {
-    if (!supabase || !canReview) return;
-    const client = supabase;
+    if (!backend || !canReview) return;
+    const client = backend;
     setReviewing(true);
     setError('');
     setMessage('');
@@ -347,8 +331,8 @@ function ChallengeCard({ view, onChanged }: { view: ChallengeView; onChanged: ()
   const received = view.direction === 'received';
 
   const respond = async (accept: boolean) => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     setActing(true);
     setError('');
     const { error: rpcError } = await client.rpc('respond_direct_challenge', {
@@ -417,18 +401,18 @@ function ChallengeCard({ view, onChanged }: { view: ChallengeView; onChanged: ()
 export function ChallengesPage() {
   const { user } = useAuth();
   const [views, setViews] = useState<ChallengeView[]>([]);
-  const [loading, setLoading] = useState(user?.provider === 'supabase');
+  const [loading, setLoading] = useState(user?.provider === 'cloud');
   const [error, setError] = useState('');
   const [tab, setTab] = useState<'received' | 'sent'>('received');
 
-  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+  const cloudReady = user?.provider === 'cloud' && Boolean(backend);
 
   const load = useCallback(async () => {
-    if (!user || user.provider !== 'supabase' || !supabase) {
+    if (!user || user.provider !== 'cloud' || !backend) {
       setLoading(false);
       return;
     }
-    const client = supabase;
+    const client = backend;
     setLoading(true);
     setError('');
 

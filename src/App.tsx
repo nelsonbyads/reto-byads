@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { useWorkspace, workspaceHome, type WorkspaceKind } from './context/WorkspaceContext';
@@ -22,33 +22,33 @@ import './styles/v15.7.13-account-security.css';
 import './styles/v15.7.15-eco3-marketplace.css';
 import './styles/v15.8-fitness-premium.css';
 import './styles/v15.8.1-global-visual-system.css';
-import { AdminPage } from './pages/AdminPage';
-import { BrandAuditPage } from './pages/BrandAuditPage';
-import { BrandCampaignsPage } from './pages/BrandCampaignsPage';
-import { BrandCompetitionsPage } from './pages/BrandCompetitionsPage';
-import { ChallengesPage } from './pages/ChallengesPage';
-import { BusinessSetupPage } from './pages/BusinessSetupPage';
-import { ContactPage } from './pages/ContactPage';
-import { GymbrosPage } from './pages/GymbrosPage';
-import { GymBattlesPage } from './pages/GymBattlesPage';
-import { LegalPage } from './pages/LegalPage';
+const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
+const BrandAuditPage = lazy(() => import('./pages/BrandAuditPage').then((m) => ({ default: m.BrandAuditPage })));
+const BrandCampaignsPage = lazy(() => import('./pages/BrandCampaignsPage').then((m) => ({ default: m.BrandCampaignsPage })));
+const BrandCompetitionsPage = lazy(() => import('./pages/BrandCompetitionsPage').then((m) => ({ default: m.BrandCompetitionsPage })));
+const ChallengesPage = lazy(() => import('./pages/ChallengesPage').then((m) => ({ default: m.ChallengesPage })));
+const BusinessSetupPage = lazy(() => import('./pages/BusinessSetupPage').then((m) => ({ default: m.BusinessSetupPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then((m) => ({ default: m.ContactPage })));
+const GymbrosPage = lazy(() => import('./pages/GymbrosPage').then((m) => ({ default: m.GymbrosPage })));
+const GymBattlesPage = lazy(() => import('./pages/GymBattlesPage').then((m) => ({ default: m.GymBattlesPage })));
+const LegalPage = lazy(() => import('./pages/LegalPage').then((m) => ({ default: m.LegalPage })));
 import { LoginPage } from './pages/LoginPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
-import { NotificationsPage } from './pages/NotificationsPage';
-import { OrganizationChallengesPage } from './pages/OrganizationChallengesPage';
-import { OrganizationsPage } from './pages/OrganizationsPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { RewardsMarketplacePage } from './pages/RewardsMarketplacePage';
-import { RewardManagementPage } from './pages/RewardManagementPage';
-import { RewardAnalyticsPage } from './pages/RewardAnalyticsPage';
-import { RewardValidationPage } from './pages/RewardValidationPage';
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage').then((m) => ({ default: m.NotificationsPage })));
+const OrganizationChallengesPage = lazy(() => import('./pages/OrganizationChallengesPage').then((m) => ({ default: m.OrganizationChallengesPage })));
+const OrganizationsPage = lazy(() => import('./pages/OrganizationsPage').then((m) => ({ default: m.OrganizationsPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
+const RewardsMarketplacePage = lazy(() => import('./pages/RewardsMarketplacePage').then((m) => ({ default: m.RewardsMarketplacePage })));
+const RewardManagementPage = lazy(() => import('./pages/RewardManagementPage').then((m) => ({ default: m.RewardManagementPage })));
+const RewardAnalyticsPage = lazy(() => import('./pages/RewardAnalyticsPage').then((m) => ({ default: m.RewardAnalyticsPage })));
+const RewardValidationPage = lazy(() => import('./pages/RewardValidationPage').then((m) => ({ default: m.RewardValidationPage })));
 import { RegisterPage } from './pages/RegisterPage';
-import { SponsoredChallengesPage } from './pages/SponsoredChallengesPage';
-import { SeasonHubPage } from './pages/SeasonHubPage';
-import { SquadsPage } from './pages/SquadsPage';
+const SponsoredChallengesPage = lazy(() => import('./pages/SponsoredChallengesPage').then((m) => ({ default: m.SponsoredChallengesPage })));
+const SeasonHubPage = lazy(() => import('./pages/SeasonHubPage').then((m) => ({ default: m.SeasonHubPage })));
+const SquadsPage = lazy(() => import('./pages/SquadsPage').then((m) => ({ default: m.SquadsPage })));
 import { WorkoutPage } from './pages/WorkoutPage';
-import { WorkspaceHomePage } from './pages/WorkspaceHomePage';
+const WorkspaceHomePage = lazy(() => import('./pages/WorkspaceHomePage').then((m) => ({ default: m.WorkspaceHomePage })));
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading, recoveryMode } = useAuth();
@@ -72,7 +72,7 @@ function WorkspaceRedirect() {
   if (recoveryMode) return <Navigate to="/reset-password" replace/>;
   if (!user) return <Navigate to="/login" replace/>;
   if (loading) return <main className="auth-loading">Cargando workspace…</main>;
-  if (user.provider === 'supabase' && needsBusinessSetup && (signupIntent === 'gym' || signupIntent === 'brand')) return <Navigate to={`/business-setup?type=${signupIntent}`} replace/>;
+  if (user.provider === 'cloud' && needsBusinessSetup && (signupIntent === 'gym' || signupIntent === 'brand')) return <Navigate to={`/business-setup?type=${signupIntent}`} replace/>;
   return <Navigate to={workspaceHome(activeWorkspace)} replace/>;
 }
 
@@ -80,6 +80,7 @@ export default function App() {
   const { loading } = useAuth();
   if (loading) return <main className="auth-loading">Conectando DadoFit…</main>;
   return <>
+    <Suspense fallback={<main className="auth-loading">Cargando…</main>}>
     <Routes>
       <Route path="/" element={<WorkspaceRedirect/>}/>
       <Route path="/login" element={<LoginPage/>}/>
@@ -116,6 +117,7 @@ export default function App() {
       <Route path="/dashboard" element={<Navigate to="/" replace/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>
     </Routes>
+    </Suspense>
     <SiteFooter/>
   </>;
 }

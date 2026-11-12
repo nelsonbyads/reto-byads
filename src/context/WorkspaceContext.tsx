@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 
 export type SignupIntent = 'personal' | 'gym' | 'brand';
 export type WorkspaceKind = 'personal' | 'gym' | 'brand';
@@ -92,7 +92,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refresh = useCallback(async (preferredWorkspaceId?: string) => {
-    if (!user || user.provider !== 'supabase' || !supabase) {
+    if (!user || user.provider !== 'cloud' || !backend) {
       setSignupIntent('personal');
       setCapabilities(EMPTY_CAPABILITIES);
       setWorkspaces([PERSONAL_WORKSPACE]);
@@ -103,7 +103,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
     setError('');
-    const { data, error: rpcError } = await supabase.rpc('get_dadofit_workspace_context');
+    const { data, error: rpcError } = await backend.rpc('get_dadofit_workspace_context');
     if (rpcError) {
       setError(rpcError.message);
       setWorkspaces([PERSONAL_WORKSPACE]);

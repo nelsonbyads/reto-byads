@@ -1,480 +1,28 @@
-import {
-  ArrowLeft,
-  Building2,
-  Check,
-  Clock3,
-  Coins,
-  FileVideo2,
-  Image as ImageIcon,
-  RefreshCw,
-  Send,
-  ShieldCheck,
-  Swords,
-  Trophy,
-  Upload,
-  X,
-} from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from "react";
+import { ArrowLeft } from "lucide-react";
+import { Building2 } from "lucide-react";
+import { Check } from "lucide-react";
+import { Clock3 } from "lucide-react";
+import { Coins } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { Swords } from "lucide-react";
+import { Trophy } from "lucide-react";
+import { X } from "lucide-react";
+import { useCallback } from "react";
+import { useEffect } from "react";
+import { useMemo } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../components/AppHeader";
 import { useAuth } from "../auth/AuthContext";
-import { supabase } from "../lib/supabase";
+import { backend } from "../lib/backend";
 import { dcBlockReasonLabel } from "../lib/dcBlockReason";
-import {
-  loadPartnerPointConfigs,
-  resolvePartnerPointConfig,
-  type PartnerPointConfig,
-} from "../lib/partnerPoints";
-
-interface BattleRow {
-  id: string;
-  challenge_id: string;
-  challenger_organization_id: string;
-  challenged_organization_id: string;
-  created_by_user_id: string;
-  accepted_by_user_id: string | null;
-  status:
-    "pending" | "active" | "completed" | "declined" | "expired" | "cancelled";
-  response_expires_at: string;
-  starts_at: string | null;
-  expires_at: string | null;
-  completed_at: string | null;
-  winner_organization_id: string | null;
-  created_at: string;
-}
-
-interface ChallengeRow {
-  id: string;
-  status: string;
-  exercise_name: string;
-  reps: number;
-  dice_level: string;
-  starts_at: string;
-  expires_at: string | null;
-  reward_coins: number;
-  reward_xp: number;
-  sponsor_points: number;
-}
-
-interface ParticipantRow {
-  id: string;
-  challenge_id: string;
-  user_id: string;
-  organization_id: string | null;
-  status: string;
-  invited_at: string;
-  accepted_at: string | null;
-  submitted_at: string | null;
-  completed_at: string | null;
-  rewarded_at: string | null;
-  reward_coins_granted: number;
-  reward_xp_granted: number;
-  sponsor_points_granted: number;
-  reward_block_reason: string | null;
-  dc_block_reason: string | null;
-}
-
-interface OrganizationRow {
-  id: string;
-  name: string;
-  logo_url: string | null;
-  organization_type: string;
-}
-
-interface MembershipRow {
-  organization_id: string;
-  role: "owner" | "admin" | "coach" | "member";
-  status: string;
-}
-
-interface ProfileRow {
-  id: string;
-  username: string | null;
-  display_name: string;
-  avatar_url: string | null;
-}
-
-interface EvidenceRow {
-  id: string;
-  participant_id: string;
-  evidence_kind: "image" | "video";
-  storage_path: string;
-  file_name: string | null;
-  size_bytes: number | null;
-  created_at: string;
-}
-
-interface EvidenceView extends EvidenceRow {
-  signedUrl: string | null;
-}
-
-function formatDate(value: string | null) {
-  if (!value) return "—";
-  try {
-    return new Intl.DateTimeFormat("es-CO", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
-function formatBytes(value: number | null) {
-  if (!value) return "";
-  if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} KB`;
-  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function participantStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    accepted: "Participando",
-    declined: "No participa",
-    submitted: "En revisión",
-    approved: "Aprobado",
-    rejected: "Nueva evidencia",
-    expired: "Expirado",
-  };
-  return labels[status] ?? status;
-}
-
-function battleStatusLabel(status: BattleRow["status"]) {
-  const labels: Record<BattleRow["status"], string> = {
-    pending: "Esperando respuesta",
-    active: "Batalla activa",
-    completed: "Finalizada",
-    declined: "Rechazada",
-    expired: "Expirada",
-    cancelled: "Cancelada",
-  };
-  return labels[status];
-}
-
-function initials(profile: ProfileRow | undefined) {
-  const name = profile?.display_name?.trim() || profile?.username || "DF";
-  return (
-    name
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase())
-      .join("") || "DF"
-  );
-}
-
-function GymBattleEvidence({
-  participant,
-  canUpload,
-  canReview,
-  onChanged,
-}: {
-  participant: ParticipantRow;
-  canUpload: boolean;
-  canReview: boolean;
-  onChanged: () => Promise<void>;
-}) {
-  const { user } = useAuth();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [items, setItems] = useState<EvidenceView[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [acting, setActing] = useState(false);
-  const [notes, setNotes] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  const load = useCallback(async () => {
-    if (!supabase) return;
-    const client = supabase;
-    setLoading(true);
-    setError("");
-    const { data, error: evidenceError } = await client
-      .from("challenge_evidence")
-      .select(
-        "id, participant_id, evidence_kind, storage_path, file_name, size_bytes, created_at",
-      )
-      .eq("participant_id", participant.id)
-      .order("created_at", { ascending: false });
-
-    if (evidenceError) {
-      setError(evidenceError.message);
-      setLoading(false);
-      return;
-    }
-
-    const rows = (data ?? []) as EvidenceRow[];
-    const hydrated = await Promise.all(
-      rows.map(async (row): Promise<EvidenceView> => {
-        const { data: signed } = await client.storage
-          .from("challenge-evidence")
-          .createSignedUrl(row.storage_path, 3600);
-        return { ...row, signedUrl: signed?.signedUrl ?? null };
-      }),
-    );
-    setItems(hydrated);
-    setLoading(false);
-  }, [participant.id]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const upload = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (
-      !file ||
-      !user ||
-      user.provider !== "supabase" ||
-      !supabase ||
-      !canUpload
-    )
-      return;
-    if (file.size > 50 * 1024 * 1024) {
-      setError("El archivo supera el límite de 50 MB.");
-      return;
-    }
-    const isImage = file.type.startsWith("image/");
-    const isVideo = file.type.startsWith("video/");
-    if (!isImage && !isVideo) {
-      setError("Sube una imagen o video compatible.");
-      return;
-    }
-
-    const client = supabase;
-    setUploading(true);
-    setError("");
-    setMessage("");
-    const safeName =
-      file.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-100) || "evidence";
-    const path = `${user.id}/${participant.id}/${crypto.randomUUID()}-${safeName}`;
-    const { error: storageError } = await client.storage
-      .from("challenge-evidence")
-      .upload(path, file, { contentType: file.type, upsert: false });
-    if (storageError) {
-      setUploading(false);
-      setError(storageError.message);
-      return;
-    }
-
-    const { error: rowError } = await client.from("challenge_evidence").insert({
-      participant_id: participant.id,
-      evidence_kind: isImage ? "image" : "video",
-      storage_path: path,
-      file_name: file.name,
-      mime_type: file.type,
-      size_bytes: file.size,
-    });
-    if (rowError) {
-      await client.storage.from("challenge-evidence").remove([path]);
-      setUploading(false);
-      setError(rowError.message);
-      return;
-    }
-    setUploading(false);
-    setMessage("Evidencia cargada. Ya puedes enviarla a revisión.");
-    await load();
-  };
-
-  const remove = async (item: EvidenceView) => {
-    if (!supabase || !canUpload || !window.confirm("¿Eliminar esta evidencia?"))
-      return;
-    const client = supabase;
-    const { error: dbError } = await client
-      .from("challenge_evidence")
-      .delete()
-      .eq("id", item.id);
-    if (dbError) {
-      setError(dbError.message);
-      return;
-    }
-    await client.storage.from("challenge-evidence").remove([item.storage_path]);
-    await load();
-  };
-
-  const submit = async () => {
-    if (!supabase || !canUpload || items.length === 0) return;
-    setActing(true);
-    setError("");
-    setMessage("");
-    const { error: rpcError } = await supabase.rpc(
-      "submit_organization_battle",
-      { p_participant_id: participant.id },
-    );
-    setActing(false);
-    if (rpcError) {
-      setError(rpcError.message);
-      return;
-    }
-    setMessage("Evidencia enviada al Gym rival.");
-    await onChanged();
-  };
-
-  const review = async (decision: "approved" | "rejected") => {
-    if (!supabase || !canReview) return;
-    setActing(true);
-    setError("");
-    setMessage("");
-    const { data, error: rpcError } = await supabase.rpc(
-      "review_organization_battle",
-      {
-        p_participant_id: participant.id,
-        p_decision: decision,
-        p_notes: notes.trim() || null,
-      },
-    );
-    setActing(false);
-    if (rpcError) {
-      setError(rpcError.message);
-      return;
-    }
-    const result = data as {
-      reward_blocked?: boolean;
-      coins_granted?: number;
-      xp_granted?: number;
-      sponsor_points?: number;
-    } | null;
-    if (decision === "rejected")
-      setMessage(
-        "Evidencia rechazada. El participante deberá subir una nueva.",
-      );
-    else if (result?.reward_blocked)
-      setMessage(
-        "Aporte aprobado sin recompensa adicional por política anti-farming.",
-      );
-    else
-      setMessage(
-        `Aprobado: +${result?.coins_granted ?? 25} DC · +${result?.xp_granted ?? 50} XP · +${result?.sponsor_points ?? 100} Partner Points.`,
-      );
-    await onChanged();
-  };
-
-  return (
-    <div className="gym-battle-evidence-v121">
-      <div className="gym-battle-evidence-head-v121">
-        <strong>Evidencia</strong>
-        {canUpload && (
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-          >
-            <Upload size={15} />
-            {uploading ? "Subiendo…" : "Agregar"}
-          </button>
-        )}
-        <input
-          ref={inputRef}
-          className="sr-only"
-          type="file"
-          accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
-          onChange={(event) => {
-            void upload(event);
-          }}
-        />
-      </div>
-      {error && <div className="auth-error">{error}</div>}
-      {message && <div className="auth-success">{message}</div>}
-      {loading ? (
-        <p className="gym-battle-muted-v121">Cargando evidencia…</p>
-      ) : items.length === 0 ? (
-        <p className="gym-battle-muted-v121">Aún no hay evidencia.</p>
-      ) : (
-        <div className="gym-battle-evidence-list-v121">
-          {items.map((item) => (
-            <article key={item.id}>
-              <div className="gym-battle-evidence-preview-v121">
-                {item.signedUrl && item.evidence_kind === "image" ? (
-                  <img src={item.signedUrl} alt="" />
-                ) : item.signedUrl ? (
-                  <video src={item.signedUrl} controls preload="metadata" />
-                ) : item.evidence_kind === "image" ? (
-                  <ImageIcon />
-                ) : (
-                  <FileVideo2 />
-                )}
-              </div>
-              <div>
-                <strong>{item.file_name || "Evidencia"}</strong>
-                <small>
-                  {formatBytes(item.size_bytes)} · {formatDate(item.created_at)}
-                </small>
-              </div>
-              {canUpload && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    void remove(item);
-                  }}
-                  aria-label="Eliminar evidencia"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </article>
-          ))}
-        </div>
-      )}
-      {canUpload && (
-        <button
-          className="gym-battle-submit-v121"
-          type="button"
-          onClick={() => {
-            void submit();
-          }}
-          disabled={acting || items.length === 0}
-        >
-          <Send size={15} />
-          {participant.status === "rejected"
-            ? "Volver a enviar"
-            : "Enviar al Gym rival"}
-        </button>
-      )}
-      {canReview && (
-        <div className="gym-battle-review-v121">
-          <label>
-            Comentario opcional
-            <textarea
-              rows={2}
-              maxLength={500}
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-            />
-          </label>
-          <div>
-            <button
-              type="button"
-              className="reject"
-              onClick={() => {
-                void review("rejected");
-              }}
-              disabled={acting}
-            >
-              <X size={15} /> Pedir otra evidencia
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                void review("approved");
-              }}
-              disabled={acting}
-            >
-              <Check size={15} /> Aprobar +100 Partner Points
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+import { loadPartnerPointConfigs } from "../lib/partnerPoints";
+import { resolvePartnerPointConfig } from "../lib/partnerPoints";
+import { type PartnerPointConfig } from "../lib/partnerPoints";
+import { formatShortDateTime as formatDate } from "../lib/format";
+import { BattleRow, ChallengeRow, MembershipRow, OrganizationRow, ParticipantRow, ProfileRow, battleStatusLabel, initials, participantStatusLabel } from "./gymBattles/model";
+import { GymBattleEvidence } from "./gymBattles/GymBattleEvidence";
 
 export function GymBattlesPage() {
   const { user } = useAuth();
@@ -492,19 +40,19 @@ export function GymBattlesPage() {
     new Map(),
   );
   const [tab, setTab] = useState<"active" | "history">("active");
-  const [loading, setLoading] = useState(user?.provider === "supabase");
+  const [loading, setLoading] = useState(user?.provider === "cloud");
   const [acting, setActing] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  const cloudReady = user?.provider === "supabase" && Boolean(supabase);
+  const cloudReady = user?.provider === "cloud" && Boolean(backend);
 
   const load = useCallback(async () => {
-    if (!user || user.provider !== "supabase" || !supabase) {
+    if (!user || user.provider !== "cloud" || !backend) {
       setLoading(false);
       return;
     }
-    const client = supabase;
+    const client = backend;
     setLoading(true);
     setError("");
 
@@ -651,11 +199,11 @@ export function GymBattlesPage() {
   const current = tab === "active" ? activeBattles : historyBattles;
 
   const respond = async (battleId: string, accept: boolean) => {
-    if (!supabase) return;
+    if (!backend) return;
     setActing(`respond:${battleId}`);
     setError("");
     setMessage("");
-    const { error: rpcError } = await supabase.rpc(
+    const { error: rpcError } = await backend.rpc(
       "respond_organization_battle",
       { p_battle_id: battleId, p_accept: accept },
     );
@@ -673,9 +221,9 @@ export function GymBattlesPage() {
   };
 
   const declineContribution = async (participantId: string) => {
-    if (!supabase || !window.confirm("¿No participar en esta batalla?")) return;
+    if (!backend || !window.confirm("¿No participar en esta batalla?")) return;
     setActing(`decline:${participantId}`);
-    const { error: rpcError } = await supabase.rpc(
+    const { error: rpcError } = await backend.rpc(
       "decline_organization_battle_participation",
       { p_participant_id: participantId },
     );
@@ -685,10 +233,10 @@ export function GymBattlesPage() {
   };
 
   const finalize = async (battleId: string) => {
-    if (!supabase) return;
+    if (!backend) return;
     setActing(`finalize:${battleId}`);
     setError("");
-    const { error: rpcError } = await supabase.rpc(
+    const { error: rpcError } = await backend.rpc(
       "finalize_organization_battle",
       { p_battle_id: battleId },
     );

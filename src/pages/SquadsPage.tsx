@@ -24,7 +24,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { ChallengeCenterNav } from '../components/ChallengeCenterNav';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
+import { formatShortDateTime as formatDate, formatFileSize as formatBytes } from '../lib/format';
 
 interface SquadRow {
   id: string;
@@ -144,21 +145,6 @@ function profileName(profile: PublicProfile | null | undefined) {
   return profile?.display_name?.trim() || profile?.username || 'Gymbro';
 }
 
-function formatDate(value: string | null) {
-  if (!value) return '—';
-  try {
-    return new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
-function formatBytes(bytes: number | null) {
-  if (!bytes) return '';
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function battleStatusLabel(status: BattleRow['status']) {
   const labels: Record<BattleRow['status'], string> = {
     pending: 'Esperando rival',
@@ -187,7 +173,7 @@ function battleExpired(view: BattleView) {
   return Boolean(view.battle.expires_at && new Date(view.battle.expires_at).getTime() <= Date.now());
 }
 
-async function evidenceWithUrls(client: NonNullable<typeof supabase>, participantId: string): Promise<EvidenceView[]> {
+async function evidenceWithUrls(client: NonNullable<typeof backend>, participantId: string): Promise<EvidenceView[]> {
   const { data, error } = await client
     .from('challenge_evidence')
     .select('id, participant_id, evidence_kind, storage_path, file_name, mime_type, size_bytes, created_at')
@@ -232,8 +218,8 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
   const canPrepare = ['accepted', 'rejected'].includes(participant.status);
 
   const loadEvidence = useCallback(async () => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     setLoading(true);
     try {
       setItems(await evidenceWithUrls(client, participant.id));
@@ -249,7 +235,7 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
   const upload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
-    if (!file || !user || user.provider !== 'supabase' || !supabase || !canPrepare) return;
+    if (!file || !user || user.provider !== 'cloud' || !backend || !canPrepare) return;
     if (file.size > 50 * 1024 * 1024) {
       setError('El archivo supera el límite de 50 MB.');
       return;
@@ -259,7 +245,7 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
       return;
     }
 
-    const client = supabase;
+    const client = backend;
     setUploading(true);
     setError('');
     setMessage('');
@@ -294,8 +280,8 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
   };
 
   const submit = async () => {
-    if (!supabase || items.length === 0 || !canPrepare) return;
-    const client = supabase;
+    if (!backend || items.length === 0 || !canPrepare) return;
+    const client = backend;
     setActing(true);
     setError('');
     setMessage('');
@@ -310,8 +296,8 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
   };
 
   const decline = async () => {
-    if (!supabase || !canPrepare || !window.confirm('¿No participar en esta batalla? Tu Squad no recibirá Competitive Score por tu participación.')) return;
-    const client = supabase;
+    if (!backend || !canPrepare || !window.confirm('¿No participar en esta batalla? Tu Squad no recibirá Competitive Score por tu participación.')) return;
+    const client = backend;
     setActing(true);
     setError('');
     const { error: rpcError } = await client.rpc('decline_group_challenge_participation', { p_participant_id: participant.id });
@@ -343,7 +329,7 @@ function MyBattleParticipation({ participant, challenge, onChanged }: { particip
   );
 }
 
-function ReviewSubmission({ participant, profile, challenge, onChanged }: { participant: ParticipantRow; profile: PublicProfile | null; challenge: ChallengeRow; onChanged: () => Promise<void> }) {
+function ReviewSubmission({ participant, profile, onChanged }: { participant: ParticipantRow; profile: PublicProfile | null; challenge: ChallengeRow; onChanged: () => Promise<void> }) {
   const [items, setItems] = useState<EvidenceView[]>([]);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
@@ -351,8 +337,8 @@ function ReviewSubmission({ participant, profile, challenge, onChanged }: { part
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     let active = true;
     void evidenceWithUrls(client, participant.id)
       .then((records) => { if (active) setItems(records); })
@@ -362,8 +348,8 @@ function ReviewSubmission({ participant, profile, challenge, onChanged }: { part
   }, [participant.id]);
 
   const review = async (decision: 'approved' | 'rejected') => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     setReviewing(true);
     setError('');
     const { error: rpcError } = await client.rpc('review_group_challenge', {
@@ -398,7 +384,7 @@ function ReviewSubmission({ participant, profile, challenge, onChanged }: { part
 export function SquadsPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<'squads' | 'battles'>('squads');
-  const [loading, setLoading] = useState(user?.provider === 'supabase');
+  const [loading, setLoading] = useState(user?.provider === 'cloud');
   const [refreshing, setRefreshing] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
   const [memberships, setMemberships] = useState<SquadMembershipView[]>([]);
@@ -413,7 +399,7 @@ export function SquadsPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+  const cloudReady = user?.provider === 'cloud' && Boolean(backend);
   const activeMemberships = useMemo(() => memberships.filter((item) => item.status === 'active'), [memberships]);
   const invitations = useMemo(() => memberships.filter((item) => item.status === 'invited'), [memberships]);
   const activeMembershipByGroup = useMemo(() => new Map(activeMemberships.map((item) => [item.group_id, item])), [activeMemberships]);
@@ -423,11 +409,11 @@ export function SquadsPage() {
   const selectedMemberIds = useMemo(() => new Set(selectedMembers.filter((item) => ['active', 'invited'].includes(item.status)).map((item) => item.user_id)), [selectedMembers]);
 
   const loadSquads = useCallback(async () => {
-    if (!user || user.provider !== 'supabase' || !supabase) {
+    if (!user || user.provider !== 'cloud' || !backend) {
       setLoading(false);
       return;
     }
-    const client = supabase;
+    const client = backend;
     const { data: membershipData, error: membershipError } = await client
       .from('group_members')
       .select('group_id, user_id, role, status, joined_at')
@@ -455,8 +441,8 @@ export function SquadsPage() {
   }, [user]);
 
   const loadBattles = useCallback(async () => {
-    if (!user || user.provider !== 'supabase' || !supabase) return;
-    const client = supabase;
+    if (!user || user.provider !== 'cloud' || !backend) return;
+    const client = backend;
     const { data: battleData, error: battleError } = await client
       .from('group_battles')
       .select('id, challenge_id, challenger_group_id, challenged_group_id, created_by_user_id, accepted_by_user_id, status, response_expires_at, starts_at, expires_at, completed_at, winner_group_id, created_at')
@@ -523,13 +509,13 @@ export function SquadsPage() {
   useEffect(() => { void refreshAll(); }, [refreshAll]);
 
   useEffect(() => {
-    if (!selectedGroupId || !user || user.provider !== 'supabase' || !supabase) {
+    if (!selectedGroupId || !user || user.provider !== 'cloud' || !backend) {
       setSelectedMembers([]);
       setMemberProfiles(new Map());
       setGymbros([]);
       return;
     }
-    const client = supabase;
+    const client = backend;
     let active = true;
 
     const loadDetails = async () => {
@@ -588,8 +574,8 @@ export function SquadsPage() {
 
   const createSquad = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase || !newName.trim()) return;
-    const client = supabase;
+    if (!backend || !newName.trim()) return;
+    const client = backend;
     setCreating(true);
     setError('');
     setMessage('');
@@ -620,8 +606,8 @@ export function SquadsPage() {
   };
 
   const respondInvite = async (groupId: string, accept: boolean) => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     await act(groupId, async () => {
       const { error: rpcError } = await client.rpc('respond_squad_invite', { p_group_id: groupId, p_accept: accept });
       return { error: rpcError };
@@ -629,8 +615,8 @@ export function SquadsPage() {
   };
 
   const inviteGymbro = async (profileId: string) => {
-    if (!supabase || !selectedGroupId) return;
-    const client = supabase;
+    if (!backend || !selectedGroupId) return;
+    const client = backend;
     await act(profileId, async () => {
       const { error: rpcError } = await client.rpc('invite_squad_member', { p_group_id: selectedGroupId, p_user_id: profileId });
       return { error: rpcError };
@@ -638,8 +624,8 @@ export function SquadsPage() {
   };
 
   const removeMember = async (profileId: string) => {
-    if (!supabase || !selectedGroupId || !window.confirm('¿Sacar a este miembro del Squad?')) return;
-    const client = supabase;
+    if (!backend || !selectedGroupId || !window.confirm('¿Sacar a este miembro del Squad?')) return;
+    const client = backend;
     await act(profileId, async () => {
       const { error: rpcError } = await client.rpc('remove_squad_member', { p_group_id: selectedGroupId, p_user_id: profileId });
       return { error: rpcError };
@@ -647,8 +633,8 @@ export function SquadsPage() {
   };
 
   const leaveSquad = async () => {
-    if (!supabase || !selectedGroupId || !window.confirm('¿Salir de este Squad?')) return;
-    const client = supabase;
+    if (!backend || !selectedGroupId || !window.confirm('¿Salir de este Squad?')) return;
+    const client = backend;
     await act(selectedGroupId, async () => {
       const { error: rpcError } = await client.rpc('leave_squad', { p_group_id: selectedGroupId });
       return { error: rpcError };
@@ -656,8 +642,8 @@ export function SquadsPage() {
   };
 
   const respondBattle = async (battleId: string, accept: boolean) => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     await act(battleId, async () => {
       const { error: rpcError } = await client.rpc('respond_group_challenge', { p_battle_id: battleId, p_accept: accept });
       return { error: rpcError };
@@ -665,8 +651,8 @@ export function SquadsPage() {
   };
 
   const finalizeBattle = async (battleId: string) => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     await act(battleId, async () => {
       const { error: rpcError } = await client.rpc('finalize_group_battle', { p_battle_id: battleId });
       return { error: rpcError };

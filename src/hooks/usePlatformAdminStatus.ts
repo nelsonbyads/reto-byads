@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 
 export function usePlatformAdminStatus() {
   const { user } = useAuth();
@@ -8,8 +8,8 @@ export function usePlatformAdminStatus() {
   useEffect(() => {
     let active = true;
     const run = async () => {
-      if (!user || user.provider !== 'supabase' || !supabase) { if (active) setIsPlatformAdmin(false); return; }
-      const { data, error } = await supabase.rpc('is_platform_admin', { p_user_id: user.id });
+      if (!user || user.provider !== 'cloud' || !backend) { if (active) setIsPlatformAdmin(false); return; }
+      const { data, error } = await backend.rpc('is_platform_admin', { p_user_id: user.id });
       if (active) setIsPlatformAdmin(!error && data === true);
     };
     void run();

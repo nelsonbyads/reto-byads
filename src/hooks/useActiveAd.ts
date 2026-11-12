@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import type { AdPlacement } from '../config/ads';
 
 export interface ActiveAd {
@@ -13,6 +13,26 @@ export interface ActiveAd {
   rotation_seconds?: number;
   rotation_count?: number;
   rotation_index?: number;
+}
+
+// Several slots on one page share a placement, and navigation remounts them.
+// One in-flight request and a 50 s cache per placement keep the public ads
+// endpoint well under its per-IP rate limit.
+const CACHE_TTL_MS = 50_000;
+const adCache = new Map<string, { at: number; promise: Promise<ActiveAd[] | null> }>();
+
+function fetchAds(placement: string): Promise<ActiveAd[] | null> {
+  const cached = adCache.get(placement);
+  if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.promise;
+  const promise = backend.rpc('get_active_ads', { p_placement_key: placement }).then(({ data, error }) => {
+    if (error) {
+      adCache.delete(placement);
+      return null;
+    }
+    return (Array.isArray(data) ? data : []) as ActiveAd[];
+  });
+  adCache.set(placement, { at: Date.now(), promise });
+  return promise;
 }
 
 /**
@@ -31,15 +51,13 @@ export function useActiveAd(placement: AdPlacement) {
     let active = true;
 
     const load = async () => {
-      if (!supabase) return;
-      const { data, error } = await supabase.rpc('get_active_ads', { p_placement_key: placement });
-      if (!active || error) return;
-      const rows = (Array.isArray(data) ? data : []) as ActiveAd[];
+      const rows = await fetchAds(placement);
+      if (!active || rows === null) return;
       setAds(rows);
     };
 
     void load();
-    const refreshId = window.setInterval(() => { void load(); }, 60_000);
+    const refreshId = window.setInterval(() => { if (document.visibilityState === 'visible') void load(); }, 60_000);
 
     return () => {
       active = false;

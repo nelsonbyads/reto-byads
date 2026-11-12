@@ -5,7 +5,8 @@ import { AppHeader } from '../components/AppHeader';
 import { WorkspaceActionLink } from '../components/WorkspaceActionLink';
 import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
+import { normalizeWebsiteInput, safeExternalUrl } from '../lib/safeUrl';
 
 interface OrganizationRow {
   id: string;
@@ -67,7 +68,7 @@ export function OrganizationsPage() {
   const [invitations, setInvitations] = useState<Array<{ organization: OrganizationRow; membership: MemberRow }>>([]);
   const [profiles, setProfiles] = useState<Map<string, ProfileRow>>(new Map());
   const [gymbros, setGymbros] = useState<ProfileRow[]>([]);
-  const [loading, setLoading] = useState(user?.provider === 'supabase');
+  const [loading, setLoading] = useState(user?.provider === 'cloud');
   const [creating, setCreating] = useState(false);
   const [acting, setActing] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -78,7 +79,7 @@ export function OrganizationsPage() {
   const [website, setWebsite] = useState('');
   const [country, setCountry] = useState('CO');
 
-  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+  const cloudReady = user?.provider === 'cloud' && Boolean(backend);
   const allowedCreationTypes = useMemo<OrganizationRow['organization_type'][]>(() => {
     const next: OrganizationRow['organization_type'][] = [];
     if (capabilities.canCreateGym) next.push('gym');
@@ -91,11 +92,11 @@ export function OrganizationsPage() {
   }, [allowedCreationTypes, type]);
 
   const load = useCallback(async () => {
-    if (!user || user.provider !== 'supabase' || !supabase) {
+    if (!user || user.provider !== 'cloud' || !backend) {
       setLoading(false);
       return;
     }
-    const client = supabase;
+    const client = backend;
     setLoading(true);
     setError('');
 
@@ -194,8 +195,8 @@ export function OrganizationsPage() {
 
   const createOrganization = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase || !cloudReady) return;
-    const client = supabase;
+    if (!backend || !cloudReady) return;
+    const client = backend;
     setError('');
     setMessage('');
     if (!allowedCreationTypes.includes(type)) { setError('Tu cuenta no tiene permiso para crear este tipo de workspace.'); return; }
@@ -204,7 +205,7 @@ export function OrganizationsPage() {
       p_name: name.trim(),
       p_organization_type: type,
       p_description: description.trim() || null,
-      p_website_url: website.trim() || null,
+      p_website_url: normalizeWebsiteInput(website) || null,
       p_country_code: country.trim().toUpperCase() || null,
     });
     setCreating(false);
@@ -220,47 +221,47 @@ export function OrganizationsPage() {
   };
 
   const respondInvite = async (organizationId: string, accept: boolean) => {
-    if (!supabase) return;
+    if (!backend) return;
     setActing(`invite:${organizationId}`);
     setError('');
-    const { error: rpcError } = await supabase.rpc('respond_organization_invite', { p_organization_id: organizationId, p_accept: accept });
+    const { error: rpcError } = await backend.rpc('respond_organization_invite', { p_organization_id: organizationId, p_accept: accept });
     setActing(null);
     if (rpcError) setError(rpcError.message);
     else await Promise.all([load(), refresh()]);
   };
 
   const invite = async (organizationId: string, userId: string) => {
-    if (!supabase) return;
+    if (!backend) return;
     setActing(`add:${organizationId}:${userId}`);
     setError('');
-    const { error: rpcError } = await supabase.rpc('invite_organization_member', { p_organization_id: organizationId, p_user_id: userId });
+    const { error: rpcError } = await backend.rpc('invite_organization_member', { p_organization_id: organizationId, p_user_id: userId });
     setActing(null);
     if (rpcError) setError(rpcError.message);
     else await load();
   };
 
   const removeMember = async (organizationId: string, userId: string) => {
-    if (!supabase || !window.confirm('¿Retirar a este miembro de la organización?')) return;
+    if (!backend || !window.confirm('¿Retirar a este miembro de la organización?')) return;
     setActing(`remove:${organizationId}:${userId}`);
-    const { error: rpcError } = await supabase.rpc('remove_organization_member', { p_organization_id: organizationId, p_user_id: userId });
+    const { error: rpcError } = await backend.rpc('remove_organization_member', { p_organization_id: organizationId, p_user_id: userId });
     setActing(null);
     if (rpcError) setError(rpcError.message);
     else await load();
   };
 
   const leave = async (organizationId: string) => {
-    if (!supabase || !window.confirm('¿Salir de esta organización?')) return;
+    if (!backend || !window.confirm('¿Salir de esta organización?')) return;
     setActing(`leave:${organizationId}`);
-    const { error: rpcError } = await supabase.rpc('leave_organization', { p_organization_id: organizationId });
+    const { error: rpcError } = await backend.rpc('leave_organization', { p_organization_id: organizationId });
     setActing(null);
     if (rpcError) setError(rpcError.message);
     else await Promise.all([load(), refresh()]);
   };
 
   const setRole = async (organizationId: string, userId: string, role: string) => {
-    if (!supabase) return;
+    if (!backend) return;
     setActing(`role:${organizationId}:${userId}`);
-    const { error: rpcError } = await supabase.rpc('set_organization_member_role', { p_organization_id: organizationId, p_user_id: userId, p_role: role });
+    const { error: rpcError } = await backend.rpc('set_organization_member_role', { p_organization_id: organizationId, p_user_id: userId, p_role: role });
     setActing(null);
     if (rpcError) setError(rpcError.message);
     else await load();
@@ -330,7 +331,7 @@ export function OrganizationsPage() {
                       </div>
 
                       <div className="organization-links-v12">
-                        {view.organization.website_url && <a href={view.organization.website_url} target="_blank" rel="noreferrer"><ExternalLink size={14}/> Sitio web</a>}
+                        {safeExternalUrl(view.organization.website_url) && <a href={safeExternalUrl(view.organization.website_url)} target="_blank" rel="noreferrer"><ExternalLink size={14}/> Sitio web</a>}
                         {canManageChallenges && view.organization.organization_type === 'gym' && <WorkspaceActionLink to="/app" workspaceId={`org:${view.organization.id}`}><ShieldCheck size={14}/> Publicar desde una tirada</WorkspaceActionLink>}
                         {view.organization.organization_type === 'gym' && <WorkspaceActionLink to="/organization-challenges" workspaceId={`org:${view.organization.id}`}>Retos del Gym</WorkspaceActionLink>}
                       </div>

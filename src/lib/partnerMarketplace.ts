@@ -203,3 +203,21 @@ export function filterPartnerMarketplaces(
     return searchable.includes(normalizedQuery);
   });
 }
+
+/**
+ * Turns the reason raised by redeem_reward (SQL) into a message the user can
+ * act on, instead of a generic failure (ARQ-05).
+ */
+export function redeemErrorMessage(message: string | null | undefined): string {
+  const text = (message ?? "").toLowerCase();
+  if (text.includes("insufficient")) return "No tienes saldo suficiente para este premio.";
+  if (text.includes("sold out") || text.includes("no promo codes")) return "Este premio se agotó.";
+  if (text.includes("redemption limit")) return "Ya alcanzaste el máximo de canjes permitido para este premio.";
+  if (text.includes("not available yet")) return "Este premio todavía no está disponible.";
+  if (text.includes("expired")) return "Este premio ya no está disponible.";
+  if (text.includes("not active") || text.includes("not found")) return "Este premio ya no está activo.";
+  if (text.includes("membership required")) return "Necesitas una membresía activa en este Gym para canjearlo.";
+  if (text.includes("economy") || text.includes("partner points")) return "La economía de este Partner no está habilitada en este momento.";
+  if (text.includes("suspendida")) return "Tu cuenta está suspendida.";
+  return "El canje no pudo completarse. Actualiza y revisa la disponibilidad.";
+}

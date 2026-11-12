@@ -1,0 +1,157 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend (lint, typecheck, unit tests, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run prepare
+      # Lints the web app and the API sources (errors fail, warnings are reported).
+      - run: npm run lint
+      - run: npx tsc -p tsconfig.app.json --noEmit
+      - run: npm test
+      - run: npm run build
+
+  guardrails:
+    name: Migration guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No new grants to anon outside the reviewed public functions
+        run: |
+          allowed='dadofit_health|get_dadofit_schema_version|submit_support_request|get_active_ad|get_active_ads|record_ad_event|__eco4b_consume_test'
+          if grep -nE "grant[^;]*to[^;]*\banon\b" db/migrations/*.sql supabase/migrations/*.sql | grep -vE "$allowed"; then
+            echo "::error::A migration grants privileges to anon. Review it and extend the allowlist only if intended."
+            exit 1
+          fi
+      - name: Migrations must not contain test hooks or environment-specific data
+        run: |
+          if grep -nE "__[a-z0-9_]+_test\b|TEMPORARY test hook" db/migrations/*.sql; then
+            echo "::error::Test hooks belong in db/tests, not in migrations."
+            exit 1
+          fi
+
+  sql:
+    name: SQL migrations + pgTAP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run the pgTAP suite on a database migrated from scratch
+        run: |
+          docker compose -f infra/docker-compose.yml --env-file infra/.env.example --profile tests build sqltest
+          docker compose -f infra/docker-compose.yml --env-file infra/.env.example --profile tests run --rm sqltest
+        env:
+          POSTGRES_PASSWORD: ci-unused
+          API_DB_PASSWORD: ci-unused
+          API_JWT_SECRET: ci-unused-secret-with-at-least-32-characters
+          APP_PUBLIC_URL: http://localhost:8787
+
+  api:
+    name: API integration tests (${{ matrix.storage }} storage)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - storage: disk
+          - storage: s3
+            s3_endpoint: http://s3:9090
+    env:
+      POSTGRES_PASSWORD: ci-postgres-password
+      API_DB_PASSWORD: ci-api-password
+      API_JWT_SECRET: ci-jwt-secret-with-at-least-thirty-two-characters
+      APP_PUBLIC_URL: http://localhost:8787
+      RATE_LIMIT_AUTH_PER_MINUTE: "1000"
+      RATE_LIMIT_GLOBAL_PER_MINUTE: "5000"
+      # The s3 leg runs the same suite against an S3-compatible mock.
+      STORAGE_DRIVER: ${{ matrix.storage }}
+      S3_ENDPOINT: ${{ matrix.s3_endpoint }}
+      S3_FORCE_PATH_STYLE: "true"
+      S3_ACCESS_KEY_ID: ci-local
+      S3_SECRET_ACCESS_KEY: ci-local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - name: Start database, mail catcher, S3 mock and API
+        run: |
+          C="docker compose -f infra/docker-compose.yml --env-file infra/.env.example"
+          $C up -d db mailpit
+          if [ "$STORAGE_DRIVER" = s3 ]; then $C --profile s3 up -d s3; fi
+          $C --profile tools run --rm migrate
+          $C up -d --build api
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:8782/api/ready && break; sleep 2; done
+      - run: npm ci
+        working-directory: server
+      - name: Unit + integration tests
+        working-directory: server
+        run: npm test
+        env:
+          BASE_URL: http://127.0.0.1:8782
+          MAILPIT_URL: http://127.0.0.1:8785
+          DATABASE_ADMIN_URL: postgres://postgres:ci-postgres-password@127.0.0.1:55432/dadofit
+      - name: Frontend database types match the migrated schema
+        if: matrix.storage == 'disk'
+        working-directory: server
+        run: |
+          node scripts/generate-db-types.mjs
+          git diff --exit-code -- ../src/types/database.ts || {
+            echo "::error::src/types/database.ts is stale. Run: npm --prefix server run db:types"; exit 1; }
+        env:
+          DATABASE_ADMIN_URL: postgres://postgres:ci-postgres-password@127.0.0.1:55432/dadofit
+      - name: API logs on failure
+        if: failure()
+        run: docker compose -f infra/docker-compose.yml --env-file infra/.env.example logs api
+
+  security:
+    name: Dependency audit + image scan
+    runs-on: ubuntu-latest
+    env:
+      # Trivy pinned by digest (0.76.0): a moved tag cannot change what runs here.
+      TRIVY_IMAGE: aquasec/trivy@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: npm audit (runtime dependencies, high and critical)
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm --prefix server audit --omit=dev --audit-level=high
+      - name: Build images
+        run: |
+          docker build -t dadofit-api:scan server
+          docker build -t dadofit-web:scan -f infra/web/Dockerfile .
+      - name: Trivy (fixable HIGH/CRITICAL vulnerabilities fail the build)
+        run: |
+          for image in dadofit-api:scan dadofit-web:scan; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" image \
+              --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$image"
+          done
+      - name: Trivy misconfiguration scan (Dockerfiles and Compose, report only)
+        run: |
+          for target in /src/infra /src/server; do
+            docker run --rm -v "$PWD:/src:ro" "$TRIVY_IMAGE" config \
+              --severity HIGH,CRITICAL --skip-dirs /src/server/node_modules --exit-code 0 "$target"
+          done

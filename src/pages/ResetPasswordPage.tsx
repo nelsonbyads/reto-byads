@@ -5,7 +5,7 @@ import { useAuth } from '../auth/AuthContext';
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validateNewPassword, validatePasswordConfirmation } from '../lib/passwordRules';
 
 export function ResetPasswordPage() {
-  const { user, loading, recoveryMode, completePasswordRecovery, cancelPasswordRecovery } = useAuth();
+  const { loading, recoveryMode, completePasswordRecovery, cancelPasswordRecovery } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
@@ -16,7 +16,7 @@ export function ResetPasswordPage() {
 
   if (loading) return <main className="auth-loading">Validando enlace seguro…</main>;
 
-  const hasRecoverySession = recoveryMode && user?.provider === 'supabase';
+  const hasRecoverySession = recoveryMode;
 
   const cancelRecovery = async (destination: '/login' | '/forgot-password') => {
     await cancelPasswordRecovery();
@@ -46,7 +46,7 @@ export function ResetPasswordPage() {
   return <main className="auth-page auth-page-security-v15713">
     <section className="auth-hero auth-hero-security-v15713" aria-hidden="true">
       <div className="auth-brand"><div className="brand-mark brand-mark-large"><Dumbbell/></div><span>DadoFit</span></div>
-      <div className="auth-hero-copy"><span className="auth-kicker"><KeyRound size={15}/> NUEVA CONTRASEÑA</span><h1>Recupera tu cuenta y vuelve a entrenar.</h1><p>El enlace de recuperación crea una sesión temporal. Al guardar la nueva contraseña cerraremos esa sesión y volverás al login.</p></div>
+      <div className="auth-hero-copy"><span className="auth-kicker"><KeyRound size={15}/> NUEVA CONTRASEÑA</span><h1>Recupera tu cuenta y vuelve a entrenar.</h1><p>El enlace de recuperación es de un solo uso. Al guardar la nueva contraseña cerraremos tus sesiones abiertas y volverás al login.</p></div>
       <div className="auth-proof"><ShieldCheck size={18}/><span>Tu contraseña nunca es visible para DadoFit</span></div>
     </section>
     <section className="auth-panel"><div className="auth-form-wrap">

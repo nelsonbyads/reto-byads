@@ -2,7 +2,7 @@ import { Check, Shield, Swords, UsersRound, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import type { AppExercise, DiceLevel } from '../types/exercise';
 
 interface Props {
@@ -37,12 +37,12 @@ export function SquadChallengeButton({ exercise, reps, diceLevel }: Props) {
   const [sentBattleId, setSentBattleId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+  const cloudReady = user?.provider === 'cloud' && Boolean(backend);
   const title = useMemo(() => `${reps}× ${exercise.name}`, [exercise.name, reps]);
 
   useEffect(() => {
-    if (!open || !cloudReady || !user || !supabase) return;
-    const client = supabase;
+    if (!open || !cloudReady || !user || !backend) return;
+    const client = backend;
     let active = true;
 
     const load = async () => {
@@ -119,8 +119,8 @@ export function SquadChallengeButton({ exercise, reps, diceLevel }: Props) {
   };
 
   const sendBattle = async () => {
-    if (!supabase || !user || user.provider !== 'supabase' || !challengerId || !opponentId) return;
-    const client = supabase;
+    if (!backend || !user || user.provider !== 'cloud' || !challengerId || !opponentId) return;
+    const client = backend;
     setSending(true);
     setError('');
 

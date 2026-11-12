@@ -27,13 +27,14 @@ import { WorkspaceActionLink } from "../components/WorkspaceActionLink";
 import { ChallengeCenterNav } from "../components/ChallengeCenterNav";
 import { useAuth } from "../auth/AuthContext";
 import { useWorkspace } from "../context/WorkspaceContext";
-import { supabase } from "../lib/supabase";
+import { backend } from "../lib/backend";
 import { dcBlockReasonLabel } from "../lib/dcBlockReason";
 import {
   loadPartnerPointConfigs,
   resolvePartnerPointConfig,
   type PartnerPointConfig,
 } from "../lib/partnerPoints";
+import { formatShortDateTime as formatDate, formatFileSize as formatBytes } from "../lib/format";
 
 interface ChallengeRow {
   id: string;
@@ -96,26 +97,6 @@ interface EvidenceView extends EvidenceRow {
   signedUrl: string | null;
 }
 
-function formatDate(value: string | null) {
-  if (!value) return "—";
-  try {
-    return new Intl.DateTimeFormat("es-CO", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
-function formatBytes(bytes: number | null) {
-  if (!bytes) return "";
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function statusLabel(status: string) {
   const labels: Record<string, string> = {
     invited: "Pendiente",
@@ -162,8 +143,8 @@ function EvidencePanel({
   const canReview = mode === "reviewer" && participant.status === "submitted";
 
   const load = useCallback(async () => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     setLoading(true);
     const { data, error: evidenceError } = await client
       .from("challenge_evidence")
@@ -200,8 +181,8 @@ function EvidencePanel({
     if (
       !file ||
       !user ||
-      user.provider !== "supabase" ||
-      !supabase ||
+      user.provider !== "cloud" ||
+      !backend ||
       !canUpload
     )
       return;
@@ -214,7 +195,7 @@ function EvidencePanel({
       return;
     }
 
-    const client = supabase;
+    const client = backend;
     setUploading(true);
     setError("");
     setMessage("");
@@ -251,9 +232,9 @@ function EvidencePanel({
   };
 
   const remove = async (item: EvidenceView) => {
-    if (!supabase || !canUpload || !window.confirm("¿Eliminar esta evidencia?"))
+    if (!backend || !canUpload || !window.confirm("¿Eliminar esta evidencia?"))
       return;
-    const client = supabase;
+    const client = backend;
     const { error: dbError } = await client
       .from("challenge_evidence")
       .delete()
@@ -267,11 +248,11 @@ function EvidencePanel({
   };
 
   const submit = async () => {
-    if (!supabase || !canUpload || items.length === 0) return;
+    if (!backend || !canUpload || items.length === 0) return;
     setActing(true);
     setError("");
     setMessage("");
-    const { error: rpcError } = await supabase.rpc(
+    const { error: rpcError } = await backend.rpc(
       "submit_organization_challenge",
       { p_participant_id: participant.id },
     );
@@ -285,11 +266,11 @@ function EvidencePanel({
   };
 
   const review = async (decision: "approved" | "rejected") => {
-    if (!supabase || !canReview) return;
+    if (!backend || !canReview) return;
     setActing(true);
     setError("");
     setMessage("");
-    const { data, error: rpcError } = await supabase.rpc(
+    const { data, error: rpcError } = await backend.rpc(
       "review_organization_challenge",
       {
         p_participant_id: participant.id,
@@ -461,18 +442,18 @@ export function OrganizationChallengesPage() {
     new Map(),
   );
   const [tab, setTab] = useState<"mine" | "review" | "published">("mine");
-  const [loading, setLoading] = useState(user?.provider === "supabase");
+  const [loading, setLoading] = useState(user?.provider === "cloud");
   const [error, setError] = useState("");
   const [acting, setActing] = useState<string | null>(null);
 
-  const cloudReady = user?.provider === "supabase" && Boolean(supabase);
+  const cloudReady = user?.provider === "cloud" && Boolean(backend);
 
   const load = useCallback(async () => {
-    if (!user || user.provider !== "supabase" || !supabase) {
+    if (!user || user.provider !== "cloud" || !backend) {
       setLoading(false);
       return;
     }
-    const client = supabase;
+    const client = backend;
     setLoading(true);
     setError("");
 
@@ -617,9 +598,9 @@ export function OrganizationChallengesPage() {
   }, [load]);
 
   const respond = async (participantId: string, accept: boolean) => {
-    if (!supabase) return;
+    if (!backend) return;
     setActing(participantId);
-    const { error: rpcError } = await supabase.rpc(
+    const { error: rpcError } = await backend.rpc(
       "respond_organization_challenge",
       { p_participant_id: participantId, p_accept: accept },
     );
@@ -629,9 +610,9 @@ export function OrganizationChallengesPage() {
   };
 
   const finalize = async (challengeId: string) => {
-    if (!supabase) return;
+    if (!backend) return;
     setActing(`finalize:${challengeId}`);
-    const { error: rpcError } = await supabase.rpc(
+    const { error: rpcError } = await backend.rpc(
       "finalize_organization_challenge",
       { p_challenge_id: challengeId },
     );

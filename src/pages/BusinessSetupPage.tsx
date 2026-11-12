@@ -4,7 +4,8 @@ import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
+import { normalizeWebsiteInput } from '../lib/safeUrl';
 
 export function BusinessSetupPage() {
   const { user } = useAuth();
@@ -27,18 +28,18 @@ export function BusinessSetupPage() {
     navigate('/workspace', { replace: true });
   }, [existing, navigate, selectWorkspace]);
 
-  if (!user || user.provider !== 'supabase') return <Navigate to="/app" replace/>;
+  if (!user || user.provider !== 'cloud') return <Navigate to="/app" replace/>;
   if (existing) return <main className="auth-loading">Abriendo tu workspace…</main>;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase || !allowed) return;
+    if (!backend || !allowed) return;
     setSubmitting(true); setError('');
-    const { data, error: rpcError } = await supabase.rpc('create_organization', {
+    const { data, error: rpcError } = await backend.rpc('create_organization', {
       p_name: name.trim(),
       p_organization_type: requested,
       p_description: description.trim() || null,
-      p_website_url: website.trim() || null,
+      p_website_url: normalizeWebsiteInput(website) || null,
       p_country_code: country.trim().toUpperCase() || null,
     });
     setSubmitting(false);

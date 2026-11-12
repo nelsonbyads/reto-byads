@@ -2,6 +2,7 @@ import { ExternalLink, Megaphone } from 'lucide-react';
 import type { AdPlacement } from '../config/ads';
 import { useActiveAd, type ActiveAd } from '../hooks/useActiveAd';
 import { useAdAnalytics } from '../hooks/useAdAnalytics';
+import { safeExternalUrl } from '../lib/safeUrl';
 
 export type AdSlotVariant = 'rail' | 'compact' | 'mobile';
 
@@ -53,7 +54,7 @@ export function AdSlotView({ placement, sideLabel, variant = 'rail', ad }: ViewP
     const className = `ad-slot-v8 ad-slot-v135 ad-live-v14${variantClass}`;
 
     return ad.target_url
-      ? <a ref={analytics.setElement} className={className} href={ad.target_url} target="_blank" rel="noreferrer sponsored" data-ad-placement={placement} data-ad-variant={variant} aria-label={`Publicidad: ${ad.brand_name}`} onClick={analytics.trackClick}>{body}</a>
+      ? <a ref={analytics.setElement} className={className} href={safeExternalUrl(ad.target_url)} target="_blank" rel="noreferrer sponsored" data-ad-placement={placement} data-ad-variant={variant} aria-label={`Publicidad: ${ad.brand_name}`} onClick={analytics.trackClick}>{body}</a>
       : <section ref={analytics.setElement} className={className} data-ad-placement={placement} data-ad-variant={variant} aria-label={`Publicidad: ${ad.brand_name}`}>{body}</section>;
   }
 

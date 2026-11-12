@@ -1,0 +1,41 @@
+# Weekly dependency updates. Minor/patch bumps are grouped per ecosystem to keep
+# the number of PRs low; majors arrive one by one so they can be reviewed.
+# A 14-day cooldown avoids adopting freshly published (possibly compromised)
+# releases; security updates are not delayed.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    cooldown: { default-days: 14 }
+    open-pull-requests-limit: 5
+    groups:
+      frontend-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /server
+    schedule: { interval: weekly, day: monday }
+    cooldown: { default-days: 14 }
+    open-pull-requests-limit: 5
+    groups:
+      api-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directories: [/server, /infra/web, /infra/db]
+    schedule: { interval: weekly, day: monday }
+    cooldown: { default-days: 14 }
+
+  - package-ecosystem: docker-compose
+    directory: /infra
+    schedule: { interval: weekly, day: monday }
+    cooldown: { default-days: 14 }
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    cooldown: { default-days: 14 }
+    groups:
+      actions:
+        patterns: ["*"]

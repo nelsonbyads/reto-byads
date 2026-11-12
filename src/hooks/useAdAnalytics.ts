@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import type { AdPlacement } from '../config/ads';
 
 const SESSION_KEY = 'dadofit:ad-session:v144';
@@ -24,8 +24,8 @@ function deviceType() {
 }
 
 async function recordEvent(campaignId: string, placement: AdPlacement, eventType: 'impression' | 'click') {
-  if (!supabase) return;
-  await supabase.rpc('record_ad_event', {
+  if (!backend) return;
+  await backend.rpc('record_ad_event', {
     p_campaign_id: campaignId,
     p_placement_key: placement,
     p_event_type: eventType,
@@ -53,7 +53,7 @@ export function useAdAnalytics(campaignId: string | null, placement: AdPlacement
   }, []);
 
   useEffect(() => {
-    if (!campaignId || !elementRef.current || !supabase) return;
+    if (!campaignId || !elementRef.current || !backend) return;
 
     const node = elementRef.current;
     const impressionKey = `${campaignId}:${placement}:${window.location.pathname}`;

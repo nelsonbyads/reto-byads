@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 
 interface PublicProfile {
   id: string;
@@ -32,22 +32,22 @@ export function GymbrosPage() {
   const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [searching, setSearching] = useState(false);
-  const [loading, setLoading] = useState(user?.provider === 'supabase');
+  const [loading, setLoading] = useState(user?.provider === 'cloud');
   const [actingId, setActingId] = useState<string | null>(null);
   const [results, setResults] = useState<PublicProfile[]>([]);
   const [relations, setRelations] = useState<GymbroRelation[]>([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+  const cloudReady = user?.provider === 'cloud' && Boolean(backend);
 
   const loadRelations = useCallback(async () => {
-    if (!user || user.provider !== 'supabase' || !supabase) {
+    if (!user || user.provider !== 'cloud' || !backend) {
       setLoading(false);
       return;
     }
 
-    const client = supabase;
+    const client = backend;
     setLoading(true);
     setError('');
 
@@ -123,7 +123,7 @@ export function GymbrosPage() {
     event.preventDefault();
     setError('');
     setMessage('');
-    if (!user || user.provider !== 'supabase' || !supabase) return;
+    if (!user || user.provider !== 'cloud' || !backend) return;
 
     const normalized = query.trim().toLowerCase().replace(/^@/, '');
     if (normalized.length < 3) {
@@ -132,7 +132,7 @@ export function GymbrosPage() {
     }
 
     setSearching(true);
-    const { data, error: searchError } = await supabase
+    const { data, error: searchError } = await backend
       .from('profiles')
       .select('id, username, display_name, avatar_url')
       .neq('id', user.id)
@@ -164,8 +164,8 @@ export function GymbrosPage() {
   };
 
   const sendRequest = async (profileId: string) => {
-    if (!user || user.provider !== 'supabase' || !supabase) return;
-    const client = supabase;
+    if (!user || user.provider !== 'cloud' || !backend) return;
+    const client = backend;
     await perform(profileId, async () => {
       const { error: insertError } = await client.from('friendships').insert({
         requester_id: user.id,
@@ -177,8 +177,8 @@ export function GymbrosPage() {
   };
 
   const acceptRequest = async (friendshipId: string) => {
-    if (!user || user.provider !== 'supabase' || !supabase) return;
-    const client = supabase;
+    if (!user || user.provider !== 'cloud' || !backend) return;
+    const client = backend;
     await perform(friendshipId, async () => {
       const { error: updateError } = await client
         .from('friendships')
@@ -191,8 +191,8 @@ export function GymbrosPage() {
   };
 
   const deleteRelation = async (friendshipId: string, success: string) => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     await perform(friendshipId, async () => {
       const { error: deleteError } = await client.from('friendships').delete().eq('id', friendshipId);
       return { error: deleteError };
@@ -236,7 +236,7 @@ export function GymbrosPage() {
         {!cloudReady ? (
           <section className="profile-card-v9 profile-cloud-callout-v9">
             <h2>Necesitas una cuenta cloud</h2>
-            <p>La red de Gymbros funciona entre usuarios reales de DadoFit y requiere iniciar sesión con Supabase.</p>
+            <p>La red de Gymbros funciona entre usuarios reales de DadoFit y requiere iniciar sesión con tu cuenta DadoFit.</p>
             <Link className="profile-primary-v9" to="/register">Crear cuenta DadoFit</Link>
           </section>
         ) : (

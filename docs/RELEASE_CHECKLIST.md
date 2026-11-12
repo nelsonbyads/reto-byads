@@ -1,112 +1,89 @@
-# DadoFit V15.7 - Pre-Release / Feature Freeze Checklist
+# DadoFit — Checklist de release
 
-## Database
-- [ ] `npx supabase migration list` revisado.
-- [ ] `20260904234500_pre_release_seasons_competitions.sql` aparece Local + Remote.
-- [ ] `npx supabase db push` aplicado si habia pendientes.
-- [ ] `node scripts/check-supabase.mjs` = OK.
-- [ ] `select public.get_dadofit_schema_version();` = `v15.7-pre-release-feature-pack`.
+Checklist para liberar una versión del backend propio (local o AWS). La versión V15.7 original queda en el historial de git.
 
-## Automated checks
-- [ ] `npm test` pasa completo.
-- [ ] `npm run build` termina sin errores.
-- [ ] Warning de chunk >500 KB documentado como deuda si aparece; no bloquear solo por tamaño.
+## 1. Automático (CI)
+- [ ] CI en verde. Corre estos jobs:
+  - ESLint, tipos, Vitest y build;
+  - guardarraíles de migraciones;
+  - migraciones desde cero + pgTAP;
+  - integración de la API con disco y con S3;
+  - tipos de BD al día;
+  - `npm audit`;
+  - Trivy.
+- [ ] Revisados los avisos de Trivy sobre configuración (no bloquean, pero no deben aumentar).
+- [ ] Las PR de Dependabot pendientes están revisadas o descartadas con motivo.
 
-## A. Unified Challenges
-- [ ] Personal → Retos muestra tabs `1 vs 1 / Del Gym / Squads / Patrocinados / Temporadas`.
-- [ ] `Del Gym` abre los retos de organización del Gymbro.
-- [ ] `Squads` conserva creación/invitaciones/batallas.
-- [ ] `Patrocinados` conserva Branded Challenges.
-- [ ] Header Personal sigue compacto: `Entrenar / Retos / Premios / Más`.
+## 2. Base de datos
+- [ ] Snapshot o backup verificado antes de migrar (RDS snapshot, o `restore-check` con Compose).
+- [ ] `migrate` (perfil `tools`) termina con `applied=N, already applied=M` y sin errores.
+- [ ] `GET /api/ready` = `ready`.
+- [ ] `select public.get_dadofit_schema_version();` devuelve la versión esperada (hoy `marketplace-partner-001-backend`).
+- [ ] `check:integrity` sin filas con problemas (ver `docs/TESTING.md` §4b).
 
-## B. TP / GP Seasons
-- [ ] `/seasons` abre en Personal.
-- [ ] Temporada Squad muestra ranking TP.
-- [ ] Temporada Gym muestra ranking GP.
-- [ ] Gym Dashboard enlaza a `Temporadas & rankings`.
-- [ ] SuperAdmin → `Temporadas` lista y crea ventanas Squad/Gym.
-- [ ] Crear dos temporadas solapadas del mismo tipo es rechazado.
-- [ ] Nuevo reto Squad queda asociado a temporada Squad.
-- [ ] Nuevo reto Gym / Gym vs Gym queda asociado a temporada Gym.
-- [ ] Cerrar temporada NO borra `score_events`.
-- [ ] Histórico de temporadas cerradas sigue visible.
+## 3. Autenticación
+- [ ] Registro → correo de confirmación → login.
+- [ ] Recuperación de contraseña con enlace de un solo uso.
+- [ ] Usuario importado de Supabase entra con su contraseña antigua (se vuelve a cifrar con argon2id).
+- [ ] Varias pestañas abiertas no cierran la sesión al renovarse.
+- [ ] Cuenta suspendida queda fuera en la siguiente petición.
 
-## C. Sponsored Gym Competitions
-- [ ] Brand verificada → Dashboard → `Competencias Gym`.
-- [ ] Owner/Admin puede crear competencia con mínimo 2 Gyms verificados.
-- [ ] Menos de 2 Gyms es rechazado.
-- [ ] Gym Owner/Admin recibe notificación.
-- [ ] La notificación abre el workspace Gym y `/seasons`.
-- [ ] Owner/Admin Gym puede aceptar o rechazar.
-- [ ] Coach/Member no puede responder aunque fuerce RPC.
-- [ ] Brand recibe notificación de respuesta.
-- [ ] Brand ve estado de cada Gym invitado.
-- [ ] Leaderboard patrocinado usa GP generado dentro de la ventana de la competencia.
-- [ ] El GP patrocinado no elimina ni mueve el GP de la temporada Gym global.
-
-## D. Rewards / QR / Analytics
-- [ ] Crear oferta Gym.
-- [ ] Publicar oferta y recibir notificación como miembro activo.
-- [ ] Oferta aparece solo dentro de vigencia.
-- [ ] Gymbro canjea y se descuentan DC transaccionalmente.
-- [ ] Mis canjes muestra referencia DF.
-- [ ] Reward presencial/físico genera QR.
-- [ ] Owner/Admin valida QR y confirma entrega.
-- [ ] Estado cambia `ISSUED → REDEEMED`.
-- [ ] QR ya usado no vuelve a entregar.
-- [ ] Rewards Analytics actualiza canjes, DC y pendientes.
-- [ ] SuperAdmin Rewards Analytics carga.
-
-## E. Economy / anti-farming
+## 4. Retos y evidencia
+- [ ] Personal → Retos muestra `1 vs 1 / Del Gym / Squads / Patrocinados / Temporadas`.
+- [ ] Subir, ver (también video, con adelantar/retroceder) y borrar evidencia.
+- [ ] Un archivo cuyo contenido no corresponde a su tipo es rechazado (415).
 - [ ] 1v1: DC + XP.
 - [ ] Squad: DC + XP + TP.
-- [ ] Gym: DC + XP + GP.
-- [ ] Gym vs Gym: DC + XP + GP.
-- [ ] Sponsored Challenge: DC + XP.
-- [ ] Aprobación bloqueada muestra `0 DC / 0 XP / 0 TP/GP`.
-- [ ] La UI no presenta recompensa potencial como payout otorgado.
-- [ ] `sponsor_points` puede seguir existiendo internamente, pero UI de Gym muestra GP.
+- [ ] Gym: DC + XP + Partner Points del Gym.
+- [ ] Patrocinado: DC + XP + Partner Points de la marca; con doble validación pasa por auditoría.
+- [ ] **Aprobar un reto con DC y un presupuesto activo funciona** (regresión del bug de `eco4c_grant_dc`).
+- [ ] Sin presupuesto activo, el reto se aprueba sin DC y muestra el motivo.
+- [ ] Aprobación bloqueada por anti-farming muestra `0` en la recompensa correspondiente.
+- [ ] Rechazar → nueva evidencia → reenviar → aprobar.
 
-## F. RBAC / security
-- [ ] Owner/Admin Gym: gestión completa Rewards y respuesta a competencias.
-- [ ] Coach Gym: operación permitida existente, sin administración Rewards/competencias patrocinadas.
-- [ ] Member Gym: participación sin administración.
-- [ ] Owner/Admin Brand: crea competencia patrocinada.
-- [ ] Usuario sin rol no puede ejecutar RPCs privilegiadas.
-- [ ] SuperAdmin exclusivo en `/admin`.
+## 5. Temporadas y competencias
+- [ ] `/seasons` muestra ranking de Squads y de Gyms.
+- [ ] SuperAdmin crea temporadas; dos solapadas del mismo tipo son rechazadas.
+- [ ] Cerrar una temporada no borra `score_events` y el histórico sigue visible.
+- [ ] Brand verificada crea competencia con al menos 2 Gyms verificados; los Gyms aceptan o rechazan y la Brand ve el estado.
 
-## G. Responsive / Ads
-- [ ] Desktop ancho: header Personal no se superpone.
-- [ ] Laptop: header compacto conserva accesibilidad.
-- [ ] Mobile: Challenge Center hace scroll horizontal sin romper layout.
-- [ ] Desktop amplio: rails publicitarios.
-- [ ] Laptop: dock comercial inferior.
-- [ ] Mobile: banner/fallback.
+## 6. Marketplace
+- [ ] Premio DadoFit: canje en DC, se descuenta el saldo y aparece en "Mis canjes".
+- [ ] Oferta de Gym: solo la canjean sus miembros activos y se paga en sus Partner Points.
+- [ ] Oferta de Brand: se paga en sus Partner Points.
+- [ ] Modos de entrega:
+  - [ ] código generado;
+  - [ ] código compartido;
+  - [ ] lote de cupones (sin repetir códigos);
+  - [ ] enlace;
+  - [ ] presencial/físico.
+- [ ] Presencial/físico: el proveedor busca el canje por su referencia y lo marca entregado (`ISSUED → REDEEMED`); un canje ya entregado no se vuelve a entregar.
+- [ ] Saldo insuficiente, premio agotado y máximo por usuario se rechazan con mensaje claro.
+- [ ] Rewards Analytics (partner y SuperAdmin) refleja los canjes.
 
-## Docker
-- [ ] Build limpio con `.env.local`.
-- [ ] `dadofit-web` Up/healthy.
-- [ ] `http://localhost:8781` abre.
-- [ ] Refresh de rutas internas sin 404.
-- [ ] Media carga.
-- [ ] Supabase funciona dentro del build Docker.
+## 7. Administración y publicidad
+- [ ] `/admin` solo accesible para SuperAdmin; las 10 secciones cargan.
+- [ ] Verificar organización y habilitar su economía.
+- [ ] Crear, aprobar, pausar y cancelar presupuestos DC.
+- [ ] Crear campaña de publicidad, asignar ubicaciones y activarla. Se ve en escritorio (rieles), laptop (dock inferior) y móvil (banner).
+- [ ] Impresiones y clics se registran; el reporte se exporta a CSV y Excel.
 
-## Repository / Feature Freeze
-- [ ] `AGENT.md`, `README.md`, Blueprint y checklist actualizados.
-- [ ] `.env.local` NO trackeado.
+## 8. Permisos (RBAC)
+- [ ] Owner/Admin de Gym: gestión completa de ofertas y competencias.
+- [ ] Coach: opera retos, sin administrar ofertas ni competencias.
+- [ ] Member: solo participa.
+- [ ] Un usuario sin rol no puede ejecutar RPC privilegiadas aunque las llame directamente.
+
+## 9. Infraestructura
+- [ ] Imágenes etiquetadas (`IMAGE_TAG=<versión>`) y construidas desde un commit limpio.
+- [ ] Contenedores `healthy`; refresh directo de rutas internas sin 404; la media carga.
+- [ ] Logs sin tokens (ni en nginx/Caddy ni en la API).
+- [ ] En AWS: alarmas de CloudWatch activas, backups y PITR de RDS activos, bucket S3 privado con versionado.
+
+## 10. Repositorio
+- [ ] `git status` revisado: sin `infra/.env*`, `infra/seed/` ni dumps.
 - [ ] No se subieron secretos.
-- [ ] `data/`, `images/`, `videos/`, `LICENSE`, `NOTICE.md` conservados.
-- [ ] No quedan bugs blocker/critical del QA V15.7.
-- [ ] FEATURE FREEZE declarado.
-- [ ] `git status` revisado.
-- [ ] Commit pre-release creado.
-- [ ] Push a `origin/main` completado.
-- [ ] `git status` final limpio.
-
-## Commit recomendado cuando QA quede aprobado
-
-```bash
-git add .
-git commit -m "feat: complete DadoFit pre-release seasons competitions and unified challenges"
-git push origin main
-```
+- [ ] `data/`, `images/`, `videos/`, `LICENSE` y `NOTICE.md` conservados.
+- [ ] README, `docs/ARCHITECTURE.md` y este checklist al día.
+- [ ] Cambios integrados por pull request con CI en verde, sin push directo a `main`.
+- [ ] Rollback preparado: `IMAGE_TAG` anterior anotado (las migraciones son aditivas).

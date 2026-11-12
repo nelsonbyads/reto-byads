@@ -10,6 +10,11 @@ describe('password rules', () => {
     expect(validateNewPassword('dadofit-2026')).toBeNull();
   });
 
+  it('requires letters and numbers', () => {
+    expect(validateNewPassword('solo-letras-largas')).toContain('letras y números');
+    expect(validateNewPassword('1234567890123')).toContain('letras y números');
+  });
+
   it('rejects passwords longer than the supported maximum', () => {
     expect(validateNewPassword('a'.repeat(PASSWORD_MAX_LENGTH + 1))).toContain(`${PASSWORD_MAX_LENGTH}`);
   });

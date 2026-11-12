@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { WorkspaceActionLink } from '../components/WorkspaceActionLink';
 import { AppHeader } from '../components/AppHeader';
 import { useAuth } from '../auth/AuthContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validateNewPassword, validatePasswordConfirmation } from '../lib/passwordRules';
 import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
 
@@ -35,7 +35,7 @@ export function ProfilePage() {
   const [sponsorBalances, setSponsorBalances] = useState<SponsorPointBalance[]>([]);
   const [gymBalances, setGymBalances] = useState<GymPointBalance[]>([]);
   const [ppConfigs, setPpConfigs] = useState<Map<string, PartnerPointConfig>>(new Map());
-  const [loading, setLoading] = useState(user?.provider === 'supabase');
+  const [loading, setLoading] = useState(user?.provider === 'cloud');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -48,8 +48,8 @@ export function ProfilePage() {
   const [passwordMessage, setPasswordMessage] = useState('');
 
   useEffect(() => {
-    if (!user || user.provider !== 'supabase' || !supabase) { setLoading(false); return; }
-    const client = supabase;
+    if (!user || user.provider !== 'cloud' || !backend) { setLoading(false); return; }
+    const client = backend;
     let active = true;
     const load = async () => {
       const [profileResult, progressResult, walletResult, sentGymbros, receivedGymbros, squadsResult, organizationsResult, dashboardResult, sponsorPointsResult, gymPointsResult] = await Promise.all([
@@ -112,11 +112,11 @@ export function ProfilePage() {
 
   const save = async (event: FormEvent) => {
     event.preventDefault(); setMessage(''); setError('');
-    if (!user || user.provider !== 'supabase' || !supabase) return;
+    if (!user || user.provider !== 'cloud' || !backend) return;
     const normalizedUsername = username.trim().toLowerCase();
     if (!/^[a-z0-9_.]{3,30}$/.test(normalizedUsername)) { setError('El username debe tener 3-30 caracteres: letras minúsculas, números, punto o guion bajo.'); return; }
     setSaving(true);
-    const { error: updateError } = await supabase.from('profiles').update({ display_name: displayName.trim(), username: normalizedUsername }).eq('id', user.id);
+    const { error: updateError } = await backend.from('profiles').update({ display_name: displayName.trim(), username: normalizedUsername }).eq('id', user.id);
     setSaving(false);
     if (updateError) { setError(updateError.code === '23505' ? 'Ese username ya está siendo usado.' : updateError.message); return; }
     setUsername(normalizedUsername); setMessage('Perfil actualizado.');
@@ -132,10 +132,10 @@ export function ProfilePage() {
           <h1>{displayName || user?.name || 'Gymbro'}</h1>
           <p>@{username || 'gymbro'} · Nivel {stats.level}</p>
         </div>
-        <span className="profile-cloud-badge-v133">{user?.provider === 'supabase' ? 'Cloud conectado' : 'Sesión local'}</span>
+        <span className="profile-cloud-badge-v133">{user?.provider === 'cloud' ? 'Cloud conectado' : 'Sesión local'}</span>
       </section>
 
-      {user?.provider !== 'supabase' ? <section className="profile-card-v9 profile-cloud-callout-v9"><h2>Activa tu perfil social</h2><p>Los Gymbros, retos, DadoCoins, Squads y organizaciones requieren una cuenta cloud.</p><Link className="profile-primary-v9" to="/register">Crear cuenta DadoFit</Link></section> : loading ? <section className="profile-card-v9">Cargando perfil…</section> : <>
+      {user?.provider !== 'cloud' ? <section className="profile-card-v9 profile-cloud-callout-v9"><h2>Activa tu perfil social</h2><p>Los Gymbros, retos, DadoCoins, Squads y organizaciones requieren una cuenta cloud.</p><Link className="profile-primary-v9" to="/register">Crear cuenta DadoFit</Link></section> : loading ? <section className="profile-card-v9">Cargando perfil…</section> : <>
         <section className="profile-stats-v9 profile-stats-v133">
           <article><Trophy size={20}/><span>Nivel</span><strong>{stats.level}</strong></article>
           <article><span className="profile-xp-icon-v9">XP</span><span>Experiencia</span><strong>{stats.xp.toLocaleString()}</strong></article>

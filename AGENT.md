@@ -97,32 +97,23 @@ C:\Users\USUARIO\Documents\Dice-Fitness\reto-byads
 
 ```text
 reto-byads/
-├── .git/
-├── data/
-├── images/
-├── videos/
-├── public/
-├── scripts/
-├── src/
-├── supabase/
-├── docs/
-├── docker/
-├── Dockerfile
-├── docker-compose.yml
-├── .dockerignore
-├── .gitignore
-├── .env.local
-├── .env.example
-├── index.html
-├── package.json
-├── package-lock.json
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-├── vite.config.ts
-├── LICENSE
-├── NOTICE.md
-└── README.md
+├── src/                 SPA React (cliente de la API: src/lib/backend.ts)
+│   ├── admin/sections/  backoffice SuperAdmin, una sección por archivo
+│   └── types/database.ts  tipos generados desde el esquema (no editar a mano)
+├── server/              API propia (Node 22 + Fastify)
+│   ├── src/             auth, /api/rpc, /api/db, /api/files, almacenamiento disk/S3
+│   ├── scripts/         tipos de BD, importación, siembra demo, integridad, carga
+│   └── test/            node:test (unitarios + integración)
+├── db/compat/           capa de compatibilidad SQL (roles, auth.uid(), storage)
+├── db/migrations/       migraciones del backend propio
+├── supabase/migrations/ migraciones históricas (siguen aplicándose; no borrar)
+├── supabase/tests/      suites pgTAP
+├── infra/               Docker Compose, nginx, Caddy, migrate/backup/import
+├── infra/seed/          cuentas demo y copias locales (ignorado por git)
+├── docs/                documentación (vivos: README, ARCHITECTURE, DEPLOYMENT, TESTING, ENTREGA_LOCAL, DECISIONES_PRODUCCION)
+├── data/ images/ videos/ public/
+├── Dockerfile, docker-compose.yml, docker/   LEGADO (web antigua contra Supabase): no usar
+└── README.md, DOCKER.md, LICENSE, NOTICE.md
 ```
 
 NO existe subcarpeta oficial `dice-app/`.
@@ -134,89 +125,72 @@ NO existe subcarpeta oficial `dice-app/`.
 Frontend:
 
 ```text
-React 18
-TypeScript
-Vite
-React Router DOM
-Lucide React
-CSS custom
-localStorage
+React 18 · TypeScript · Vite · React Router DOM · Lucide React · CSS custom
 ```
 
-Backend / BaaS:
+Backend (propio, en Docker; Supabase ya NO se usa):
 
 ```text
-Supabase
-PostgreSQL
-Supabase Auth
-Supabase Storage
-RLS
-RPCs
-SECURITY DEFINER
-SQL migrations
+API Node 22 + Fastify (server/)
+PostgreSQL 17 con RLS
+RPCs SECURITY DEFINER (la lógica de economía y retos vive en SQL)
+Autenticación propia: argon2id, access token en memoria + refresh rotativo en cookie httpOnly, CSRF
+Archivos: STORAGE_DRIVER=disk (local) o s3 (AWS), URLs firmadas, verificación de contenido
+Migraciones SQL con runner propio (infra/db/migrate.sh, tabla schema_migrations con checksum)
 ```
 
-Testing:
+Testing y calidad:
 
 ```text
-Vitest
-TypeScript build
-Vite build
+Vitest · node:test (API) · pgTAP · ESLint · TypeScript · Trivy · npm audit · Dependabot
 ```
 
 Infraestructura:
 
 ```text
-Docker
-Docker Compose
-Node 22 builder
-Nginx runtime
-Git
-GitHub
+Docker Compose (infra/) · nginx sin privilegios · Caddy (TLS) · GitHub Actions
+Destino de producción: AWS (RDS, S3, SES, Secrets Manager, CloudWatch; cómputo por decidir)
 ```
 
 ---
 
 # 6. Desarrollo local
 
-Vite:
-
-```text
-http://localhost:5175
-```
-
-Comandos mínimos:
+Stack completo (web en http://localhost:8787, API en 127.0.0.1:8782, Mailpit en http://localhost:8785):
 
 ```bash
-npm test
-npm run build
+docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build
+docker compose -f infra/docker-compose.yml --env-file infra/.env --profile tools run --rm migrate
+```
+
+Frontend con recarga en caliente (http://localhost:5175, reenvía /api a la API):
+
+```bash
 npm run dev
 ```
+
+Comandos mínimos antes de entregar:
+
+```bash
+npm run lint
+npx tsc -p tsconfig.app.json --noEmit
+npm test
+npm run build
+cd server && npm test        # con el stack levantado y límites de peticiones altos (docs/TESTING.md)
+```
+
+Cuentas de demostración y datos de prueba: `docs/ENTREGA_LOCAL.md`.
 
 ---
 
 # 7. Docker
 
-URL:
+Guía completa: `DOCKER.md`. Reglas:
 
-```text
-http://localhost:8781
-```
-
-Build recomendado:
-
-```bash
-docker compose --env-file .env.local down --remove-orphans
-docker compose --env-file .env.local build --no-cache
-docker compose --env-file .env.local up -d --force-recreate
-docker compose --env-file .env.local ps
-```
-
-Builder Node:
-
-```text
-Node 22
-```
+- Proyecto Compose: `reto-byads-stack` (`infra/docker-compose.yml`).
+- Nunca `docker compose down --volumes`, `docker volume rm` sobre `reto-byads-stack_*` ni limpiezas globales (`prune`).
+- Para parar: `stop`; para aplicar cambios: `up -d --build api web`.
+- Los archivos de la raíz (`Dockerfile`, `docker-compose.yml`, `docker/`) y el contenedor `dadofit-web` (puerto 8781) son la versión antigua contra Supabase Cloud: no usarlos (escriben en producción de Supabase).
 
 No ejecutar:
 
@@ -228,73 +202,30 @@ sin una razón concreta.
 
 ---
 
-# 8. Supabase
+# 8. Supabase (legado)
 
-Proyecto:
+Supabase Cloud (proyecto `DadoFit Development`, ref `hobsttxpvgxqneqaynyi`, us-west-2) sigue intacto como copia de respaldo hasta que la app esté en AWS. Ya no es el backend de la aplicación.
 
-```text
-DadoFit Development
-```
-
-Project ref:
-
-```text
-hobsttxpvgxqneqaynyi
-```
-
-URL:
-
-```text
-https://hobsttxpvgxqneqaynyi.supabase.co
-```
-
-Variables:
-
-```env
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_PUBLISHABLE_KEY=...
-```
-
-Nunca:
-
-- publicar keys privadas;
-- pedir service role innecesariamente;
-- exponer database password;
-- meter `.env.local` en ZIPs.
-
-Health:
-
-```bash
-node scripts/check-supabase.mjs
-```
+- Sus datos ya se importaron a Docker con éxito (ensayo del 2026-11-11, `docs/DEPLOYMENT.md` §6).
+- Credenciales para repetir la importación: `infra/.env.import` (ignorado por git). Nunca imprimirlas ni pegarlas en chats, ZIPs o commits.
+- Si se activan presupuestos DC allí, aplicar antes la corrección `db/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`.
+- Retirarlo (proyecto Cloud, contenedores `supabase_*` locales, archivos legados) es irreversible y requiere confirmación expresa recurso por recurso.
 
 ---
 
 # 9. Regla de migraciones
 
-Nunca modificar una migración que ya aparece como aplicada en:
+Nunca modificar una migración ya aplicada: el runner (`infra/db/migrate.sh`) guarda un checksum por archivo en `schema_migrations` y falla si un archivo aplicado cambió.
 
-```bash
-npx supabase migration list
-```
-
-Si Local + Remote tienen el mismo timestamp:
-
-```text
-NO editar y esperar que vuelva a correr.
-```
-
-Crear otra migración:
+Crear siempre una migración nueva en `db/migrations/`:
 
 ```text
 YYYYMMDDHHMMSS_fix_description.sql
 ```
 
-Si existe inconsistencia:
+Orden de aplicación: `db/compat` → `supabase/migrations` → `db/migrations`. Las migraciones deben ser aditivas (añadir antes de quitar) para permitir rollback de imágenes.
 
-```text
-crear migración de reconciliación
-```
+Después de cambiar funciones o tablas expuestas: actualizar la lista blanca (`server/src/rpcAllowlist.js` / `catalog.js`) si aplica y regenerar `src/types/database.ts` (`npm --prefix server run db:types`).
 
 No borrar historial.
 
@@ -2296,3 +2227,18 @@ Validación pendiente o condicionada:
 - El healthcheck remoto confirma conectividad, pero la versión efectiva depende de ejecutar las migraciones pendientes con `supabase db push`.
 - El QA responsive automatizado confirmó ausencia de overflow en la pantalla de login a 375/768/1440/1920. Las rutas protegidas `/app`, `/profile`, `/rewards` y `/admin` requieren QA visual autenticado adicional.
 - No se instaló ni se conservó Puppeteer como dependencia permanente.
+
+---
+
+## Estado actual (2026-11-12) — backend propio, listo para entregar en local
+
+Esta sección reemplaza las notas de validación anteriores que mencionan `SUPABASE_SERVICE_ROLE_KEY` o `supabase db push`: ya no aplican.
+
+- Migración Supabase → backend propio completa (M0–M11 + endurecimiento S1–S6). Detalle: `docs/SPEC_MIGRACION_BACKEND_PROPIO.md`.
+- Datos reales de Supabase Cloud importados y verificados en Docker; login con contraseñas heredadas comprobado.
+- Base local poblada con datos demo (`server/scripts/seed-demo.mjs`): 132 cuentas, gyms, marcas, retos, premios, canjes y publicidad. Integridad 12/12; carga sin errores (`docs/ENTREGA_LOCAL.md`).
+- Bug corregido: `eco4c_grant_dc` devolvía 500 al pagar DC desde un presupuesto activo (`db/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`, con prueba de regresión).
+- Preparado para AWS (RDS, S3, SES, Secrets Manager, CloudWatch); decisiones pendientes en `docs/DECISIONES_PRODUCCION.md` (la principal: dónde corre el cómputo).
+- Pruebas: API 46/46 (disco y S3) + economía 3/3, Vitest 172/172, ESLint y TypeScript sin errores, Trivy sin HIGH/CRITICAL con parche.
+
+Siguiente paso esperado: decidir el cómputo en AWS y desplegar; después, retirar Supabase y los archivos legados con confirmación expresa.

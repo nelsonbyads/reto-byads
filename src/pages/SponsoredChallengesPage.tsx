@@ -27,7 +27,7 @@ import { ChallengeCenterNav } from "../components/ChallengeCenterNav";
 import { ExerciseMedia } from "../components/ExerciseMedia";
 import { useAuth } from "../auth/AuthContext";
 import { useWorkspace } from "../context/WorkspaceContext";
-import { supabase } from "../lib/supabase";
+import { backend } from "../lib/backend";
 import { useExercises } from "../hooks/useExercises";
 import { EMPTY_FILTERS } from "../lib/filters";
 import { formatSponsoredGoal, readSponsoredGoal } from "../lib/sponsoredGoals";
@@ -36,6 +36,7 @@ import {
   resolvePartnerPointConfig,
   type PartnerPointConfig,
 } from "../lib/partnerPoints";
+import { formatShortDateTime as formatDate, formatFileSize as formatBytes } from "../lib/format";
 
 interface ChallengeRow {
   id: string;
@@ -93,24 +94,6 @@ interface EvidenceView extends EvidenceRow {
   signedUrl: string | null;
 }
 
-function formatDate(value: string | null) {
-  if (!value) return "—";
-  try {
-    return new Intl.DateTimeFormat("es-CO", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-function formatBytes(bytes: number | null) {
-  if (!bytes) return "";
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 function statusLabel(status: string) {
   const labels: Record<string, string> = {
     accepted: "En curso",
@@ -140,8 +123,8 @@ function ParticipantEvidence({
   const canUpload = ["accepted", "rejected"].includes(participant.status);
 
   const load = useCallback(async () => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     setLoading(true);
     const { data, error: queryError } = await client
       .from("challenge_evidence")
@@ -178,8 +161,8 @@ function ParticipantEvidence({
     if (
       !file ||
       !user ||
-      user.provider !== "supabase" ||
-      !supabase ||
+      user.provider !== "cloud" ||
+      !backend ||
       !canUpload
     )
       return;
@@ -191,7 +174,7 @@ function ParticipantEvidence({
       setError("Sube una imagen o video compatible.");
       return;
     }
-    const client = supabase;
+    const client = backend;
     setUploading(true);
     setError("");
     setMessage("");
@@ -228,9 +211,9 @@ function ParticipantEvidence({
   };
 
   const remove = async (item: EvidenceView) => {
-    if (!supabase || !canUpload || !window.confirm("¿Eliminar esta evidencia?"))
+    if (!backend || !canUpload || !window.confirm("¿Eliminar esta evidencia?"))
       return;
-    const client = supabase;
+    const client = backend;
     const { error: dbError } = await client
       .from("challenge_evidence")
       .delete()
@@ -244,11 +227,11 @@ function ParticipantEvidence({
   };
 
   const submit = async () => {
-    if (!supabase || !canUpload || items.length === 0) return;
+    if (!backend || !canUpload || items.length === 0) return;
     setActing(true);
     setError("");
     setMessage("");
-    const { error: rpcError } = await supabase.rpc(
+    const { error: rpcError } = await backend.rpc(
       "submit_sponsored_challenge",
       { p_participant_id: participant.id },
     );
@@ -370,11 +353,11 @@ export function SponsoredChallengesPage() {
   );
 
   const load = useCallback(async () => {
-    if (!supabase || !user || user.provider !== "supabase") {
+    if (!backend || !user || user.provider !== "cloud") {
       setLoading(false);
       return;
     }
-    const client = supabase;
+    const client = backend;
     setLoading(true);
     setError("");
     const now = new Date().toISOString();
@@ -466,19 +449,18 @@ export function SponsoredChallengesPage() {
   useEffect(() => {
     void load();
   }, [load]);
-  if (activeWorkspace.kind !== "personal") return <Navigate to="/" replace />;
-
   const joinedCount = useMemo(
     () => [...participants.values()].length,
     [participants],
   );
+  if (activeWorkspace.kind !== "personal") return <Navigate to="/" replace />;
 
   const join = async (challengeId: string) => {
-    if (!supabase) return;
+    if (!backend) return;
     setActing(challengeId);
     setError("");
     setMessage("");
-    const { error: rpcError } = await supabase.rpc("join_sponsored_challenge", {
+    const { error: rpcError } = await backend.rpc("join_sponsored_challenge", {
       p_challenge_id: challengeId,
     });
     setActing(null);

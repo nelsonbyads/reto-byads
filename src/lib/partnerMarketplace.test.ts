@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { blockedReasonLabel, filterPartnerMarketplaces, formatInteger, initialMarketplaceSelection, isCurrentRequest, managementErrorMessage, marketplaceStateCopy, nextTabIndex, normalizePartnerIcon, normalizePartnerWorkspaceKind, quickPartnerMarketplaces, safePartnerColor, safeRpcInteger, type PartnerMarketplaceDto } from "./partnerMarketplace";
+import { blockedReasonLabel, filterPartnerMarketplaces, formatInteger, initialMarketplaceSelection, isCurrentRequest, managementErrorMessage, marketplaceStateCopy, nextTabIndex, normalizePartnerIcon, normalizePartnerWorkspaceKind, quickPartnerMarketplaces, redeemErrorMessage, safePartnerColor, safeRpcInteger, type PartnerMarketplaceDto } from "./partnerMarketplace";
 
 const community = (id: string): PartnerMarketplaceDto => ({ organization_id: id, organization_name: id, organization_type: "brand", organization_logo: null, points_name: "Moves", points_short_name: "MV", points_icon: null, points_color: "#456789", enabled: true, balance: 20, relationship_reason: "PARTNER_WALLET", marketplace_state: "OPERATIONAL" });
 
@@ -57,5 +57,15 @@ describe("partner marketplace presentation", () => {
     const history = { ...community("history"), organization_name: "Titanes", marketplace_state: "HISTORY_ONLY" as const };
     expect(filterPartnerMarketplaces([nike, history], "bogota", "ALL")).toEqual([nike]);
     expect(filterPartnerMarketplaces([nike, history], "", "HISTORY_ONLY")).toEqual([history]);
+  });
+});
+
+describe("redeemErrorMessage", () => {
+  it("maps SQL redemption errors to actionable copy", () => {
+    expect(redeemErrorMessage("insufficient DadoCoins")).toContain("saldo suficiente");
+    expect(redeemErrorMessage("reward is sold out")).toContain("agotó");
+    expect(redeemErrorMessage("redemption limit reached")).toContain("máximo de canjes");
+    expect(redeemErrorMessage("active Gym membership required")).toContain("membresía");
+    expect(redeemErrorMessage("something else")).toContain("no pudo completarse");
   });
 });

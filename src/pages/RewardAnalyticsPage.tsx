@@ -18,7 +18,7 @@ import {
   resolvePartnerPointConfig,
   type PartnerPointConfig,
 } from "../lib/partnerPoints";
-import { supabase } from "../lib/supabase";
+import { backend } from "../lib/backend";
 
 type Summary = {
   offers_total: number;
@@ -108,13 +108,13 @@ export function RewardAnalyticsPage() {
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
-    if (!supabase || !orgId || !manager) {
+    if (!backend || !orgId || !manager) {
       setLoading(false);
       return;
     }
     setLoading(true);
     setError("");
-    const { data: payload, error: rpcError } = await supabase.rpc(
+    const { data: payload, error: rpcError } = await backend.rpc(
       "provider_reward_analytics",
       {
         p_organization_id: orgId,

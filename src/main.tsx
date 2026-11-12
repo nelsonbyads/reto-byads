@@ -21,6 +21,13 @@ import './styles/v13.2-sponsored-goals.css';
 import './styles/v13.3-ui-governance.css';
 import './styles/v13.4-final-polish.css';
 import './styles/v13.5-monetization.css';
+// Theme palettes must come last: main.tsx's sheets load after App's, so the
+// last import here is the last stylesheet in the cascade.
+import './styles/v16-themes.css';
+import { applyTheme, readStoredTheme } from './lib/theme';
+
+// Apply the stored theme before the first render (public pages have no header).
+applyTheme(readStoredTheme(), false);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

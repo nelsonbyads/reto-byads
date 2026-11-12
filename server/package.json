@@ -1,0 +1,30 @@
+{
+  "name": "dadofit-api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DadoFit self-hosted API (replaces Supabase Auth, PostgREST and Storage)",
+  "engines": {
+    "node": ">=22.23.4 <23"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch --env-file=../infra/.env.api src/server.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "db:types": "node scripts/generate-db-types.mjs",
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "check:integrity": "node scripts/check-integrity.mjs",
+    "load:test": "node scripts/load-test.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1156.0",
+    "@aws-sdk/lib-storage": "3.1156.0",
+    "@fastify/cookie": "11.1.5",
+    "@fastify/rate-limit": "11.2.2",
+    "@node-rs/argon2": "2.2.2",
+    "bcryptjs": "3.0.3",
+    "fastify": "5.12.8",
+    "nodemailer": "10.5.0",
+    "pg": "8.23.1"
+  }
+}

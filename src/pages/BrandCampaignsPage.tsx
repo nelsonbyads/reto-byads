@@ -1,14 +1,15 @@
-import { ArrowLeft, Check, CheckCircle2, Clock3, Coins, FileVideo2, Image as ImageIcon, Megaphone, Pause, Pencil, Play, RefreshCw, Save, Send, ShieldCheck, Sparkles, Trophy, Upload, UsersRound, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { ArrowLeft, Check, CheckCircle2, Clock3, Coins, FileVideo2, Image as ImageIcon, Megaphone, Pause, Pencil, Play, RefreshCw, Save, Send, ShieldCheck, Sparkles, Trophy, UsersRound, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { ExerciseCatalogPicker } from '../components/ExerciseCatalogPicker';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { canEditSponsorCampaign, canManageBrandRole, sponsoredChallengeEditMode, SPONSORED_LIMITS } from '../lib/sponsoredRules';
 import { defaultGoalUnit, formatSponsoredGoal, readSponsoredGoal, SPONSORED_GOAL_OPTIONS, SPONSORED_GOAL_UNITS, type SponsoredGoalType } from '../lib/sponsoredGoals';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
 import type { AppExercise } from '../types/exercise';
+import { formatShortDateTime as formatDate, formatFileSize as formatBytes } from '../lib/format';
 
 interface CampaignRow {
   id: string;
@@ -62,17 +63,6 @@ interface BrandSummary { members: number; campaigns: number; active_campaigns: n
 
 const EMPTY_SUMMARY: BrandSummary = { members: 0, campaigns: 0, active_campaigns: 0, sponsored_challenges: 0, active_challenges: 0, participants: 0, pending_review: 0, approved: 0, coins_granted: 0, xp_granted: 0, sp_granted: 0 };
 
-function formatDate(value: string | null) {
-  if (!value) return '—';
-  try { return new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(value)); } catch { return value; }
-}
-
-function formatBytes(bytes: number | null) {
-  if (!bytes) return '';
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function toDatetimeLocal(value: string | null) {
   if (!value) return '';
   const date = new Date(value);
@@ -95,8 +85,8 @@ function ReviewEvidence({ participant, onChanged }: { participant: ParticipantRo
   const [message, setMessage] = useState('');
 
   const load = useCallback(async () => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!backend) return;
+    const client = backend;
     setLoading(true);
     const { data, error: queryError } = await client.from('challenge_evidence').select('id, participant_id, evidence_kind, storage_path, file_name, mime_type, size_bytes, created_at').eq('participant_id', participant.id).order('created_at', { ascending: false });
     if (queryError) { setError(queryError.message); setLoading(false); return; }
@@ -112,9 +102,9 @@ function ReviewEvidence({ participant, onChanged }: { participant: ParticipantRo
   useEffect(() => { void load(); }, [load]);
 
   const review = async (decision: 'approved' | 'rejected') => {
-    if (!supabase || participant.status !== 'submitted') return;
+    if (!backend || participant.status !== 'submitted') return;
     setActing(true); setError(''); setMessage('');
-    const { data, error: rpcError } = await supabase.rpc('review_sponsored_challenge', { p_participant_id: participant.id, p_decision: decision, p_notes: notes.trim() || null });
+    const { data, error: rpcError } = await backend.rpc('review_sponsored_challenge', { p_participant_id: participant.id, p_decision: decision, p_notes: notes.trim() || null });
     setActing(false);
     if (rpcError) { setError(rpcError.message); return; }
     const result = (data ?? {}) as Record<string, unknown>;
@@ -171,8 +161,8 @@ export function BrandCampaignsPage() {
   const verified = activeWorkspace.verificationStatus === 'verified';
 
   const load = useCallback(async () => {
-    if (!supabase || !orgId) { setLoading(false); return; }
-    const client = supabase;
+    if (!backend || !orgId) { setLoading(false); return; }
+    const client = backend;
     setLoading(true); setError('');
     const [campaignResult, challengeResult, summaryResult] = await Promise.all([
       client.from('sponsor_campaigns').select('id, organization_id, name, description, status, starts_at, ends_at, default_reward_coins, default_reward_xp, default_reward_sp, max_participants, created_at').eq('organization_id', orgId).order('created_at', { ascending: false }),
@@ -205,11 +195,10 @@ export function BrandCampaignsPage() {
   }, [canManage, orgId]);
 
   useEffect(() => { void load(); }, [load]);
+  const submitted = useMemo(() => participants.filter((item) => item.status === 'submitted'), [participants]);
   if (activeWorkspace.kind !== 'brand' || !orgId) return <Navigate to="/" replace/>;
   const ppShort = resolvePartnerPointConfig(ppConfigs, orgId, 'brand').points_short_name;
   const ppName = resolvePartnerPointConfig(ppConfigs, orgId, 'brand').points_name;
-
-  const submitted = useMemo(() => participants.filter((item) => item.status === 'submitted'), [participants]);
 
   const resetCampaignForm = () => {
     setEditingCampaignId(null);
@@ -235,11 +224,11 @@ export function BrandCampaignsPage() {
 
   const createCampaign = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase || !canManage || !orgId) return;
+    if (!backend || !canManage || !orgId) return;
     const editing = Boolean(editingCampaignId);
     setActing(editing ? `edit-campaign:${editingCampaignId}` : 'create'); setError(''); setMessage('');
     const request = editing && editingCampaignId
-      ? await supabase.rpc('update_sponsor_campaign', {
+      ? await backend.rpc('update_sponsor_campaign', {
           p_campaign_id: editingCampaignId,
           p_name: campaignName.trim(),
           p_description: campaignDescription.trim() || null,
@@ -248,7 +237,7 @@ export function BrandCampaignsPage() {
           p_default_reward_sp: rewardSp,
           p_max_participants: campaignMax,
         })
-      : await supabase.rpc('create_sponsor_campaign', {
+      : await backend.rpc('create_sponsor_campaign', {
           p_organization_id: orgId,
           p_name: campaignName.trim(),
           p_description: campaignDescription.trim() || null,
@@ -272,9 +261,9 @@ export function BrandCampaignsPage() {
   };
 
   const setCampaignStatus = async (campaignId: string, status: CampaignRow['status']) => {
-    if (!supabase || !canManage) return;
+    if (!backend || !canManage) return;
     setActing(`status:${campaignId}`); setError(''); setMessage('');
-    const { error: rpcError } = await supabase.rpc('set_sponsor_campaign_status', { p_campaign_id: campaignId, p_status: status });
+    const { error: rpcError } = await backend.rpc('set_sponsor_campaign_status', { p_campaign_id: campaignId, p_status: status });
     setActing(null);
     if (rpcError) setError(rpcError.message); else { setMessage(`Campaña actualizada: ${campaignStatusLabel(status)}.`); await load(); }
   };
@@ -310,7 +299,7 @@ export function BrandCampaignsPage() {
 
   const publishChallenge = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase || !canManage || !publishCampaignId) return;
+    if (!backend || !canManage || !publishCampaignId) return;
 
     if (editingChallengeId) {
       const challenge = challenges.find((item) => item.id === editingChallengeId);
@@ -324,7 +313,7 @@ export function BrandCampaignsPage() {
       const finalExerciseName = mode === 'limited' ? challenge.exercise_name : (selectedExercise?.name ?? exerciseName.trim());
       if (!finalExerciseName) { setError('Selecciona un ejercicio o crea una actividad personalizada.'); return; }
       setActing(`edit-challenge:${challenge.id}`); setError(''); setMessage('');
-      const { error: rpcError } = await supabase.rpc('update_sponsored_challenge', {
+      const { error: rpcError } = await backend.rpc('update_sponsored_challenge', {
         p_challenge_id: challenge.id,
         p_exercise_name: finalExerciseName,
         p_exercise_id: selectedExercise?.id ?? challenge.exercise_id ?? null,
@@ -347,7 +336,7 @@ export function BrandCampaignsPage() {
     const finalExerciseName = selectedExercise?.name ?? exerciseName.trim();
     if (!finalExerciseName) { setError('Selecciona un ejercicio o crea una actividad personalizada.'); return; }
     setActing('publish'); setError(''); setMessage('');
-    const { error: rpcError } = await supabase.rpc('publish_sponsored_challenge', {
+    const { error: rpcError } = await backend.rpc('publish_sponsored_challenge', {
       p_campaign_id: publishCampaignId,
       p_exercise_name: finalExerciseName,
       p_exercise_id: selectedExercise?.id ?? null,
@@ -365,7 +354,7 @@ export function BrandCampaignsPage() {
   };
 
   const closeChallenge = async (challengeId: string) => {
-    if (!supabase || !canManage) return;
+    if (!backend || !canManage) return;
     const affected = participants.filter((participant) => participant.challenge_id === challengeId && ['invited', 'accepted', 'rejected', 'submitted', 'pending_audit'].includes(participant.status));
     const pendingEvidence = affected.filter((participant) => participant.status === 'submitted' || participant.status === 'pending_audit').length;
     const warning = pendingEvidence > 0
@@ -373,7 +362,7 @@ export function BrandCampaignsPage() {
       : '';
     if (!window.confirm(`¿Cerrar definitivamente este Branded Challenge?${warning}\n\n${affected.length} participación(es) pendiente(s) quedarán expiradas. Las recompensas ya aprobadas se conservarán.`)) return;
     setActing(`close:${challengeId}`); setError(''); setMessage('');
-    const { error: rpcError } = await supabase.rpc('close_sponsored_challenge', { p_challenge_id: challengeId });
+    const { error: rpcError } = await backend.rpc('close_sponsored_challenge', { p_challenge_id: challengeId });
     setActing(null);
     if (rpcError) {
       setError(`No fue posible cerrar el Branded Challenge: ${rpcError.message}`);

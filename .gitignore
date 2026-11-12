@@ -11,3 +11,6 @@ src-backup/
 .DS_Store
 .vscode/
 .idea/
+
+# Local demo accounts written by server/scripts/seed-demo.mjs
+infra/seed/

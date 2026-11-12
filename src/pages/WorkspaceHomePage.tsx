@@ -1,10 +1,10 @@
 import { Activity, Building2, CheckCircle2, CircleDollarSign, ClipboardCheck, Dice5, Gift, History, Megaphone, ShieldCheck, Swords, Tag, Trophy, UserCheck, UsersRound, XCircle } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { canManageBrandRole } from '../lib/sponsoredRules';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
 
 interface WorkspaceStats {
@@ -70,8 +70,8 @@ export function WorkspaceHomePage() {
   const [pointConfigs, setPointConfigs] = useState<Map<string, PartnerPointConfig>>(new Map());
 
   const load = useCallback(async () => {
-    if (!supabase || !activeWorkspace.organizationId) { setLoading(false); return; }
-    const client = supabase;
+    if (!backend || !activeWorkspace.organizationId) { setLoading(false); return; }
+    const client = backend;
     const orgId = activeWorkspace.organizationId;
     setLoading(true);
     setError('');
@@ -123,14 +123,14 @@ export function WorkspaceHomePage() {
   useEffect(() => {
     const orgId = activeWorkspace.organizationId;
     const canReadEconomy = ['owner', 'admin'].includes(activeWorkspace.role ?? '');
-    if (!supabase || !orgId || !canReadEconomy) {
+    if (!backend || !orgId || !canReadEconomy) {
       setBudgets([]);
       setPointAnalytics(null);
       return;
     }
     void Promise.all([
-      supabase.rpc('get_my_dc_budgets'),
-      supabase.rpc('get_partner_point_analytics', { p_organization_id: orgId }),
+      backend.rpc('get_my_dc_budgets'),
+      backend.rpc('get_partner_point_analytics', { p_organization_id: orgId }),
       loadPartnerPointConfigs([orgId]),
     ]).then(([budgetResult, analyticsResult, configs]) => {
       setBudgets(budgetResult.error ? [] : ((budgetResult.data ?? []) as DcBudgetView[]).filter((item: any) => !item.organization_id || item.organization_id === orgId));
@@ -145,7 +145,8 @@ export function WorkspaceHomePage() {
   const brandManager = canManageBrandRole(activeWorkspace.role);
   const verification = activeWorkspace.verificationStatus ?? 'pending_verification';
   const reviewed = stats.approved + stats.rejected;
-  const approvalRate = useMemo(() => reviewed > 0 ? Math.round((stats.approved / reviewed) * 100) : 0, [reviewed, stats.approved]);
+  // Plain arithmetic: a hook here would run after the conditional return above.
+  const approvalRate = reviewed > 0 ? Math.round((stats.approved / reviewed) * 100) : 0;
   const pointConfig = resolvePartnerPointConfig(pointConfigs, activeWorkspace.organizationId, activeWorkspace.kind);
 
   return <div className="profile-shell-v9 workspace-shell-v122 workspace-shell-v133"><AppHeader/><main className="profile-page-v9 workspace-home-v122 workspace-home-v133">

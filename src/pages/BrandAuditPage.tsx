@@ -5,7 +5,7 @@ import { AppHeader } from '../components/AppHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { canManageBrandRole } from '../lib/sponsoredRules';
 import { formatSponsoredGoal, readSponsoredGoal } from '../lib/sponsoredGoals';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 
 interface GovernanceCampaign {
   id: string;
@@ -90,8 +90,8 @@ export function BrandAuditPage() {
   const [historyFilter, setHistoryFilter] = useState<'all' | 'primary' | 'audit'>('all');
 
   const load = useCallback(async () => {
-    if (!supabase || !orgId) { setLoading(false); return; }
-    const client = supabase;
+    if (!backend || !orgId) { setLoading(false); return; }
+    const client = backend;
     setLoading(true); setError('');
     const { data: result, error: rpcError } = await client.rpc('get_brand_governance_dashboard', { p_organization_id: orgId });
     if (rpcError) { setError(rpcError.message); setLoading(false); return; }
@@ -112,14 +112,15 @@ export function BrandAuditPage() {
   }, [orgId]);
 
   useEffect(() => { void load(); }, [load]);
+  const filteredHistory = useMemo(() => historyFilter === 'all' ? data.history : data.history.filter((item) => item.review_stage === historyFilter), [data.history, historyFilter]);
   if (activeWorkspace.kind !== 'brand' || !orgId) return <Navigate to="/" replace/>;
   if (!canManage) return <Navigate to="/workspace" replace/>;
 
   const toggleDoubleValidation = async (campaign: GovernanceCampaign) => {
-    if (!supabase || !canManage || !['draft', 'paused'].includes(campaign.status)) return;
+    if (!backend || !canManage || !['draft', 'paused'].includes(campaign.status)) return;
     setActing(`toggle:${campaign.id}`); setError(''); setMessage('');
     const enabled = !campaign.requires_double_validation;
-    const { error: rpcError } = await supabase.rpc('set_sponsor_campaign_double_validation', { p_campaign_id: campaign.id, p_enabled: enabled });
+    const { error: rpcError } = await backend.rpc('set_sponsor_campaign_double_validation', { p_campaign_id: campaign.id, p_enabled: enabled });
     setActing(null);
     if (rpcError) { setError(rpcError.message); return; }
     setMessage(enabled ? 'Doble validación activada para la campaña.' : 'Doble validación desactivada para la campaña.');
@@ -127,9 +128,9 @@ export function BrandAuditPage() {
   };
 
   const audit = async (participantId: string, decision: 'approved' | 'rejected') => {
-    if (!supabase || !canManage) return;
+    if (!backend || !canManage) return;
     setActing(`audit:${participantId}`); setError(''); setMessage('');
-    const { data: result, error: rpcError } = await supabase.rpc('audit_sponsored_challenge', { p_participant_id: participantId, p_decision: decision, p_notes: notes[participantId]?.trim() || null });
+    const { data: result, error: rpcError } = await backend.rpc('audit_sponsored_challenge', { p_participant_id: participantId, p_decision: decision, p_notes: notes[participantId]?.trim() || null });
     setActing(null);
     if (rpcError) { setError(rpcError.message); return; }
     const row = (result ?? {}) as Record<string, unknown>;
@@ -139,8 +140,6 @@ export function BrandAuditPage() {
     setNotes((current) => ({ ...current, [participantId]: '' }));
     await load();
   };
-
-  const filteredHistory = useMemo(() => historyFilter === 'all' ? data.history : data.history.filter((item) => item.review_stage === historyFilter), [data.history, historyFilter]);
 
   return <div className="profile-shell-v9 brand-audit-shell-v133"><AppHeader/><main className="profile-page-v9 brand-audit-page-v133">
     <div className="brand-audit-topline-v133"><Link className="profile-back-v9" to="/workspace"><ArrowLeft size={16}/> Dashboard Marca</Link><button type="button" onClick={() => { void load(); }} disabled={loading}><RefreshCw size={15}/> Actualizar</button></div>

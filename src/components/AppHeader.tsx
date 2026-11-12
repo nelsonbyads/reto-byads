@@ -32,10 +32,8 @@ import {
   getWorkspaceNavigation,
   type WorkspaceNavIcon,
 } from "../lib/workspaceNavigation";
+import { applyTheme, readStoredTheme, type DadoFitTheme } from "../lib/theme";
 
-type DadoFitTheme = "pastel" | "light" | "dark";
-
-const THEME_KEY = "dadofit:theme:v15.8";
 const THEME_OPTIONS: Array<{
   id: DadoFitTheme;
   label: string;
@@ -46,23 +44,12 @@ const THEME_OPTIONS: Array<{
   { id: "dark", label: "Oscuro", icon: Moon },
 ];
 
-function readInitialTheme(): DadoFitTheme {
-  try {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === "pastel" || stored === "light" || stored === "dark")
-      return stored;
-  } catch {
-    /* ignore */
-  }
-  return "dark";
-}
-
 export function AppHeader() {
   const { user, logout } = useAuth();
   const { activeWorkspace } = useWorkspace();
   const isPlatformAdmin = usePlatformAdminStatus();
   const location = useLocation();
-  const [theme, setTheme] = useState<DadoFitTheme>(readInitialTheme);
+  const [theme, setTheme] = useState<DadoFitTheme>(readStoredTheme);
   const [themeOpen, setThemeOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -77,12 +64,7 @@ export function AppHeader() {
   };
 
   useEffect(() => {
-    document.documentElement.dataset.dadofitTheme = theme;
-    try {
-      localStorage.setItem(THEME_KEY, theme);
-    } catch {
-      /* ignore */
-    }
+    applyTheme(theme);
   }, [theme]);
 
   useEffect(() => {
@@ -104,7 +86,7 @@ export function AppHeader() {
     };
   }, []);
 
-  const cloud = user?.provider === "supabase";
+  const cloud = user?.provider === "cloud";
   const personal = activeWorkspace.kind === "personal";
   const gym = activeWorkspace.kind === "gym";
   const ThemeIcon =

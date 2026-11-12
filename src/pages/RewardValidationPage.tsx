@@ -3,7 +3,7 @@ import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react
 import { useSearchParams } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 
 type RedemptionRow = {
   id: string;
@@ -61,12 +61,12 @@ export function RewardValidationPage() {
   const [success, setSuccess] = useState('');
 
   const loadPending = useCallback(async () => {
-    if (!supabase || !orgId || !manager) {
+    if (!backend || !orgId || !manager) {
       setListLoading(false);
       return;
     }
     setListLoading(true);
-    const { data, error: e } = await supabase.rpc('provider_list_reward_redemptions', {
+    const { data, error: e } = await backend.rpc('provider_list_reward_redemptions', {
       p_organization_id: orgId,
       p_status: 'issued',
     });
@@ -76,13 +76,13 @@ export function RewardValidationPage() {
   }, [manager, orgId]);
 
   const doLookup = useCallback(async (raw: string) => {
-    if (!supabase) return;
+    if (!backend) return;
     const clean = normalizeLookup(raw);
     if (!clean) return;
     setLoading(true);
     setError('');
     setSuccess('');
-    const { data, error: e } = await supabase.rpc('provider_lookup_reward_redemption', { p_lookup: clean });
+    const { data, error: e } = await backend.rpc('provider_lookup_reward_redemption', { p_lookup: clean });
     setLoading(false);
     if (e) {
       setResult(null);
@@ -107,11 +107,11 @@ export function RewardValidationPage() {
   };
 
   const fulfill = async () => {
-    if (!supabase || !result || result.status !== 'issued') return;
+    if (!backend || !result || result.status !== 'issued') return;
     if (!window.confirm(`Confirmar que ${result.user_name} recibió “${result.title}”?`)) return;
     setLoading(true);
     setError('');
-    const { data, error: e } = await supabase.rpc('provider_fulfill_reward_redemption', {
+    const { data, error: e } = await backend.rpc('provider_fulfill_reward_redemption', {
       p_redemption_id: result.id,
       p_notes: notes || null,
     });

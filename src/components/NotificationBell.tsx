@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { notificationTarget, notificationWorkspaceId } from '../lib/notificationRouting';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 
 interface NotificationRow { id: string; notification_type: string; title: string; body: string | null; data: Record<string, unknown> | null; read_at: string | null; created_at: string; }
 
@@ -14,11 +14,11 @@ export function NotificationBell() {
   const { user } = useAuth();
   const { selectWorkspace, workspaces } = useWorkspace();
   const [open, setOpen] = useState(false); const [items, setItems] = useState<NotificationRow[]>([]); const [unreadCount, setUnreadCount] = useState(0); const [loading, setLoading] = useState(false); const [markingAll, setMarkingAll] = useState(false); const [error, setError] = useState('');
-  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+  const cloudReady = user?.provider === 'cloud' && Boolean(backend);
 
   const load = useCallback(async () => {
-    if (!cloudReady || !user || !supabase) return;
-    const client = supabase; setLoading(true); setError('');
+    if (!cloudReady || !user || !backend) return;
+    const client = backend; setLoading(true); setError('');
     const [itemsResult, countResult] = await Promise.all([
       client.from('notifications').select('id, notification_type, title, body, data, read_at, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
       client.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).is('read_at', null),
@@ -28,10 +28,10 @@ export function NotificationBell() {
     setLoading(false);
   }, [cloudReady, user]);
 
-  useEffect(() => { if (!cloudReady) return; void load(); const interval = window.setInterval(() => { void load(); }, 20000); const handleFocus = () => { void load(); }; window.addEventListener('focus', handleFocus); return () => { window.clearInterval(interval); window.removeEventListener('focus', handleFocus); }; }, [cloudReady, load]);
+  useEffect(() => { if (!cloudReady) return; void load(); const interval = window.setInterval(() => { if (document.visibilityState === 'visible') void load(); }, 20000); const handleFocus = () => { void load(); }; window.addEventListener('focus', handleFocus); return () => { window.clearInterval(interval); window.removeEventListener('focus', handleFocus); }; }, [cloudReady, load]);
 
-  const markRead = async (id: string) => { if (!supabase || !user) return; const now = new Date().toISOString(); const { error: updateError } = await supabase.from('notifications').update({ read_at: now }).eq('id', id).eq('user_id', user.id).is('read_at', null); if (!updateError) { setItems((current) => current.map((item) => item.id === id ? { ...item, read_at: item.read_at ?? now } : item)); setUnreadCount((current) => Math.max(0, current - 1)); } };
-  const markAllRead = async () => { if (!supabase || unreadCount === 0) return; setMarkingAll(true); setError(''); const { error: rpcError } = await supabase.rpc('mark_all_notifications_read'); setMarkingAll(false); if (rpcError) { setError(rpcError.message); return; } const now = new Date().toISOString(); setItems((current) => current.map((item) => item.read_at ? item : { ...item, read_at: now })); setUnreadCount(0); };
+  const markRead = async (id: string) => { if (!backend || !user) return; const now = new Date().toISOString(); const { error: updateError } = await backend.from('notifications').update({ read_at: now }).eq('id', id).eq('user_id', user.id).is('read_at', null); if (!updateError) { setItems((current) => current.map((item) => item.id === id ? { ...item, read_at: item.read_at ?? now } : item)); setUnreadCount((current) => Math.max(0, current - 1)); } };
+  const markAllRead = async () => { if (!backend || unreadCount === 0) return; setMarkingAll(true); setError(''); const { error: rpcError } = await backend.rpc('mark_all_notifications_read'); setMarkingAll(false); if (rpcError) { setError(rpcError.message); return; } const now = new Date().toISOString(); setItems((current) => current.map((item) => item.read_at ? item : { ...item, read_at: now })); setUnreadCount(0); };
 
   const prepareWorkspace = (item: NotificationRow) => {
     const workspaceId = notificationWorkspaceId(item, workspaces);

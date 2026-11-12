@@ -14,10 +14,12 @@
     "build": "tsc -b && vite build && node scripts/copy-media.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview --host 0.0.0.0 --port 4173"
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "lint": "eslint .",
+    "format": "prettier --write",
+    "format:check": "prettier --check"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.112.4",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -25,12 +27,18 @@
     "write-excel-file": "^4.1.1"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.5",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
-    "supabase": "^2.115.0",
+    "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
     "typescript": "^5.7.2",
+    "typescript-eslint": "8.72.1",
     "vite": "^6.4.5",
     "vitest": "^5.0.5"
   }

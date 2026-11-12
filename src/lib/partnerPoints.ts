@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { backend } from './backend';
 
 export interface PartnerPointConfig {
   organization_id: string;
@@ -50,14 +50,13 @@ export function resolvePartnerPointConfig(
 /** Carga únicamente la presentación pública autorizada de cada organización. */
 export async function loadPartnerPointConfigs(organizationIds: string[]): Promise<Map<string, PartnerPointConfig>> {
   const map = new Map<string, PartnerPointConfig>();
-  if (!supabase || organizationIds.length === 0) return map;
+  if (!backend || organizationIds.length === 0) return map;
   const unique = Array.from(new Set(organizationIds.filter(Boolean)));
   if (unique.length === 0) return map;
-  const results = await Promise.all(unique.map((organizationId) => supabase!.rpc('get_partner_point_config', { p_organization_id: organizationId })));
-  for (const result of results) {
-    if (result.error || !Array.isArray(result.data)) continue;
-    for (const row of result.data as PartnerPointConfig[]) map.set(row.organization_id, row);
-  }
+  // One authorised batch call instead of one request per organization (PERF-01).
+  const result = await backend.rpc('get_partner_point_configs_batch', { p_organization_ids: unique.slice(0, 200) });
+  if (result.error || !Array.isArray(result.data)) return map;
+  for (const row of result.data as PartnerPointConfig[]) map.set(row.organization_id, row);
   return map;
 }
 

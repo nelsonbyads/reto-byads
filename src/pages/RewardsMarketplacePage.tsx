@@ -1,360 +1,44 @@
-import {
-  AlertCircle,
-  Building2,
-  CheckCircle2,
-  Clipboard,
-  Clock3,
-  Coins,
-  ExternalLink,
-  Gift,
-  Heart,
-  History,
-  Package,
-  QrCode,
-  RefreshCw,
-  Search,
-  Sparkles,
-  Star,
-  Store,
-  Trophy,
-  X,
-  XCircle,
-  Zap,
-} from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type MutableRefObject,
-} from "react";
+import { AlertCircle } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { Clipboard } from "lucide-react";
+import { Clock3 } from "lucide-react";
+import { Coins } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { Gift } from "lucide-react";
+import { History } from "lucide-react";
+import { Package } from "lucide-react";
+import { QrCode } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import { Search } from "lucide-react";
+import { Store } from "lucide-react";
+import { X } from "lucide-react";
+import { XCircle } from "lucide-react";
+import { useCallback } from "react";
+import { useEffect } from "react";
+import { useRef } from "react";
+import { useState } from "react";
+import { type CSSProperties } from "react";
+import { type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { type MutableRefObject } from "react";
 import { AppHeader } from "../components/AppHeader";
 import { RewardQrCode } from "../components/RewardQrCode";
-import {
-  blockedReasonLabel,
-  filterPartnerMarketplaces,
-  formatInteger,
-  initialMarketplaceSelection,
-  isCurrentRequest,
-  marketplaceStateCopy,
-  nextTabIndex,
-  normalizePartnerIcon,
-  PARTNER_MARKETPLACE_RPCS,
-  safePartnerColor,
-  quickPartnerMarketplaces,
-  type CatalogRewardDto,
-  type IntegerValue,
-  type PartnerMarketplaceDto,
-  type MarketplaceState,
-  type RedemptionHistoryDto,
-} from "../lib/partnerMarketplace";
-import { supabase } from "../lib/supabase";
-
-type Scope = "dadofit" | "partner";
-type RedemptionResult = {
-  title: string;
-  new_balance: IntegerValue;
-  payment_currency: "dc" | "gp" | "sp";
-  payment_amount: IntegerValue;
-  redemption_reference: string | null;
-  assigned_code: string | null;
-  redemption_url: string | null;
-};
-type FulfillmentDto = {
-  assigned_code?: string | null;
-  redemption_url?: string | null;
-  fulfillment_instructions?: string | null;
-  validation_token?: string | null;
-  fulfillment_notes?: string | null;
-};
-const typeLabels: Record<string, string> = {
-  discount: "Descuento",
-  product: "Producto",
-  gym_pass: "Pase de Gym",
-  subscription: "Suscripción",
-  experience: "Experiencia",
-  other: "Otro",
-};
-const fulfillmentLabels: Record<string, string> = {
-  digital_code: "Código digital",
-  digital_benefit: "Beneficio digital",
-  physical_product: "Producto físico",
-  in_person: "Canje presencial",
-};
-const fmt = formatInteger;
-const date = (value: string | null) =>
-  value
-    ? new Intl.DateTimeFormat("es-CO", { dateStyle: "medium" }).format(
-        new Date(value),
-      )
-    : "—";
-
-function PartnerIcon({ value }: { value: string | null }) {
-  const key = normalizePartnerIcon(value);
-  if (key === "star") return <Star />;
-  if (key === "sparkles") return <Sparkles />;
-  if (key === "building") return <Building2 />;
-  if (key === "trophy") return <Trophy />;
-  if (key === "heart") return <Heart />;
-  if (key === "zap") return <Zap />;
-  return <Store />;
-}
-
-function CommunityButton({
-  community,
-  active,
-  onSelect,
-}: {
-  community: PartnerMarketplaceDto;
-  active: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      className={active ? "active" : ""}
-      style={{ "--community-accent": safePartnerColor(community.points_color) } as CSSProperties}
-      onClick={onSelect}
-    >
-      <span className="community-logo">
-        {community.organization_logo ? (
-          <img src={community.organization_logo} alt="" />
-        ) : (
-          <PartnerIcon value={community.points_icon} />
-        )}
-      </span>
-      <span>
-        <strong>{community.organization_name}</strong>
-        <small>{fmt(community.balance)} {community.points_short_name}</small>
-      </span>
-      <i>
-        {community.marketplace_state === "OPERATIONAL"
-          ? "Ver marketplace"
-          : community.marketplace_state === "DISABLED"
-            ? "Suspendido"
-            : "Solo historial"}
-      </i>
-    </button>
-  );
-}
-
-function CommunityDirectory({
-  communities,
-  selectedOrganizationId,
-  onClose,
-  onSelect,
-}: {
-  communities: PartnerMarketplaceDto[];
-  selectedOrganizationId: string | null;
-  onClose: () => void;
-  onSelect: (organizationId: string) => void;
-}) {
-  const [query, setQuery] = useState("");
-  const [state, setState] = useState<MarketplaceState | "ALL">("ALL");
-  const closeButton = useRef<HTMLButtonElement>(null);
-  const results = filterPartnerMarketplaces(communities, query, state);
-  useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
-    closeButton.current?.focus();
-    const keydown = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", keydown);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", keydown);
-      document.body.style.overflow = "";
-      previous?.focus();
-    };
-  }, [onClose]);
-  return (
-    <div className="community-directory-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="community-directory" role="dialog" aria-modal="true" aria-labelledby="community-directory-title">
-        <header>
-          <div><span>MARKETPLACES PARTNER</span><h2 id="community-directory-title">Mis comunidades</h2><p>Busca y selecciona dónde quieres usar tus Partner Points.</p></div>
-          <button ref={closeButton} type="button" onClick={onClose} aria-label="Cerrar comunidades"><X /></button>
-        </header>
-        <div className="community-directory-tools">
-          <label><Search size={18} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar comunidad o puntos…" /></label>
-          <div role="group" aria-label="Filtrar comunidades">
-            {([['ALL','Todas'],['OPERATIONAL','Disponibles'],['DISABLED','Suspendidas'],['HISTORY_ONLY','Historial']] as const).map(([value,label]) => (
-              <button type="button" key={value} className={state === value ? "active" : ""} onClick={() => setState(value)}>{label}</button>
-            ))}
-          </div>
-        </div>
-        <div className="community-directory-results" aria-live="polite">
-          {results.length ? results.map((community) => (
-            <CommunityButton key={community.organization_id} community={community} active={selectedOrganizationId === community.organization_id} onSelect={() => onSelect(community.organization_id)} />
-          )) : <div className="community-directory-empty"><Search /><strong>No encontramos comunidades</strong><span>Prueba otro nombre o cambia el filtro.</span></div>}
-        </div>
-        <footer>{results.length} de {communities.length} comunidades</footer>
-      </section>
-    </div>
-  );
-}
-
-function RewardDetail({
-  reward,
-  balance,
-  acting,
-  onClose,
-  onRedeem,
-}: {
-  reward: CatalogRewardDto;
-  balance: IntegerValue;
-  acting: boolean;
-  onClose: () => void;
-  onRedeem: () => void;
-}) {
-  const dialog = useRef<HTMLElement>(null);
-  const closeButton = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
-    closeButton.current?.focus();
-    const keydown = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-      if (event.key !== "Tab" || !dialog.current) return;
-      const focusable = Array.from(
-        dialog.current.querySelectorAll<HTMLElement>(
-          "button:not([disabled]),a[href]",
-        ),
-      );
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener("keydown", keydown);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", keydown);
-      document.body.style.overflow = "";
-      previous?.focus();
-    };
-  }, [onClose]);
-  const reason = blockedReasonLabel(reward.blocked_reason);
-  return (
-    <div
-      className="reward-detail-backdrop"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <section
-        ref={dialog}
-        className="reward-detail-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="reward-detail-title"
-      >
-        <header>
-          <div>
-            <span>{reward.organization_name}</span>
-            <h2 id="reward-detail-title">{reward.title}</h2>
-          </div>
-          <button
-            ref={closeButton}
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar detalle"
-          >
-            <X />
-          </button>
-        </header>
-        <div className="reward-detail-scroll">
-          {reward.image_url ? (
-            <img
-              className="reward-detail-image"
-              src={reward.image_url}
-              alt={`Premio ${reward.title}`}
-            />
-          ) : (
-            <div className="reward-detail-placeholder">
-              <Gift size={44} aria-hidden="true" />
-            </div>
-          )}
-          <p>
-            {reward.description ||
-              "Beneficio exclusivo dentro del ecosistema DadoFit."}
-          </p>
-          <dl className="reward-detail-facts">
-            <div>
-              <dt>Costo</dt>
-              <dd>
-                {fmt(reward.native_cost)} {reward.points_short_name}
-              </dd>
-            </div>
-            <div>
-              <dt>Tu saldo</dt>
-              <dd>
-                {fmt(balance)} {reward.points_short_name}
-              </dd>
-            </div>
-            <div>
-              <dt>Stock</dt>
-              <dd>
-                {reward.remaining_stock === null
-                  ? "Abierto"
-                  : fmt(reward.remaining_stock)}
-              </dd>
-            </div>
-            <div>
-              <dt>Entrega</dt>
-              <dd>{fulfillmentLabels[reward.fulfillment_type] ?? "Canje"}</dd>
-            </div>
-            <div>
-              <dt>Vigencia</dt>
-              <dd>
-                {date(reward.starts_at)} a {date(reward.ends_at)}
-              </dd>
-            </div>
-            <div>
-              <dt>Límite</dt>
-              <dd>
-                {reward.user_redemptions} de {reward.max_per_user} usados
-              </dd>
-            </div>
-          </dl>
-          {reward.terms && (
-            <section className="reward-detail-terms">
-              <h3>Términos</h3>
-              <p>{reward.terms}</p>
-            </section>
-          )}
-          {!reward.can_redeem && (
-            <p className="reward-detail-blocked" role="status">
-              {reason}
-            </p>
-          )}
-        </div>
-        <footer>
-          <button type="button" className="secondary" onClick={onClose}>
-            Volver
-          </button>
-          <button
-            type="button"
-            className="primary"
-            disabled={!reward.can_redeem || acting}
-            onClick={onRedeem}
-          >
-            {acting
-              ? "Canjeando…"
-              : `Confirmar canje · ${fmt(reward.native_cost)} ${reward.points_short_name}`}
-          </button>
-        </footer>
-      </section>
-    </div>
-  );
-}
+import { blockedReasonLabel } from "../lib/partnerMarketplace";
+import { initialMarketplaceSelection } from "../lib/partnerMarketplace";
+import { isCurrentRequest } from "../lib/partnerMarketplace";
+import { marketplaceStateCopy } from "../lib/partnerMarketplace";
+import { nextTabIndex } from "../lib/partnerMarketplace";
+import { PARTNER_MARKETPLACE_RPCS } from "../lib/partnerMarketplace";
+import { safePartnerColor } from "../lib/partnerMarketplace";
+import { quickPartnerMarketplaces } from "../lib/partnerMarketplace";
+import { type CatalogRewardDto } from "../lib/partnerMarketplace";
+import { type IntegerValue } from "../lib/partnerMarketplace";
+import { type PartnerMarketplaceDto } from "../lib/partnerMarketplace";
+import { type RedemptionHistoryDto } from "../lib/partnerMarketplace";
+import { backend } from "../lib/backend";
+import { safeExternalUrl } from "../lib/safeUrl";
+import { redeemErrorMessage } from "../lib/partnerMarketplace";
+import { FulfillmentDto, RedemptionResult, Scope, date, fmt, fulfillmentLabels, typeLabels } from "./rewardsMarketplace/model";
+import { CommunityButton, CommunityDirectory, PartnerIcon, RewardDetail } from "./rewardsMarketplace/components";
 
 export function RewardsMarketplacePage() {
   const [communities, setCommunities] = useState<PartnerMarketplaceDto[]>([]);
@@ -393,8 +77,8 @@ export function RewardsMarketplacePage() {
       all: boolean,
       generation: number,
     ) => {
-      if (!supabase) return;
-      const { data, error: rpcError } = await supabase.rpc(
+      if (!backend) return;
+      const { data, error: rpcError } = await backend.rpc(
         PARTNER_MARKETPLACE_RPCS.history,
         { p_organization_id: all ? null : partnerOrganization },
       );
@@ -412,7 +96,7 @@ export function RewardsMarketplacePage() {
       nextOrganization: string | null,
       generation: number,
     ) => {
-      if (!supabase) return;
+      if (!backend) return;
       if (nextScope === "partner" && !nextOrganization) {
         if (generation === requestGeneration.current) setCatalog([]);
         return;
@@ -420,8 +104,8 @@ export function RewardsMarketplacePage() {
       setCatalogLoading(true);
       const result =
         nextScope === "dadofit"
-          ? await supabase.rpc(PARTNER_MARKETPLACE_RPCS.dadofitCatalog)
-          : await supabase.rpc(PARTNER_MARKETPLACE_RPCS.partnerCatalog, {
+          ? await backend.rpc(PARTNER_MARKETPLACE_RPCS.dadofitCatalog)
+          : await backend.rpc(PARTNER_MARKETPLACE_RPCS.partnerCatalog, {
               p_organization_id: nextOrganization,
             });
       if (result.error) throw result.error;
@@ -446,12 +130,12 @@ export function RewardsMarketplacePage() {
   );
 
   const load = useCallback(async () => {
-    if (!supabase) return;
+    if (!backend) return;
     const generation = ++requestGeneration.current;
     setLoading(true);
     setError("");
     try {
-      const discovery = await supabase.rpc(PARTNER_MARKETPLACE_RPCS.discovery);
+      const discovery = await backend.rpc(PARTNER_MARKETPLACE_RPCS.discovery);
       if (discovery.error) throw discovery.error;
       const rows = (discovery.data ?? []) as PartnerMarketplaceDto[];
       if (generation !== requestGeneration.current) return;
@@ -533,7 +217,7 @@ export function RewardsMarketplacePage() {
     }
   };
   const redeem = async (reward: CatalogRewardDto) => {
-    if (!supabase || !reward.can_redeem) return;
+    if (!backend || !reward.can_redeem) return;
     const redemptionGeneration = requestGeneration.current;
     setActing(reward.reward_id);
     setError("");
@@ -543,16 +227,14 @@ export function RewardsMarketplacePage() {
         : selected?.organization_type === "gym"
           ? "gp"
           : "sp";
-    const { data, error: rpcError } = await supabase.rpc("redeem_reward", {
+    const { data, error: rpcError } = await backend.rpc("redeem_reward", {
       p_reward_id: reward.reward_id,
       p_payment_method: payment,
     });
     setActing((current) => (current === reward.reward_id ? "" : current));
     if (redemptionGeneration !== requestGeneration.current) return;
     if (rpcError) {
-      setError(
-        "El canje no pudo completarse. Actualiza y revisa la disponibilidad.",
-      );
+      setError(redeemErrorMessage(rpcError.message));
       return;
     }
     setSuccess((data ?? null) as RedemptionResult | null);
@@ -576,10 +258,10 @@ export function RewardsMarketplacePage() {
     }
   };
   const loadFulfillment = async (redemptionId: string) => {
-    if (!supabase || fulfillment[redemptionId]) return;
+    if (!backend || fulfillment[redemptionId]) return;
     const generation = requestGeneration.current;
     setFulfillment((current) => ({ ...current, [redemptionId]: "loading" }));
-    const { data, error: rpcError } = await supabase.rpc(
+    const { data, error: rpcError } = await backend.rpc(
       PARTNER_MARKETPLACE_RPCS.ownerFulfillment,
       { p_redemption_id: redemptionId },
     );
@@ -861,9 +543,9 @@ export function RewardsMarketplacePage() {
                   </button>
                 </span>
               )}
-              {success.redemption_url && (
+              {safeExternalUrl(success.redemption_url) && (
                 <a
-                  href={success.redemption_url}
+                  href={safeExternalUrl(success.redemption_url)}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -1093,7 +775,7 @@ export function RewardsMarketplacePage() {
                               {delivery.redemption_url && (
                                 <a
                                   className="reward-open-link-v151"
-                                  href={delivery.redemption_url}
+                                  href={safeExternalUrl(delivery.redemption_url)}
                                   target="_blank"
                                   rel="noreferrer"
                                 >

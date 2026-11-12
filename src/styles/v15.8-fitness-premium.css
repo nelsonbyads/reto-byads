@@ -2,7 +2,7 @@
    DadoFit V15.8 — Fitness Premium UI
    Direction: high-impact training app, dark graphite + neon lime.
    Loaded last so it acts as a visual compatibility layer without
-   changing routes, Supabase contracts, permissions or economy logic.
+   changing routes, backend contracts, permissions or economy logic.
    ========================================================= */
 
 :root {
@@ -36,17 +36,17 @@ body {
 
 /* Keep the existing theme selector functional, but make the new DARK mode
    the intended reference style. Light/Pastel remain available. */
-html[data-dadofit-theme="dark"] .workout-layout,
-html[data-dadofit-theme="dark"] .rewards-page-v15,
-html[data-dadofit-theme="dark"] .workspace-home-page-v122,
-html[data-dadofit-theme="dark"] .brand-page-v13,
-html[data-dadofit-theme="dark"] .admin-shell-v14 {
+html[data-dadofit-theme] .workout-layout,
+html[data-dadofit-theme] .rewards-page-v15,
+html[data-dadofit-theme] .workspace-home-page-v122,
+html[data-dadofit-theme] .brand-page-v13,
+html[data-dadofit-theme] .admin-shell-v14 {
   --bg: var(--df-ink);
-  --bg-glow: rgba(200,255,25,.08);
+  --bg-glow: color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 8%, transparent);
   --panel: var(--df-surface);
   --panel-soft: var(--df-surface-2);
   --panel-elevated: var(--df-surface-2);
-  --panel-strong: #050605;
+  --panel-strong: var(--dfgt-strong, #050605);
   --text: var(--df-copy);
   --text-soft: var(--df-copy-soft);
   --muted: var(--df-copy-muted);
@@ -54,32 +54,23 @@ html[data-dadofit-theme="dark"] .admin-shell-v14 {
   --line-strong: var(--df-line-strong);
   --primary: var(--df-neon);
   --primary-hover: var(--df-neon-strong);
-  --primary-text: #080a08;
-  --secondary: var(--df-neon);
-  --secondary-soft: rgba(200,255,25,.08);
-  --selected-bg: rgba(200,255,25,.12);
-  --selected-text: var(--df-neon);
-  --dice-bg: #151916;
+  --primary-text: var(--dfgt-on-accent, #080a08);
+  --secondary: var(--dfgt-accent, var(--df-neon));
+  --secondary-soft: color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 8%, transparent);
+  --selected-bg: color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 12%, transparent);
+  --selected-text: var(--dfgt-accent, var(--df-neon));
+  --dice-bg: var(--dfgt-surface-raised, #151916);
   --dice-number: var(--df-copy);
-  --exercise-tile: #111512;
+  --exercise-tile: var(--dfgt-surface-soft, #111512);
   --focus: var(--df-neon);
   --shadow: var(--df-shadow);
-  --shadow-soft: 0 10px 30px rgba(0,0,0,.20);
-}
-
-html[data-dadofit-theme="light"] .workout-layout,
-html[data-dadofit-theme="pastel"] .workout-layout {
-  --primary: #bfe900;
-  --primary-hover: #acd400;
-  --primary-text: #10120f;
-  --focus: #98bf00;
+  --shadow-soft: 0 10px 30px color-mix(in srgb, var(--dfgt-shadow, rgb(0,0,0)) 20%, transparent);
 }
 
 /* ---------- Global visual rhythm ---------- */
 .workout-layout,
 .rewards-page-v15 {
-  background:
-    radial-gradient(circle at 12% -8%, rgba(200,255,25,.09), transparent 32rem),
+  background: radial-gradient(circle at 12% -8%, color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 9%, transparent), transparent 32rem),
     var(--bg, var(--df-ink));
 }
 
@@ -120,50 +111,50 @@ html[data-dadofit-theme="pastel"] .workout-layout {
   border: 1px solid var(--line, var(--df-line));
   border-radius: 18px;
   background: color-mix(in srgb, var(--panel, var(--df-surface)) 94%, transparent);
-  box-shadow: 0 16px 40px rgba(0,0,0,.18);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--dfgt-shadow, rgb(0,0,0)) 18%, transparent);
   backdrop-filter: blur(18px);
 }
 
-html[data-dadofit-theme="dark"] .brand-mark-v7 {
-  color: #070907 !important;
+html[data-dadofit-theme] .brand-mark-v7 {
+  color: var(--dfgt-on-accent, #070907) !important;
   background: var(--df-neon) !important;
   border-color: transparent !important;
-  box-shadow: 0 0 0 1px rgba(200,255,25,.18), 0 0 28px rgba(200,255,25,.14) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 18%, transparent), 0 0 28px color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 14%, transparent) !important;
 }
 
-html[data-dadofit-theme="dark"] .app-nav-v151 a,
-html[data-dadofit-theme="dark"] .nav-more-trigger-v151,
-html[data-dadofit-theme="dark"] .header-tool-v133,
-html[data-dadofit-theme="dark"] .user-trigger-v133 {
+html[data-dadofit-theme] .app-nav-v151 a,
+html[data-dadofit-theme] .nav-more-trigger-v151,
+html[data-dadofit-theme] .header-tool-v133,
+html[data-dadofit-theme] .user-trigger-v133 {
   border-color: transparent;
   color: var(--df-copy-soft);
   background: transparent;
 }
 
-html[data-dadofit-theme="dark"] .app-nav-v151 a:hover,
-html[data-dadofit-theme="dark"] .nav-more-trigger-v151:hover,
-html[data-dadofit-theme="dark"] .header-tool-v133:hover,
-html[data-dadofit-theme="dark"] .user-trigger-v133:hover {
+html[data-dadofit-theme] .app-nav-v151 a:hover,
+html[data-dadofit-theme] .nav-more-trigger-v151:hover,
+html[data-dadofit-theme] .header-tool-v133:hover,
+html[data-dadofit-theme] .user-trigger-v133:hover {
   color: var(--df-copy);
-  background: rgba(255,255,255,.05);
+  background: color-mix(in srgb, var(--dfgt-contrast, rgb(255,255,255)) 5%, transparent);
 }
 
-html[data-dadofit-theme="dark"] .app-nav-v151 a.active,
-html[data-dadofit-theme="dark"] .nav-more-trigger-v151.active {
-  color: #070907 !important;
+html[data-dadofit-theme] .app-nav-v151 a.active,
+html[data-dadofit-theme] .nav-more-trigger-v151.active {
+  color: var(--dfgt-on-accent, #070907) !important;
   background: var(--df-neon) !important;
   border-color: var(--df-neon) !important;
 }
 
-html[data-dadofit-theme="dark"] .header-menu-v133,
-html[data-dadofit-theme="dark"] .nav-more-menu-v151 {
+html[data-dadofit-theme] .header-menu-v133,
+html[data-dadofit-theme] .nav-more-menu-v151 {
   border: 1px solid var(--df-line-strong);
-  background: #0d100e;
+  background: var(--dfgt-surface, #0d100e);
   box-shadow: var(--df-shadow);
 }
 
 /* ---------- Common panels and form surfaces ---------- */
-html[data-dadofit-theme="dark"] :where(
+html[data-dadofit-theme] :where(
   .summary-card,
   .profile-card,
   .dashboard-card,
@@ -176,22 +167,22 @@ html[data-dadofit-theme="dark"] :where(
   .brand-card
 ) {
   border-color: var(--df-line) !important;
-  background: linear-gradient(180deg, #121612, #0c0f0d) !important;
+  background: linear-gradient(180deg, var(--dfgt-surface-soft, #121612), var(--dfgt-surface, #0c0f0d)) !important;
   box-shadow: none !important;
 }
 
-html[data-dadofit-theme="dark"] :where(input, select, textarea) {
+html[data-dadofit-theme] :where(input, select, textarea) {
   accent-color: var(--df-neon);
 }
 
-html[data-dadofit-theme="dark"] .workout-layout :where(input,select,textarea) {
+html[data-dadofit-theme] .workout-layout :where(input,select,textarea) {
   border-color: var(--df-line) !important;
-  background: #0d100e !important;
+  background: var(--dfgt-surface, #0d100e) !important;
   color: var(--df-copy) !important;
 }
 
-html[data-dadofit-theme="dark"] .workout-layout :where(input,textarea)::placeholder {
-  color: #6f786b;
+html[data-dadofit-theme] .workout-layout :where(input,textarea)::placeholder {
+  color: var(--dfgt-muted, #6f786b);
 }
 
 /* =========================================================
@@ -202,11 +193,11 @@ html[data-dadofit-theme="dark"] .workout-layout :where(input,textarea)::placehol
   color: var(--text, var(--df-copy));
 }
 
-html[data-dadofit-theme="dark"] .rewards-page-v15 {
+html[data-dadofit-theme] .rewards-page-v15 {
   --bg: var(--df-ink);
   --panel: var(--df-surface);
   --panel-soft: var(--df-surface-2);
-  --panel-strong: #050605;
+  --panel-strong: var(--dfgt-strong, #050605);
   --text: var(--df-copy);
   --text-soft: var(--df-copy-soft);
   --muted: var(--df-copy-muted);
@@ -228,15 +219,14 @@ html[data-dadofit-theme="dark"] .rewards-page-v15 {
   border-radius: var(--df-radius-lg);
 }
 
-html[data-dadofit-theme="dark"] .rewards-hero-v15 {
+html[data-dadofit-theme] .rewards-hero-v15 {
   border: 1px solid var(--df-line-strong);
-  background:
-    linear-gradient(105deg, rgba(200,255,25,.09), transparent 45%),
-    #0d100e;
+  background: linear-gradient(105deg, color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 9%, transparent), transparent 45%),
+    var(--dfgt-surface, #0d100e);
   box-shadow: none;
 }
 
-html[data-dadofit-theme="dark"] .rewards-hero-v15::after {
+html[data-dadofit-theme] .rewards-hero-v15::after {
   content: '';
   position: absolute;
   width: 240px;
@@ -245,12 +235,12 @@ html[data-dadofit-theme="dark"] .rewards-hero-v15::after {
   top: -118px;
   z-index: -1;
   border-radius: 50%;
-  background: rgba(200,255,25,.12);
+  background: color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 12%, transparent);
   filter: blur(8px);
 }
 
 .rewards-hero-v15 .eyebrow {
-  color: var(--primary, var(--df-neon));
+  color: var(--primary, var(--dfgt-accent, var(--df-neon)));
   font-weight: 900;
   letter-spacing: .16em;
 }
@@ -270,14 +260,14 @@ html[data-dadofit-theme="dark"] .rewards-hero-v15::after {
   border-radius: var(--df-radius);
 }
 
-html[data-dadofit-theme="dark"] .rewards-balance-v15 {
+html[data-dadofit-theme] .rewards-balance-v15 {
   border: 1px solid var(--df-line-strong);
-  background: #151916;
+  background: var(--dfgt-surface-raised, #151916);
 }
 
-html[data-dadofit-theme="dark"] .rewards-balance-v15 svg,
-html[data-dadofit-theme="dark"] .rewards-balance-v15 strong {
-  color: var(--df-neon);
+html[data-dadofit-theme] .rewards-balance-v15 svg,
+html[data-dadofit-theme] .rewards-balance-v15 strong {
+  color: var(--dfgt-accent, var(--df-neon));
 }
 
 .rewards-tabs-v15 button,
@@ -286,27 +276,27 @@ html[data-dadofit-theme="dark"] .rewards-balance-v15 strong {
   border-radius: 13px;
 }
 
-html[data-dadofit-theme="dark"] .rewards-tabs-v15 button {
+html[data-dadofit-theme] .rewards-tabs-v15 button {
   border-color: var(--df-line);
-  background: #0e110f;
+  background: var(--dfgt-surface, #0e110f);
   color: var(--df-copy-soft);
 }
 
-html[data-dadofit-theme="dark"] .rewards-tabs-v15 button.active {
+html[data-dadofit-theme] .rewards-tabs-v15 button.active {
   border-color: var(--df-neon);
   background: var(--df-neon);
-  color: #070907;
+  color: var(--dfgt-on-accent, #070907);
 }
 
-html[data-dadofit-theme="dark"] .rewards-tabs-v15 button span {
-  background: #070907;
-  color: var(--df-neon);
+html[data-dadofit-theme] .rewards-tabs-v15 button span {
+  background: var(--dfgt-bg, #070907);
+  color: var(--dfgt-accent, var(--df-neon));
 }
 
-html[data-dadofit-theme="dark"] .rewards-toolbar-v15 label,
-html[data-dadofit-theme="dark"] .rewards-toolbar-v15 select {
+html[data-dadofit-theme] .rewards-toolbar-v15 label,
+html[data-dadofit-theme] .rewards-toolbar-v15 select {
   border-color: var(--df-line);
-  background: #0e110f;
+  background: var(--dfgt-surface, #0e110f);
   color: var(--df-copy);
 }
 
@@ -326,17 +316,17 @@ html[data-dadofit-theme="dark"] .rewards-toolbar-v15 select {
   isolation: isolate;
 }
 
-html[data-dadofit-theme="dark"] .reward-card-v15 {
+html[data-dadofit-theme] .reward-card-v15 {
   border: 1px solid var(--df-line);
-  background: #0d100e;
+  background: var(--dfgt-surface, #0d100e);
   box-shadow: none;
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
-html[data-dadofit-theme="dark"] .reward-card-v15:hover {
+html[data-dadofit-theme] .reward-card-v15:hover {
   transform: translateY(-2px);
-  border-color: rgba(200,255,25,.34);
-  box-shadow: 0 18px 48px rgba(0,0,0,.24);
+  border-color: color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 34%, transparent);
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--dfgt-shadow, rgb(0,0,0)) 24%, transparent);
 }
 
 /* Critical overflow fix: media has its own immutable box. */
@@ -370,8 +360,9 @@ html[data-dadofit-theme="dark"] .reward-card-v15:hover {
   z-index: 2;
   top: 12px;
   left: 12px;
+  /* Label over the reward photo: a dark scrim in every theme. */
   border: 1px solid rgba(255,255,255,.14);
-  background: rgba(5,7,5,.82);
+  background: color-mix(in srgb, var(--dfgt-strong, rgb(5,7,5)) 82%, transparent);
   backdrop-filter: blur(8px);
 }
 
@@ -385,7 +376,7 @@ html[data-dadofit-theme="dark"] .reward-card-v15:hover {
   display: flex !important;
   flex-direction: column !important;
   padding: 16px !important;
-  background: var(--panel, #0d100e);
+  background: var(--panel, var(--dfgt-surface, #0d100e));
 }
 
 .reward-card-v15 .reward-provider-v15 {
@@ -437,9 +428,9 @@ html[data-dadofit-theme="dark"] .reward-card-v15:hover {
   max-width: 100%;
 }
 
-html[data-dadofit-theme="dark"] .reward-card-v15 .reward-meta-v15 span {
-  border: 1px solid rgba(255,255,255,.06);
-  background: #161a17;
+html[data-dadofit-theme] .reward-card-v15 .reward-meta-v15 span {
+  border: 1px solid color-mix(in srgb, var(--dfgt-contrast, rgb(255,255,255)) 6%, transparent);
+  background: var(--dfgt-surface-raised, #161a17);
   color: var(--df-copy-soft);
 }
 
@@ -456,8 +447,8 @@ html[data-dadofit-theme="dark"] .reward-card-v15 .reward-meta-v15 span {
   color: var(--text, var(--df-copy));
 }
 
-html[data-dadofit-theme="dark"] .reward-card-v15 .reward-payment-summary-eco3 strong:first-child {
-  color: var(--df-neon);
+html[data-dadofit-theme] .reward-card-v15 .reward-payment-summary-eco3 strong:first-child {
+  color: var(--dfgt-accent, var(--df-neon));
 }
 
 .reward-card-v15 .reward-payment-actions-eco3 {
@@ -478,43 +469,43 @@ html[data-dadofit-theme="dark"] .reward-card-v15 .reward-payment-summary-eco3 st
   font-weight: 900;
 }
 
-html[data-dadofit-theme="dark"] .reward-card-v15 .reward-payment-actions-eco3 button:not(:disabled) {
+html[data-dadofit-theme] .reward-card-v15 .reward-payment-actions-eco3 button:not(:disabled) {
   border: 1px solid var(--df-neon);
   background: var(--df-neon);
-  color: #080a08;
+  color: var(--dfgt-on-accent, #080a08);
 }
 
-html[data-dadofit-theme="dark"] .reward-card-v15 .reward-payment-actions-eco3 button:not(:disabled) + button {
-  border-color: rgba(200,255,25,.32);
-  background: rgba(200,255,25,.08);
-  color: var(--df-neon);
+html[data-dadofit-theme] .reward-card-v15 .reward-payment-actions-eco3 button:not(:disabled) + button {
+  border-color: color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 32%, transparent);
+  background: color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 8%, transparent);
+  color: var(--dfgt-accent, var(--df-neon));
 }
 
-html[data-dadofit-theme="dark"] .reward-card-v15 .reward-payment-actions-eco3 button:disabled {
-  border: 1px solid rgba(255,255,255,.06);
-  background: #171a17;
-  color: #687064;
+html[data-dadofit-theme] .reward-card-v15 .reward-payment-actions-eco3 button:disabled {
+  border: 1px solid color-mix(in srgb, var(--dfgt-contrast, rgb(255,255,255)) 6%, transparent);
+  background: var(--dfgt-surface-raised, #171a17);
+  color: var(--dfgt-muted, #687064);
 }
 
 .reward-card-v15 .reward-body-v15 > small {
   line-height: 1.35;
 }
 
-html[data-dadofit-theme="dark"] .redemptions-list-v15 > article,
-html[data-dadofit-theme="dark"] .rewards-empty-v15,
-html[data-dadofit-theme="dark"] .reward-editor-v15,
-html[data-dadofit-theme="dark"] .provider-rewards-v15 {
+html[data-dadofit-theme] .redemptions-list-v15 > article,
+html[data-dadofit-theme] .rewards-empty-v15,
+html[data-dadofit-theme] .reward-editor-v15,
+html[data-dadofit-theme] .provider-rewards-v15 {
   border-color: var(--df-line);
-  background: #0d100e;
+  background: var(--dfgt-surface, #0d100e);
   box-shadow: none;
 }
 
-html[data-dadofit-theme="dark"] .reward-save-v15,
-html[data-dadofit-theme="dark"] .provider-reward-actions-v15 button.primary,
-html[data-dadofit-theme="dark"] .rewards-empty-v15 button {
+html[data-dadofit-theme] .reward-save-v15,
+html[data-dadofit-theme] .provider-reward-actions-v15 button.primary,
+html[data-dadofit-theme] .rewards-empty-v15 button {
   border-color: var(--df-neon);
   background: var(--df-neon);
-  color: #080a08;
+  color: var(--dfgt-on-accent, #080a08);
 }
 
 /* ---------- Compact desktop/tablet ---------- */
@@ -589,14 +580,14 @@ html[data-dadofit-theme="dark"] .rewards-empty-v15 button {
   padding: 10px 12px;
   border: 1px solid var(--line, var(--df-line));
   border-radius: 14px;
-  background: var(--panel-soft, #151916);
+  background: var(--panel-soft, var(--dfgt-surface-raised, #151916));
 }
-.reward-wallet-chip-v158 svg { grid-area: icon; color: var(--primary, var(--df-neon)); }
+.reward-wallet-chip-v158 svg { grid-area: icon; color: var(--primary, var(--dfgt-accent, var(--df-neon))); }
 .reward-wallet-chip-v158 span { grid-area: label; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .67rem; color: var(--muted, var(--df-copy-muted)); }
 .reward-wallet-chip-v158 strong { grid-area: value; font-size: .98rem; color: var(--text, var(--df-copy)); }
-html[data-dadofit-theme="dark"] .reward-wallet-chip-v158.dc { border-color: rgba(200,255,25,.32); }
-html[data-dadofit-theme="dark"] .reward-wallet-chip-v158.gp { border-color: rgba(120,210,255,.20); }
-html[data-dadofit-theme="dark"] .reward-wallet-chip-v158.sp { border-color: rgba(255,190,90,.20); }
+html[data-dadofit-theme] .reward-wallet-chip-v158.dc { border-color: color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 32%, transparent); }
+html[data-dadofit-theme] .reward-wallet-chip-v158.gp { border-color: color-mix(in srgb, var(--dfgt-info, rgb(120,210,255)) 20%, transparent); }
+html[data-dadofit-theme] .reward-wallet-chip-v158.sp { border-color: color-mix(in srgb, var(--dfgt-warning, rgb(255,190,90)) 20%, transparent); }
 
 .reward-locked-state-v158 {
   width: 100%;
@@ -606,23 +597,22 @@ html[data-dadofit-theme="dark"] .reward-wallet-chip-v158.sp { border-color: rgba
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border: 1px solid rgba(255,255,255,.07);
+  border: 1px solid color-mix(in srgb, var(--dfgt-contrast, rgb(255,255,255)) 7%, transparent);
   border-radius: 12px;
-  background: #171a17;
-  color: #7e877a;
+  background: var(--dfgt-surface-raised, #171a17);
+  color: var(--dfgt-muted, #7e877a);
   font-size: .8rem;
   font-weight: 900;
 }
 
 /* ---------- Broader app surface harmonization ---------- */
-html[data-dadofit-theme="dark"] body {
+html[data-dadofit-theme] body {
   color: var(--df-copy);
-  background:
-    radial-gradient(circle at 8% 0%, rgba(200,255,25,.08), transparent 34rem),
-    #070907;
+  background: radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 8%, transparent), transparent 34rem),
+    var(--dfgt-bg, #070907);
 }
 
-html[data-dadofit-theme="dark"] :where(
+html[data-dadofit-theme] :where(
   .profile-shell-v9,
   .gymbros-page-v9,
   .challenges-page-v10,
@@ -638,12 +628,11 @@ html[data-dadofit-theme="dark"] :where(
   .workspace-home-page-v122
 ) {
   color: var(--df-copy);
-  background:
-    radial-gradient(circle at 12% -10%, rgba(200,255,25,.07), transparent 30rem),
-    #070907 !important;
+  background: radial-gradient(circle at 12% -10%, color-mix(in srgb, var(--dfgt-tint, rgb(200,255,25)) 7%, transparent), transparent 30rem),
+    var(--dfgt-bg, #070907) !important;
 }
 
-html[data-dadofit-theme="dark"] :where(
+html[data-dadofit-theme] :where(
   .profile-card-v9,
   .gymbro-search-card-v9,
   .challenge-summary-v10,
@@ -657,11 +646,11 @@ html[data-dadofit-theme="dark"] :where(
   .admin-card-v14
 ) {
   border-color: var(--df-line) !important;
-  background: linear-gradient(180deg, #121612, #0c0f0d) !important;
+  background: linear-gradient(180deg, var(--dfgt-surface-soft, #121612), var(--dfgt-surface, #0c0f0d)) !important;
   box-shadow: none !important;
 }
 
-html[data-dadofit-theme="dark"] :where(
+html[data-dadofit-theme] :where(
   .profile-primary-v9,
   .challenge-submit-v10,
   .challenge-accept-v10,
@@ -670,7 +659,7 @@ html[data-dadofit-theme="dark"] :where(
 ) {
   border-color: var(--df-neon) !important;
   background: var(--df-neon) !important;
-  color: #080a08 !important;
+  color: var(--dfgt-on-accent, #080a08) !important;
 }
 
 @media (max-width: 760px) {

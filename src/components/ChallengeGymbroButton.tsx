@@ -2,7 +2,7 @@ import { Check, Flame, ShieldCheck, Swords, UserRound, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import type { AppExercise, DiceLevel } from '../types/exercise';
 
 interface Props {
@@ -37,12 +37,12 @@ export function ChallengeGymbroButton({ exercise, reps, diceLevel }: Props) {
   const [sentTo, setSentTo] = useState<GymbroProfile | null>(null);
   const [error, setError] = useState('');
 
-  const cloudReady = user?.provider === 'supabase' && Boolean(supabase);
+  const cloudReady = user?.provider === 'cloud' && Boolean(backend);
   const title = useMemo(() => `${reps}× ${exercise.name}`, [exercise.name, reps]);
 
   useEffect(() => {
-    if (!open || !cloudReady || !user || !supabase) return;
-    const client = supabase;
+    if (!open || !cloudReady || !user || !backend) return;
+    const client = backend;
     let active = true;
 
     const loadGymbros = async () => {
@@ -93,8 +93,8 @@ export function ChallengeGymbroButton({ exercise, reps, diceLevel }: Props) {
   };
 
   const sendChallenge = async (gymbro: GymbroProfile) => {
-    if (!supabase || !user || user.provider !== 'supabase') return;
-    const client = supabase;
+    if (!backend || !user || user.provider !== 'cloud') return;
+    const client = backend;
     setSendingId(gymbro.id);
     setError('');
 

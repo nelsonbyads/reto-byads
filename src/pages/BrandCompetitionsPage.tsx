@@ -7,7 +7,6 @@ import {
   Save,
   Send,
   Sparkles,
-  Trophy,
   UsersRound,
   X,
 } from "lucide-react";
@@ -21,7 +20,7 @@ import {
 import { AppHeader } from "../components/AppHeader";
 import { useWorkspace } from "../context/WorkspaceContext";
 import { canManageBrandRole } from "../lib/sponsoredRules";
-import { supabase } from "../lib/supabase";
+import { backend } from "../lib/backend";
 
 type Gym = { id: string; name: string; verification_status: string };
 type Entry = {
@@ -78,17 +77,17 @@ export function BrandCompetitionsPage() {
   const [message, setMessage] = useState("");
 
   const load = useCallback(async () => {
-    if (!supabase || !orgId) return;
+    if (!backend || !orgId) return;
     setLoading(true);
     setError("");
     const [gymResult, competitionResult] = await Promise.all([
-      supabase
+      backend
         .from("organizations")
         .select("id,name,verification_status")
         .eq("organization_type", "gym")
         .eq("verification_status", "verified")
         .order("name"),
-      supabase.rpc("brand_list_sponsored_gym_competitions", {
+      backend.rpc("brand_list_sponsored_gym_competitions", {
         p_organization_id: orgId,
       }),
     ]);
@@ -150,7 +149,7 @@ export function BrandCompetitionsPage() {
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase || !orgId || !canManage || !verified) return;
+    if (!backend || !orgId || !canManage || !verified) return;
     if (selected.length < 2) {
       setError("Selecciona al menos dos Gyms verificados.");
       return;
@@ -167,11 +166,11 @@ export function BrandCompetitionsPage() {
       p_gym_ids: selected,
     };
     const { error: rpcError } = editingId
-      ? await supabase.rpc("brand_update_sponsored_gym_competition", {
+      ? await backend.rpc("brand_update_sponsored_gym_competition", {
           ...payload,
           p_season_id: editingId,
         })
-      : await supabase.rpc("brand_create_sponsored_gym_competition", payload);
+      : await backend.rpc("brand_create_sponsored_gym_competition", payload);
     setSaving(false);
     if (rpcError) {
       setError(rpcError.message);

@@ -16,3 +16,11 @@ src-backup/**
 .DS_Store
 MIGRATION.md
 KEEP_THESE_FILES.txt
+# Self-hosted stack: never send nested dependencies or secrets to a build.
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+server
+db
+supabase

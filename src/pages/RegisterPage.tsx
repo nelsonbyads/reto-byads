@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, Building2, Dumbbell, Tag, UserRound } from 'luci
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth, type SignupIntent } from '../auth/AuthContext';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { isBackendConfigured } from '../lib/backend';
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validateNewPassword } from '../lib/passwordRules';
 
 const INTENTS: Array<{ id: SignupIntent; title: string; description: string; icon: typeof UserRound }> = [
@@ -76,7 +76,7 @@ export function RegisterPage() {
           <button className="auth-primary" type="submit" disabled={submitting || Boolean(success)}>{submitting ? 'Creando…' : <>CREAR CUENTA <ArrowRight size={18}/></>}</button>
         </form>
         {success && <p className="auth-switch"><Link to="/login">Volver a iniciar sesión</Link></p>}
-        {!isSupabaseConfigured && intent !== 'personal' && <p className="auth-error">El modo local solo admite el workspace personal. Conecta Supabase para Gyms y Marcas.</p>}
+        {!isBackendConfigured && intent !== 'personal' && <p className="auth-error">El modo local solo admite el workspace personal. Gyms y Marcas requieren una cuenta DadoFit.</p>}
       </div></section>
     </main>
   );

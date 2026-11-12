@@ -20,8 +20,15 @@
     display: block;
   }
 
+  /* The dock is fixed to the bottom. Its space is reserved at the END of the
+     page (the spacer is rendered before the content, inside the left rail,
+     so giving it a height pushed the whole page down). */
   .workout-layout .responsive-ad-dock-spacer-v146 {
-    height: 108px;
+    height: 0;
+  }
+
+  .workout-layout:has(.responsive-ad-dock-wrap-v146) {
+    padding-bottom: 108px;
   }
 
   .workout-layout .responsive-ad-dock-v146 {
@@ -200,7 +207,11 @@
   }
 
   .workout-layout .responsive-ad-dock-spacer-v146 {
-    height: calc(82px + env(safe-area-inset-bottom, 0px));
+    height: 0;
+  }
+
+  .workout-layout:has(.responsive-ad-dock-wrap-v146:not(.responsive-ad-no-mobile-v146)) {
+    padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
   }
 
   .workout-layout .responsive-ad-dock-v146 {

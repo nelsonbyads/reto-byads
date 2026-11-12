@@ -1,5 +1,7 @@
 # DadoFit - Product & Technical Blueprint
 
+> **Documento histórico (etapa V9–V15).** La visión de producto sigue vigente, pero las secciones técnicas describen el backend anterior en Supabase. La arquitectura actual (backend propio en Docker, preparado para AWS) está en `docs/ARCHITECTURE.md`.
+
 ## 1. Product vision
 
 DadoFit turns exercise selection into a game: roll, train, prove it, challenge others and progress.

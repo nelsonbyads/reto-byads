@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import type { AppExercise, DiceLevel } from '../types/exercise';
 
 interface Props { exercise: AppExercise; reps: number; diceLevel: DiceLevel; }
@@ -27,7 +27,7 @@ export function OrganizationChallengeButton({ exercise, reps, diceLevel }: Props
   const [gymPoints, setGymPoints] = useState(100);
   const [pointConfigs, setPointConfigs] = useState<Map<string, PartnerPointConfig>>(new Map());
   const title = useMemo(() => `${reps}× ${exercise.name}`, [exercise.name, reps]);
-  const canManage = user?.provider === 'supabase' && activeWorkspace.kind === 'gym' && Boolean(activeWorkspace.organizationId) && ['owner', 'admin', 'coach'].includes(activeWorkspace.role ?? '');
+  const canManage = user?.provider === 'cloud' && activeWorkspace.kind === 'gym' && Boolean(activeWorkspace.organizationId) && ['owner', 'admin', 'coach'].includes(activeWorkspace.role ?? '');
   const pointConfig = resolvePartnerPointConfig(pointConfigs, activeWorkspace.organizationId, 'gym');
 
   useEffect(() => {
@@ -44,10 +44,10 @@ export function OrganizationChallengeButton({ exercise, reps, diceLevel }: Props
   };
 
   const publish = async () => {
-    if (!supabase || !activeWorkspace.organizationId || !canManage) return;
+    if (!backend || !activeWorkspace.organizationId || !canManage) return;
     setSending(true);
     setError('');
-    const { error: rpcError } = await supabase.rpc('create_organization_challenge', {
+    const { error: rpcError } = await backend.rpc('create_organization_challenge', {
       p_organization_id: activeWorkspace.organizationId,
       p_exercise_id: exercise.id,
       p_exercise_name: exercise.name,

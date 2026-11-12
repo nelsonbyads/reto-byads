@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 
 export function PlatformAccountGate({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
@@ -11,11 +11,11 @@ export function PlatformAccountGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
     const run = async () => {
-      if (!user || user.provider !== 'supabase' || !supabase) {
+      if (!user || user.provider !== 'cloud' || !backend) {
         if (mounted) setStatus('active');
         return;
       }
-      const { data, error } = await supabase.rpc('get_my_platform_status');
+      const { data, error } = await backend.rpc('get_my_platform_status');
       if (mounted) setStatus(!error && data === 'suspended' ? 'suspended' : 'active');
     };
     void run();

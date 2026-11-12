@@ -1,0 +1,388 @@
+/* =========================================================
+   DadoFit V16 — Theme palettes
+   ---------------------------------------------------------
+   The visual system (V15.8 + V15.8.1) is written once, against semantic
+   tokens, and applies to every theme. Dark is the reference palette and is
+   defined in :root (v15.8.1). This file only swaps the palette for the light
+   and pastel themes, so all three share the same layout, spacing and
+   components.
+
+   Token meaning
+   - bg / bg-soft          page canvas
+   - panel / panel-2 / -3  cards, nested blocks, inputs (raised)
+   - text / soft / muted   copy hierarchy
+   - lime / lime-hover     accent FILL (primary buttons, selected chips)
+   - on-accent             text on the accent fill
+   - accent                accent as TEXT or icon on surfaces (must be legible)
+   - tint                  base colour of translucent accent washes and borders
+   - contrast              base colour of translucent highlights
+   - line*                 borders
+   - shadow-color          base colour of translucent shadows
+   Loaded last (App.tsx).
+   ========================================================= */
+
+html[data-dadofit-theme="light"] {
+  color-scheme: light;
+  --dfg-scheme: light;
+  --dfg-bg: #f3f5f0;
+  --dfg-bg-soft: #edf0e8;
+  --dfg-panel: #ffffff;
+  --dfg-panel-2: #f6f8f2;
+  --dfg-panel-3: #edf1e7;
+  --dfg-text: #131a11;
+  --dfg-soft: #485345;
+  --dfg-muted: #6b7667;
+  --dfg-lime: #c6f135;
+  --dfg-lime-hover: #b6e322;
+  --dfg-on-accent: #11170b;
+  --dfg-accent: #4d6c00;
+  --dfg-tint: #7aa600;
+  --dfg-contrast: #121a10;
+  --dfg-line: rgba(19,26,17,.10);
+  --dfg-line-strong: rgba(77,108,0,.40);
+  --dfg-line-neutral: rgba(19,26,17,.08);
+  --dfg-danger: #d03f2b;
+  --dfg-danger-text: #b3321f;
+  --dfg-warning: #c47d0e;
+  --dfg-warning-text: #8a5806;
+  --dfg-info: #0f7cad;
+  --dfg-shadow-color: #4a5a3a;
+  --dfg-shadow: 0 14px 36px rgba(42,54,30,.10);
+  --dfg-strong: #1a2314;
+}
+
+html[data-dadofit-theme="pastel"] {
+  /* Lavender base with a mint accent: clearly distinct from the neutral
+     light theme while keeping the soft pastel identity. */
+  color-scheme: light;
+  --dfg-scheme: light;
+  --dfg-bg: #f3f0f9;
+  --dfg-bg-soft: #ece7f5;
+  --dfg-panel: #fdfcff;
+  --dfg-panel-2: #f7f4fc;
+  --dfg-panel-3: #eee9f7;
+  --dfg-text: #2b2a3d;
+  --dfg-soft: #57556f;
+  --dfg-muted: #75738c;
+  --dfg-lime: #8fd9c6;
+  --dfg-lime-hover: #79ccb7;
+  --dfg-on-accent: #0f302a;
+  --dfg-accent: #1f7666;
+  --dfg-tint: #34a08f;
+  --dfg-contrast: #2b2a3d;
+  --dfg-line: rgba(84,70,140,.12);
+  --dfg-line-strong: rgba(31,118,102,.40);
+  --dfg-line-neutral: rgba(84,70,140,.10);
+  --dfg-danger: #bd4f3c;
+  --dfg-danger-text: #ad4634;
+  --dfg-warning: #c98a2b;
+  --dfg-warning-text: #8c5c12;
+  --dfg-info: #4a7fc0;
+  --dfg-shadow-color: #5f538f;
+  --dfg-shadow: 0 14px 36px rgba(88,70,140,.10);
+  --dfg-strong: #2b2a3d;
+}
+
+/* Pastel canvas: lavender with soft mint and blush light. */
+html[data-dadofit-theme="pastel"] body {
+  background:
+    radial-gradient(circle at 6% -8%, color-mix(in srgb, var(--dfg-lime) 34%, transparent), transparent 34rem),
+    radial-gradient(circle at 100% 4%, rgba(255, 196, 222, .30), transparent 30rem),
+    var(--dfg-bg) !important;
+  background-attachment: fixed !important;
+}
+
+html[data-dadofit-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Alias palettes. In dark they keep their original literals (:root in
+   v15.8 / v15.8.1), so the dark theme renders exactly as designed; on light
+   palettes they follow the base tokens above. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) {
+  /* --dfgt-*: roles used by the shared visual layers (v15.8 / v15.8.1). Each
+     use there is var(--dfgt-role, <original dark literal>), so these are only
+     defined for the light palettes and dark stays pixel-identical. */
+  --dfgt-bg: var(--dfg-bg);
+  --dfgt-bg-soft: var(--dfg-bg-soft);
+  --dfgt-surface: var(--dfg-panel);
+  --dfgt-surface-soft: var(--dfg-panel-2);
+  --dfgt-surface-raised: var(--dfg-panel-3);
+  --dfgt-panel-3: var(--dfg-panel-3);
+  --dfgt-strong: var(--dfg-strong);
+  --dfgt-lime: var(--dfg-lime);
+  --dfgt-lime-hover: var(--dfg-lime-hover);
+  --dfgt-text: var(--dfg-text);
+  --dfgt-soft: var(--dfg-soft);
+  --dfgt-muted: var(--dfg-muted);
+  --dfgt-on-accent: var(--dfg-on-accent);
+  --dfgt-accent: var(--dfg-accent);
+  --dfgt-danger-text: var(--dfg-danger-text);
+  --dfgt-warning-text: var(--dfg-warning-text);
+  --dfgt-tint: var(--dfg-tint);
+  --dfgt-contrast: var(--dfg-contrast);
+  --dfgt-shadow: var(--dfg-shadow-color);
+  --dfgt-warning: var(--dfg-warning);
+  --dfgt-info: var(--dfg-info);
+  --dfg-canvas: var(--dfg-bg);
+  --dfg-surface: var(--dfg-panel);
+  --dfg-surface-soft: var(--dfg-panel-2);
+  --dfg-surface-raised: var(--dfg-panel-3);
+  --dfg-surface-line: var(--dfg-line);
+  --dfg-surface-line-strong: var(--dfg-line-strong);
+  --dfg-reward-parity-panel: var(--dfg-panel);
+  --dfg-reward-parity-panel-soft: var(--dfg-panel-2);
+  --dfg-reward-parity-panel-raised: var(--dfg-panel-3);
+  --dfg-reward-parity-line: var(--dfg-line);
+  --dfg-reward-parity-line-strong: var(--dfg-line-strong);
+  --dfg-v1591-canvas: var(--dfg-bg);
+  --dfg-v1591-primary: var(--dfg-panel);
+  --dfg-v1591-nested: var(--dfg-panel-2);
+  --dfg-v1591-raised: var(--dfg-panel-3);
+  --dfg-v1591-text: var(--dfg-text);
+  --dfg-v1591-soft: var(--dfg-soft);
+  --dfg-v1591-muted: var(--dfg-muted);
+  --dfg-v1591-lime: var(--dfg-lime);
+  --dfg-v1591-line: var(--dfg-line);
+  --dfg-v1591-line-strong: var(--dfg-line-strong);
+  --df-neon: var(--dfg-lime);
+  --df-neon-strong: var(--dfg-lime-hover);
+  --df-ink: var(--dfg-bg);
+  --df-surface: var(--dfg-panel);
+  --df-surface-2: var(--dfg-panel-2);
+  --df-surface-3: var(--dfg-panel-3);
+  --df-copy: var(--dfg-text);
+  --df-copy-soft: var(--dfg-soft);
+  --df-copy-muted: var(--dfg-muted);
+  --df-line: var(--dfg-line);
+  --df-line-strong: var(--dfg-line-strong);
+  --df-danger: var(--dfg-danger);
+  --df-shadow: var(--dfg-shadow);
+  --dfg-container-orbit:
+    radial-gradient(circle at calc(100% + 24px) calc(100% + 30px), transparent 0 82px, color-mix(in srgb, var(--dfg-tint) 14%, transparent) 83px 84px, transparent 85px),
+    radial-gradient(circle at calc(100% + 24px) calc(100% + 30px), color-mix(in srgb, var(--dfg-tint) 4%, transparent) 0 83px, transparent 84px);
+  --dfg-container-orbit-compact:
+    radial-gradient(circle at calc(100% + 16px) calc(100% + 20px), transparent 0 52px, color-mix(in srgb, var(--dfg-tint) 12%, transparent) 53px 54px, transparent 55px),
+    radial-gradient(circle at calc(100% + 16px) calc(100% + 20px), color-mix(in srgb, var(--dfg-tint) 3%, transparent) 0 53px, transparent 54px);
+}
+
+/* ---------- Light & pastel: component adjustments ----------
+   The ad dock (compact/mobile) used a dark copy band over a darkened, blurred
+   copy of the creative. On light palettes it becomes a light card: the
+   creative keeps its colours, the copy sits on the panel colour. Desktop rail
+   creatives keep their photo overlay (text over imagery). */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .workout-layout .ad-slot-v8.ad-live-v14:is(.ad-slot-compact-v146, .ad-slot-mobile-v146) {
+  background: var(--dfg-panel) !important;
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .workout-layout .ad-slot-v8.ad-live-v14:is(.ad-slot-compact-v146, .ad-slot-mobile-v146) .ad-live-backdrop-v1421 {
+  filter: blur(16px) saturate(.9) brightness(1.08) !important;
+  opacity: .32;
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .workout-layout .ad-slot-v8.ad-live-v14:is(.ad-slot-compact-v146, .ad-slot-mobile-v146) .ad-live-copy-v14 {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--dfg-panel) 0%, transparent) 0%,
+    color-mix(in srgb, var(--dfg-panel) 90%, transparent) 20%,
+    var(--dfg-panel) 100%) !important;
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .workout-layout .ad-slot-v8.ad-live-v14:is(.ad-slot-compact-v146, .ad-slot-mobile-v146) .ad-live-copy-v14 strong {
+  color: var(--dfg-text) !important;
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .workout-layout .ad-slot-v8.ad-live-v14:is(.ad-slot-compact-v146, .ad-slot-mobile-v146) .ad-live-copy-v14 span {
+  color: var(--dfg-muted) !important;
+  opacity: 1;
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .workout-layout .ad-slot-v8.ad-live-v14:is(.ad-slot-compact-v146, .ad-slot-mobile-v146) .ad-live-copy-v14 small {
+  color: var(--dfg-accent) !important;
+  opacity: 1;
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .workout-layout .responsive-ad-dock-panel-v146 {
+  background: color-mix(in srgb, var(--dfg-panel) 92%, transparent);
+  border-color: var(--dfg-line);
+  box-shadow: 0 14px 40px color-mix(in srgb, var(--dfg-shadow-color) 16%, transparent);
+}
+
+/* Placeholder avatars and the contact brand panel were fixed dark blocks. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .profile-avatar-v9 {
+  background: var(--dfg-panel-3);
+  color: var(--dfg-accent);
+}
+
+
+/* Rotation counter on light ad cards. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .workout-layout .ad-rotation-status-v143 {
+  background: color-mix(in srgb, var(--dfg-strong) 82%, transparent) !important;
+  color: #fff !important;
+}
+
+/* Secondary copy from older layers (footer tagline, notification dates). */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) :where(.site-footer-v141, .auth-legal-footer-v1411, .notifications-shell-v113) small {
+  color: var(--dfg-muted);
+}
+
+/* V13.3 shipped its own light/pastel palette for the account pages
+   (--df-*). Map it onto the current tokens so every page shares one palette. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) :is(.profile-shell-v9, .workout-layout) {
+  --df-bg: var(--dfg-bg);
+  --df-panel: var(--dfg-panel);
+  --df-panel-soft: var(--dfg-panel-2);
+  --df-text: var(--dfg-text);
+  --df-soft: var(--dfg-soft);
+  --df-muted: var(--dfg-muted);
+  --df-line: var(--dfg-line-neutral);
+  --df-line-strong: var(--dfg-line-strong);
+  --df-primary: var(--dfg-lime);
+  --df-primary-text: var(--dfg-on-accent);
+  --df-danger: var(--dfg-danger);
+  --df-shadow: var(--dfg-shadow);
+}
+
+
+/* Notifications (V11.3 hard-coded greys with higher specificity). */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .notifications-list-v113 article > a small {
+  color: var(--dfg-muted);
+}
+
+/* The unread counter sits on the accent fill. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .notifications-unread-v113 span {
+  color: var(--dfg-on-accent);
+  opacity: .78;
+}
+
+/* SuperAdmin backoffice: its status colours were tuned for dark surfaces. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) :is(.admin-shell-v14, .platform-suspended-v14) {
+  --admin-border-neutral: var(--dfg-line-neutral);
+  --admin-danger: var(--dfg-danger-text);
+  --admin-warning: var(--dfg-warning-text);
+  --admin-success: #3c7a1c;
+  --admin-info: #0f6f9c;
+}
+
+html[data-dadofit-theme="pastel"] :is(.admin-shell-v14, .platform-suspended-v14) {
+  --admin-success: #2f7a52;
+  --admin-info: #3c7aa6;
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .admin-economy-state.active {
+  color: var(--dfg-accent);
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .admin-economy-state.suspended {
+  color: var(--dfg-danger-text);
+}
+
+/* ---------- Light & pastel: every action follows the theme accent ----------
+   Older layers (V9–V15.7) hard-coded a lime (#c9f32f / #e3fd63 / #c7eb34) or a
+   navy (#172033 / #1d222b) for buttons, active tabs, counters and brand marks.
+   On the light palettes they all use the theme accent fill. Partner-branded
+   buttons (--partner-accent) and ad creatives keep their own colours. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) :is(
+  /* primary actions */
+  .challenge-gymbro-row-v10 > button,
+  .challenge-modal-actions-v10 a,
+  .challenge-accept-v10, .challenge-approve-v10, .challenge-submit-v10,
+  .squad-invitations-v11 button, .squad-member-list-v11 button,
+  .squad-pending-battle-v11 button.primary,
+  .squad-participant-actions-v11 button.primary,
+  .squad-review-actions-v11 .approve,
+  .organization-publish-list-v12 button,
+  .organization-invites-v12 button,
+  .organization-response-v12 button, .organization-submit-v12, .organization-review-v12 button,
+  .gym-battle-send-v121,
+  .gym-battle-response-v121 button, .gym-battle-finalize-v121, .gym-battle-submit-v121, .gym-battle-review-v121 button,
+  .contact-submit-v14,
+  .site-footer-commercial-v141 > a,
+  .reward-footer-v15 button, .rewards-empty-v15 button, .reward-save-v15,
+  .provider-reward-actions-v15 button.primary,
+  .reward-lookup-v152 > button,
+  .reward-analytics-hero-actions-v154 a,
+  .brand-competition-form-v157 > button,
+  .challenge-create-v157,
+  .brand-competition-form-actions-v157 > button[type="submit"],
+  .brand-edit-actions-v15712 > button[type="submit"],
+  .profile-primary-v9,
+  .gymbro-search-v9 > button, .gymbro-row-actions-v9 button,
+  .reward-open-detail,
+  .reward-open-link-v151,
+  .provider-validate-link-v152,
+  .reward-validation-confirm-v152 button,
+  .contact-success-v14 a,
+  .partner-presentation-editor button,
+  .history-filter button.active,
+  .season-invites-v157 button,
+  /* active tabs and segmented controls */
+  .rewards-tabs-v15 button.active,
+  .rewards-scope-filter-v21 button.active,
+  .reward-analytics-toolbar-v154 button.active,
+  .challenge-center-nav-v157 a.active,
+  /* counters and brand marks */
+  .challenge-tabs-v10 button.active span,
+  .notification-bell-trigger-v112 > span,
+  .notifications-toolbar-v113 > div button span,
+  .organization-challenge-tabs-v12 span,
+  .gym-battle-tabs-v121 button span,
+  .rewards-tabs-v15 button span,
+  .workspace-hero-icon-v122, .business-setup-icon-v122,
+  .brand-hero-v13 > div:first-child, .sponsored-hero-v13 > div:first-child,
+  .sponsored-brand-mark-v13,
+  .contact-mark-v14,
+  .site-footer-logo-v141 > span,
+  .sponsor-wallet-logo-eco1
+) {
+  background: var(--dfg-lime);
+  border-color: var(--dfg-lime);
+  color: var(--dfg-on-accent);
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) :is(
+  .reward-open-detail, .reward-open-link-v151, .provider-validate-link-v152,
+  .reward-validation-confirm-v152 button, .contact-submit-v14, .contact-success-v14 a,
+  .profile-primary-v9, .challenge-create-v157, .reward-save-v15
+):hover:not(:disabled) {
+  background: var(--dfg-lime-hover);
+}
+
+/* Status chips and notices: soft accent tint instead of a solid lime/navy. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) :is(
+  .brand-status-v13.status-active, .brand-status-v13.status-approved,
+  .sponsored-approved-v13,
+  .coupon-stats-v151
+) {
+  background: color-mix(in srgb, var(--dfg-lime) 38%, var(--dfg-panel));
+  color: var(--dfg-on-accent);
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .site-footer-accent-v141 {
+  background: linear-gradient(90deg, var(--dfg-lime), color-mix(in srgb, var(--dfg-tint) 55%, transparent), transparent);
+}
+
+/* Contact page: themed brand panel (it was a fixed navy block). */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .contact-brand-v14 {
+  background:
+    radial-gradient(circle at 18% 12%, color-mix(in srgb, var(--dfg-lime) 42%, transparent), transparent 55%),
+    linear-gradient(165deg, color-mix(in srgb, var(--dfg-lime) 22%, var(--dfg-panel-3)), var(--dfg-panel-3));
+  color: var(--dfg-text);
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .contact-brand-v14 :is(p, .contact-back-v14) {
+  color: var(--dfg-soft);
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .contact-brand-v14 .eyebrow {
+  color: var(--dfg-accent) !important;
+}
+
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) .contact-brand-v14 h1 {
+  color: var(--dfg-text);
+}
+
+/* Backoffice page header: in dark it is a near-invisible panel; on light
+   palettes it read as a flat white strip, so it sits on the canvas instead. */
+html:is([data-dadofit-theme="light"], [data-dadofit-theme="pastel"]) body .admin-shell-v14 .admin-top-v14 {
+  background: transparent !important;
+}

@@ -1,0 +1,196 @@
+# DadoFit self-hosted stack (Opción B, see docs/SPEC_MIGRACION_BACKEND_PROPIO.md).
+#
+# Development / local production-like stack. Independent from the legacy
+# "reto-byads-web" project (which still serves the Supabase Cloud build on 8781).
+# Production overrides live in infra/docker-compose.prod.yml.
+#
+# Usage (from the repository root):
+#   docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build
+#   docker compose -f infra/docker-compose.yml --env-file infra/.env --profile tools run --rm migrate
+
+name: reto-byads-stack
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+# Least privilege for every long-running container: no privilege escalation
+# through setuid binaries. The app containers also drop all capabilities and run
+# with a read-only root filesystem (only their volumes and /tmp are writable).
+x-no-new-privileges: &no-new-privileges
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  db:
+    <<: *no-new-privileges
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dadofit}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required. Copy infra/.env.example to infra/.env}
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-55432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    logging: *default-logging
+
+  migrate:
+    image: postgres:17.6-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: ${POSTGRES_DB:-dadofit}
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      # 1) compatibility layer, 2) historical migrations (kept in
+      # supabase/migrations until the cutover), 3) own-backend migrations.
+      MIGRATION_DIRS: /migrations/compat:/migrations/app:/migrations/own
+      ALLOW_CHECKSUM_DRIFT: ${ALLOW_CHECKSUM_DRIFT:-0}
+      DADOFIT_API_DB_PASSWORD: ${API_DB_PASSWORD:?API_DB_PASSWORD is required}
+    volumes:
+      - ../db/compat:/migrations/compat:ro
+      - ../supabase/migrations:/migrations/app:ro
+      - ../db/migrations:/migrations/own:ro
+      - ./db/migrate.sh:/usr/local/bin/dadofit-migrate:ro
+    entrypoint: ["sh", "/usr/local/bin/dadofit-migrate"]
+    restart: "no"
+    profiles: ["tools"]
+
+  mailpit:
+    <<: *no-new-privileges
+    image: axllent/mailpit:v1.27.10
+    ports:
+      - "127.0.0.1:${MAILPIT_UI_HOST_PORT:-8785}:8025"
+      - "127.0.0.1:${MAILPIT_SMTP_HOST_PORT:-8786}:1025"
+    restart: unless-stopped
+    logging: *default-logging
+
+  api:
+    <<: *no-new-privileges
+    build:
+      context: ../server
+    image: dadofit-api:${IMAGE_TAG:-local}
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      API_PORT: "8782"
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:?APP_PUBLIC_URL is required}
+      DATABASE_URL: postgres://dadofit_api:${API_DB_PASSWORD}@db:5432/${POSTGRES_DB:-dadofit}
+      API_JWT_SECRET: ${API_JWT_SECRET:?API_JWT_SECRET is required}
+      AUTH_REQUIRE_EMAIL_CONFIRMATION: ${AUTH_REQUIRE_EMAIL_CONFIRMATION:-true}
+      STORAGE_DIR: /data/storage
+      API_TRUST_PROXY_HOPS: ${API_TRUST_PROXY_HOPS:-1}
+      RATE_LIMIT_GLOBAL_PER_MINUTE: ${RATE_LIMIT_GLOBAL_PER_MINUTE:-300}
+      RATE_LIMIT_AUTH_PER_MINUTE: ${RATE_LIMIT_AUTH_PER_MINUTE:-10}
+      RATE_LIMIT_PUBLIC_RPC_PER_MINUTE: ${RATE_LIMIT_PUBLIC_RPC_PER_MINUTE:-60}
+      RATE_LIMIT_UPLOADS_PER_MINUTE: ${RATE_LIMIT_UPLOADS_PER_MINUTE:-30}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-DadoFit <no-reply@dadofit.local>}
+      # File storage: "disk" (volume below) or "s3" (Amazon S3; locally the
+      # optional s3 service: --profile s3 and STORAGE_DRIVER=s3).
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-disk}
+      S3_BUCKET: ${S3_BUCKET:-dadofit-files}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-false}
+      S3_PREFIX: ${S3_PREFIX:-}
+      # Only for the local S3 mock; in AWS the IAM role provides credentials.
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+    volumes:
+      - storage_data:/data/storage
+    ports:
+      - "127.0.0.1:${API_HOST_PORT:-8782}:8782"
+    restart: unless-stopped
+    logging: *default-logging
+
+  web:
+    <<: *no-new-privileges
+    build:
+      context: ..
+      dockerfile: infra/web/Dockerfile
+    image: dadofit-web:${IMAGE_TAG:-local}
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    cap_drop: [ALL]
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_HOST_PORT:-8787}:8080"
+    restart: unless-stopped
+    logging: *default-logging
+
+  # One-shot data import from Supabase (M9). Requires SOURCE_DATABASE_URL and
+  # CONFIRM_REPLACE_TARGET_DATA=yes; see infra/scripts/import-from-supabase.sh.
+  import-data:
+    image: postgres:17.6-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: ${POSTGRES_DB:-dadofit}
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - ./scripts/import-from-supabase.sh:/usr/local/bin/dadofit-import:ro
+    entrypoint: ["sh", "/usr/local/bin/dadofit-import"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: "no"
+    profiles: ["tools"]
+
+  # S3-compatible mock for exercising STORAGE_DRIVER=s3 locally and in CI. Not
+  # used in production (the API talks to Amazon S3 there).
+  s3:
+    <<: *no-new-privileges
+    image: adobe/s3mock:5.2.3
+    environment:
+      COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: ${S3_BUCKET:-dadofit-files}
+    ports:
+      - "127.0.0.1:${S3_HOST_PORT:-8788}:9090"
+    restart: "no"
+    profiles: ["s3"]
+    logging: *default-logging
+
+  sqltest:
+    build:
+      context: ./db
+      dockerfile: Dockerfile.sqltest
+    image: dadofit-sqltest:local
+    volumes:
+      - ../db/compat:/migrations/compat:ro
+      - ../supabase/migrations:/migrations/app:ro
+      - ../db/migrations:/migrations/own:ro
+      - ../supabase/tests:/tests:ro
+    restart: "no"
+    profiles: ["tests"]
+
+volumes:
+  db_data:
+  storage_data:

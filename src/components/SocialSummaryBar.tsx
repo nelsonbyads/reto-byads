@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
 
 interface SponsorPointBalance { sponsor_organization_id: string; sponsor_name: string; balance: number; }
@@ -25,11 +25,11 @@ export function SocialSummaryBar() {
   const [summary, setSummary] = useState<DashboardSummary>(EMPTY);
   const [gymBalances, setGymBalances] = useState<GymPointBalance[]>([]);
   const [ppConfigs, setPpConfigs] = useState<Map<string, PartnerPointConfig>>(new Map());
-  const cloudReady = user?.provider === 'supabase' && Boolean(supabase) && activeWorkspace.kind === 'personal';
+  const cloudReady = user?.provider === 'cloud' && Boolean(backend) && activeWorkspace.kind === 'personal';
 
   const load = useCallback(async () => {
-    if (!cloudReady || !supabase) return;
-    const client = supabase;
+    if (!cloudReady || !backend) return;
+    const client = backend;
     const [dashboard, sponsored, gymPoints] = await Promise.all([
       client.rpc('get_dadofit_dashboard_summary'),
       client.rpc('get_sponsored_pending_count'),
@@ -47,7 +47,7 @@ export function SocialSummaryBar() {
   useEffect(() => {
     if (!cloudReady) return;
     void load();
-    const interval = window.setInterval(() => { void load(); }, 30000);
+    const interval = window.setInterval(() => { if (document.visibilityState === 'visible') void load(); }, 30000);
     const handleFocus = () => { void load(); };
     window.addEventListener('focus', handleFocus);
     return () => { window.clearInterval(interval); window.removeEventListener('focus', handleFocus); };

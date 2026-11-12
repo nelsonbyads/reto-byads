@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { loadPartnerPointConfigs, resolvePartnerPointConfig, type PartnerPointConfig } from '../lib/partnerPoints';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 import { managementErrorMessage, normalizePartnerIcon, normalizePartnerWorkspaceKind, PARTNER_ICON_KEYS, PARTNER_MARKETPLACE_RPCS, safeRpcInteger } from '../lib/partnerMarketplace';
 
 type FulfillmentType = 'digital_code' | 'digital_benefit' | 'physical_product' | 'in_person';
@@ -141,13 +141,13 @@ export function RewardManagementPage() {
 
   const load = useCallback(async () => {
     const generation = ++loadGeneration.current;
-    if (!supabase || !orgId || !manager) {
+    if (!backend || !orgId || !manager) {
       setLoading(false);
       return;
     }
     setLoading(true);
     setError('');
-    const { data, error: e } = await supabase.rpc('provider_list_rewards', { p_organization_id: orgId });
+    const { data, error: e } = await backend.rpc('provider_list_rewards', { p_organization_id: orgId });
     if (generation !== loadGeneration.current) return;
     if (e) setError(managementErrorMessage('load'));
     else setRows((data ?? []) as RewardRow[]);
@@ -216,7 +216,7 @@ export function RewardManagementPage() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!supabase || !orgId) return;
+    if (!backend || !orgId) return;
     setError(''); setNotice('');
 
     let nativeCost: number;
@@ -253,8 +253,8 @@ export function RewardManagementPage() {
     };
 
     const res = editing
-      ? await supabase.rpc('provider_update_reward', { p_reward_id: editing, ...args })
-      : await supabase.rpc('provider_create_reward', { p_organization_id: orgId, ...args });
+      ? await backend.rpc('provider_update_reward', { p_reward_id: editing, ...args })
+      : await backend.rpc('provider_create_reward', { p_organization_id: orgId, ...args });
 
     if (res.error) {
       setError(`${managementErrorMessage('save')} Detalle: ${res.error.message}`);
@@ -270,7 +270,7 @@ export function RewardManagementPage() {
 
   const savePresentation = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase || !orgId) return;
+    if (!backend || !orgId) return;
     setError(''); setNotice('');
     const shortName = presentation.shortName.trim().toUpperCase();
     if (['DC', 'TP', 'XP'].includes(shortName)) {
@@ -278,7 +278,7 @@ export function RewardManagementPage() {
       revealFeedback();
       return;
     }
-    const { error: rpcError } = await supabase.rpc(PARTNER_MARKETPLACE_RPCS.updatePresentation, {
+    const { error: rpcError } = await backend.rpc(PARTNER_MARKETPLACE_RPCS.updatePresentation, {
       p_organization_id: orgId,
       p_points_name: presentation.pointsName,
       p_points_short_name: shortName,
@@ -292,8 +292,8 @@ export function RewardManagementPage() {
   };
 
   const status = async (id: string, next: string) => {
-    if (!supabase) return;
-    const { error: e } = await supabase.rpc('provider_set_reward_status', { p_reward_id: id, p_status: next });
+    if (!backend) return;
+    const { error: e } = await backend.rpc('provider_set_reward_status', { p_reward_id: id, p_status: next });
     if (e) setError(managementErrorMessage('status'));
     else await load();
   };

@@ -81,6 +81,8 @@ const MAX_SEGMENT_LENGTH = 40;
 export function sanitizeFileSegment(text: string, fallback = "Campana"): string {
   const cleaned = (text ?? "")
     .normalize("NFC")
+    // Stripping control characters from file names is the point here.
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x1f\x7f]/g, "")
     .replace(/[\\/:*?"<>|]/g, "")
     .replace(/\s+/g, "_")

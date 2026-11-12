@@ -1,64 +1,80 @@
 # DadoFit
 
-DadoFit es una SPA de fitness gamificado construida con React, TypeScript y Vite. Combina un catalogo de 1.324 ejercicios con retos sociales, evidencia en foto/video, recompensas, Squads, Gyms, Brands y Branded Challenges.
+DadoFit es una SPA de fitness gamificado construida con React, TypeScript y Vite sobre un backend propio en Docker (API Node + PostgreSQL). Combina un catálogo de 1.324 ejercicios con retos sociales, evidencia en foto/video, recompensas, Squads, Gyms, Brands y Branded Challenges.
 
-## Estado de entrega
+## Estado
 
-**Pre-Release Feature Pack: V15.7 · Feature Freeze Candidate**
+- **Backend propio terminado:** Supabase ya no se usa. La migración está documentada en `docs/SPEC_MIGRACION_BACKEND_PROPIO.md`.
+- **Funciona completo en local con Docker**, con los datos reales importados desde Supabase Cloud y un conjunto grande de datos de demostración para probar todos los módulos (ver `docs/ENTREGA_LOCAL.md`).
+- **Preparado para AWS:**
+  - RDS PostgreSQL con TLS.
+  - Archivos en S3.
+  - Correo por Amazon SES.
+  - Secretos desde Secrets Manager/SSM.
+  - Logs para CloudWatch.
 
-Alcance funcional consolidado:
+  Las decisiones pendientes están en `docs/DECISIONES_PRODUCCION.md`.
+
+## Funcionalidades
 
 - Entrenamiento individual mediante dados y niveles de intensidad.
-- Catalogo normalizado de 1.324 ejercicios con imagen/GIF e instrucciones.
+- Catálogo normalizado de 1.324 ejercicios con imagen/GIF e instrucciones.
 - Evidencia obligatoria en foto/video para cerrar rondas y retos.
-- Autenticacion cloud con Supabase Auth.
+- Autenticación propia: sesión con refresh rotativo, confirmación por correo y recuperación de contraseña.
 - Perfil personal, progreso, XP y DadoCoins.
 - Gymbros y retos 1v1.
 - Squads y Squad vs Squad.
-- Organizations / Gyms y roles Owner, Admin, Coach y Member.
-- Gym vs Gym con evidencia y revision cruzada.
+- Organizations / Gyms con roles Owner, Admin, Coach y Member.
+- Gym vs Gym con evidencia y revisión cruzada.
 - Workspaces Personal, Gym y Brand con RBAC.
-- Brands, campañas y Branded Challenges.
-- Objetivos Sponsored por repeticiones, tiempo, distancia o cantidad.
+- Brands, campañas y Branded Challenges, con doble validación opcional.
+- Objetivos patrocinados por repeticiones, tiempo, distancia o cantidad.
 - Notificaciones.
-- Rewards Marketplace, fulfillment digital/fisico, QR y validacion presencial.
+- Marketplace DadoFit (en DC) y de partners (en puntos propios de cada Gym o Brand), con código generado, código compartido, lote de cupones, enlace o entrega presencial con validación.
 - Rewards Analytics para Partner/Gym y SuperAdmin.
-- DadoCoins (DC), Team Points (TP) y Gym Points (GP) con anti-farming.
-- Temporadas competitivas TP/GP con historico no destructivo.
-- Competencias patrocinadas Brand → Gyms por GP.
-- Navegacion unificada de retos 1v1, Gym, Squad y patrocinados.
-- Anti-farming e idempotencia de recompensas.
-- Docker para build de produccion local.
+- Economía DadoCoins (DC), Team Points (TP), Gym Points (GP) y Sponsor Points (SP):
+  - presupuestos DC aprobados por el SuperAdmin;
+  - anti-farming e idempotencia de recompensas.
+- Temporadas competitivas TP/GP con histórico no destructivo.
+- Competencias patrocinadas Brand → Gyms.
+- Publicidad first-party: campañas, ubicaciones, impresiones, clics y exportación de reportes.
+- Backoffice de SuperAdmin.
 
-## Stack tecnologico
+## Stack tecnológico
 
 ### Frontend
-- React 18
-- TypeScript
-- Vite
+- React 18, TypeScript y Vite
 - React Router DOM (`BrowserRouter`)
 - Lucide React
-- CSS propio organizado por version/feature
+- CSS propio organizado por versión/feature
+- Tipos de la base de datos generados desde el esquema (`src/types/database.ts`): `backend.rpc()` y `backend.from()` validan nombres y argumentos
 
-### Backend / BaaS
-- Supabase
-- PostgreSQL
-- Supabase Auth
-- Supabase Storage
-- Row Level Security (RLS)
-- RPCs PostgreSQL y funciones `SECURITY DEFINER`
-- Migraciones SQL versionadas
+### Backend (propio, en Docker)
+- API Node 22 + Fastify (`server/`): autenticación, acceso a datos y archivos.
+- PostgreSQL 17 con Row Level Security (RLS). La lógica de economía y retos vive en SQL: RPCs y funciones `SECURITY DEFINER`.
+- Archivos de evidencia servidos con URLs firmadas y verificación del contenido real del archivo. Se guardan según `STORAGE_DRIVER`:
+  - `disk`: un volumen local (desarrollo);
+  - `s3`: Amazon S3 (producción).
+- Migraciones SQL versionadas, aplicadas por `infra/db/migrate.sh`.
+- Seguridad:
+  - contraseñas con argon2id;
+  - protección CSRF;
+  - límites por IP;
+  - bloqueo de login por correo + IP;
+  - tiempos de respuesta uniformes, para no revelar qué cuentas existen;
+  - contenedores sin privilegios y con sistema de archivos de solo lectura.
 
 ### Calidad y despliegue
-- Vitest
-- Docker
-- Docker Compose
-- Nginx
-- Git + GitHub
+- Vitest (frontend) y `node:test` (API: unitarios e integración)
+- pgTAP para las suites SQL
+- ESLint (web y API) y Prettier configurado
+- Docker Compose (`infra/`), nginx y Caddy (TLS cuando el despliegue usa Compose)
+- GitHub Actions (`.github/workflows/ci.yml`): lint, tipos, tests, migraciones + pgTAP, integración de la API con disco y con S3, `npm audit` y Trivy
+- Dependabot semanal (`.github/dependabot.yml`)
 
 ## Arquitectura de identidad y permisos
 
-DadoFit usa **una sola identidad por persona** y varios contextos de operacion:
+DadoFit usa **una sola identidad por persona** y varios contextos de operación:
 
 ```text
 AUTH USER
@@ -74,253 +90,174 @@ AUTH USER
    |    +-- Miembros y roles
    |    +-- Retos del Gym
    |    +-- Gym vs Gym
-   |    +-- Gym Points (GP)
+   |    +-- Gym Points (GP) y ofertas
    |    +-- Temporadas / rankings
    |
    +-- Brand workspace
-        +-- Campanas
+        +-- Campañas
         +-- Branded Challenges
         +-- Participantes
-        +-- Revision de evidencias
+        +-- Revisión y auditoría de evidencias
+        +-- Sponsor Points (SP) y ofertas
         +-- Competencias patrocinadas de Gyms
 ```
 
-Un usuario personal puede crear un Squad. Crear un Gym o una Brand requiere la capacidad empresarial correspondiente.
+Un usuario personal puede crear un Squad. Crear un Gym o una Brand requiere la capacidad empresarial correspondiente, que se elige al registrarse. El SuperAdmin verifica las organizaciones y habilita su economía.
 
 ## Roles de Organization
 
-| Rol | Participar | Invitar miembros | Publicar retos Gym | Revisar evidencia Gym | Gym vs Gym | Campanas Brand |
+| Rol | Participar | Invitar miembros | Publicar retos Gym | Revisar evidencia Gym | Gym vs Gym | Campañas Brand |
 | --- | --- | --- | --- | --- | --- | --- |
-| Owner | Si | Si | Si | Si | Si | Si |
-| Admin | Si | Si | Si | Si | Si | Si |
-| Coach | Si | No/limitado | Si | Si | Si | No |
-| Member | Si | No | No | No | No | No |
+| Owner | Sí | Sí | Sí | Sí | Sí | Sí |
+| Admin | Sí | Sí | Sí | Sí | Sí | Sí |
+| Coach | Sí | No/limitado | Sí | Sí | Sí | No |
+| Member | Sí | No | No | No | No | No |
 
-> Las validaciones importantes se hacen tambien en PostgreSQL. Ocultar un boton en React no es la unica barrera de seguridad.
+> Las validaciones importantes se hacen también en PostgreSQL. Ocultar un botón en React no es la única barrera de seguridad.
 
 ## Requisitos
 
-- Node.js 22.23.4 (LTS) o posterior dentro de la rama 22.x
-- npm
+- Docker Desktop (Compose v2.24 o posterior)
+- Node.js 22.23.4 (LTS) o posterior dentro de la rama 22.x, con npm (para desarrollo, tests y scripts)
 - Git
-- Docker Desktop para produccion local
-- Proyecto Supabase configurado
 
-Comprobar herramientas:
-
-```bash
-node -v
-npm -v
-git --version
-docker --version
-docker compose version
-```
-
-## Instalacion
-
-```bash
-git clone https://github.com/nelsonbyads/reto-byads.git
-cd reto-byads
-npm install
-```
-
-La aplicacion vive directamente en la raiz del repositorio. No debe recrearse una carpeta `dice-app/`.
-
-## Variables de entorno
-
-Crear `.env.local` a partir de `.env.example`:
-
-```env
-VITE_SUPABASE_URL=
-VITE_SUPABASE_PUBLISHABLE_KEY=
-```
-
-Nunca subir `.env.local` ni claves privadas al repositorio.
-
-## Base de datos Supabase
-
-Comprobar migraciones:
-
-```bash
-npx supabase migration list
-```
-
-Aplicar migraciones pendientes:
-
-```bash
-npx supabase db push
-```
-
-Comprobar conectividad/esquema:
-
-```bash
-node scripts/check-supabase.mjs
-```
-
-El `schema_version` esperado despues de aplicar el Pre-Release Feature Pack es:
+## Estructura
 
 ```text
-v15.7-pre-release-feature-pack
+src/                   SPA React (cliente de la API en src/lib/backend.ts)
+  admin/sections/      secciones del backoffice de SuperAdmin
+  types/database.ts    tipos generados desde el esquema (no editar a mano)
+server/                API propia (Fastify): auth, /api/rpc, /api/db/query, /api/files
+  scripts/             tipos de BD, importación, datos demo, integridad y carga
+db/compat/             capa de compatibilidad SQL (roles, auth.uid(), esquema storage)
+supabase/migrations/   migraciones históricas (se mantienen hasta retirar Supabase)
+db/migrations/         migraciones del backend propio
+supabase/tests/        suites pgTAP
+infra/                 Docker Compose, nginx, Caddy, migraciones, backups e importación
+infra/seed/            cuentas demo y copia de datos locales (ignorado por git)
+docs/                  documentación (ver abajo)
 ```
 
-## Desarrollo local
+## Puesta en marcha (stack completo en Docker)
 
 ```bash
+cp infra/.env.example infra/.env   # rellenar los secretos (instrucciones dentro)
+docker compose -f infra/docker-compose.yml --env-file infra/.env up -d db mailpit
+docker compose -f infra/docker-compose.yml --env-file infra/.env --profile tools run --rm migrate
+docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build api web
+```
+
+| Servicio | URL |
+| --- | --- |
+| Web | http://localhost:8787 |
+| API (directa, solo local) | http://127.0.0.1:8782/api/ready |
+| Correos de desarrollo (Mailpit) | http://localhost:8785 |
+| Postgres (solo local) | 127.0.0.1:55432 |
+
+- Los contenedores tienen `restart: unless-stopped`, así que al abrir Docker Desktop la app vuelve a levantarse sola.
+- Las cuentas nuevas reciben un correo de confirmación; en desarrollo ese correo llega a Mailpit.
+
+### Datos y cuentas de demostración
+
+La base local puede poblarse con unos 130 usuarios, gimnasios, marcas, retos, premios, canjes y publicidad, creados recorriendo los flujos reales por la API. Instrucciones y cuentas de prueba: `docs/ENTREGA_LOCAL.md`.
+
+## Desarrollo del frontend
+
+Con el stack levantado (al menos `db`, `mailpit` y `api`):
+
+```bash
+npm install
 npm run dev
 ```
 
-URL:
+- Vite (http://localhost:5175) reenvía `/api` a la API en `127.0.0.1:8782`, así que la cookie de sesión es de primera parte, igual que en producción.
+- Para apuntar a otra API: `API_PROXY_TARGET=http://host:puerto npm run dev`.
 
-```text
-http://localhost:5175
-```
-
-Rutas principales:
-
-```text
-/app
-/profile
-/gymbros
-/challenges
-/squads
-/organizations
-/organization-challenges
-/gym-battles
-/workspace
-/brand-campaigns
-/sponsored-challenges
-/seasons
-/notifications
-/rewards
-/rewards/manage
-/rewards/validate
-/rewards/analytics
-/brand-competitions
-/admin/rewards
-/admin/seasons
-```
-
-## Tests
-
-Antes de cualquier entrega:
+Cuando cambie una función o tabla expuesta, regenera los tipos. La CI falla si quedan desactualizados:
 
 ```bash
-npm test
+DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix server run db:types
 ```
 
-La suite cubre, entre otros:
-
-- filtros;
-- seleccion aleatoria / dados;
-- reglas Sponsored;
-- tipos de objetivo de Branded Challenges.
-
-Todo test debe pasar antes del release.
-
-## Build de produccion
+## Tests y calidad
 
 ```bash
-npm run build
+npm run lint                               # ESLint (web + API)
+npx tsc -p tsconfig.app.json --noEmit      # tipos
+npm test                                   # frontend (Vitest)
+docker compose -f infra/docker-compose.yml --env-file infra/.env --profile tests run --rm sqltest   # migraciones desde cero + pgTAP
+cd server && npm test                      # API: unitarios + integración (requiere el stack; ver docs/TESTING.md)
 ```
 
-El proceso:
-
-```text
-prepare dataset
--> tsc -b
--> vite build
--> copia de images/
--> copia de videos/
-```
-
-El dataset procesado queda en:
-
-```text
-public/data/exercises.min.json
-```
-
-El build final queda en:
-
-```text
-dist/
-```
-
-## Docker
-
-El Dockerfile usa Node 22 para el build y Nginx para runtime.
-
-Construccion limpia recomendada para RC1:
+Con la base local poblada:
 
 ```bash
-docker compose --env-file .env.local down --remove-orphans
-docker compose --env-file .env.local build --no-cache
-docker compose --env-file .env.local up -d
-docker compose --env-file .env.local ps
+DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix server run check:integrity   # 12 invariantes de la economía y los datos
+npm --prefix server run load:test          # prueba de carga con usuarios demo (subir antes los límites de la API, ver docs/TESTING.md)
 ```
 
-URL Docker:
+Los detalles de cada suite (variables, límites de peticiones y la ejecución contra S3 simulado) están en `docs/TESTING.md`.
 
-```text
-http://localhost:8781
+## Producción
+
+El destino previsto es **AWS** (us-east-1). Lo que el código ya soporta:
+- **Base de datos:** RDS PostgreSQL, con `DATABASE_SSL=verify-full`.
+- **Archivos:** S3, con `STORAGE_DRIVER=s3`.
+- **Correo:** SES por SMTP.
+- **Secretos:** como variables o como archivos `<NOMBRE>_FILE`.
+
+Falta decidir el cómputo: ECS Fargate, EC2 o Lightsail.
+
+Con Docker Compose en un servidor propio:
+
+```bash
+docker compose -f infra/docker-compose.yml -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d --build
 ```
+
+Solo el proxy de borde (Caddy) publica los puertos 80/443, con TLS automático. Configuración, AWS, backups, restauración, importación desde Supabase y rollback: `docs/DEPLOYMENT.md`.
 
 ## Flujo de release
 
 ```text
-Supabase migrations
+CI en verde (lint, tipos, tests, migraciones + pgTAP, integración API disco/S3, auditoría y Trivy)
       |
       v
-npm test
+Build de imágenes etiquetadas (IMAGE_TAG=<versión>)
       |
       v
-npm run build
+migrate (tools) -> up -d -> smoke test
       |
       v
-Smoke test Vite :5175
-      |
-      v
-Docker build
-      |
-      v
-Smoke test :8781
-      |
-      v
-Git checkpoint + push
+Rollback = volver al IMAGE_TAG anterior (las migraciones son aditivas)
 ```
 
-## Checklist minimo RC1
+## Checklist mínimo de release
 
-- [ ] `npx supabase migration list` sin pendientes inesperados.
-- [ ] `select public.get_dadofit_schema_version()` = `v15.7-pre-release-feature-pack`.
-- [ ] `node scripts/check-supabase.mjs` responde OK.
-- [ ] `npm test` sin fallos.
-- [ ] `npm run build` sin errores.
-- [ ] Login cloud funciona.
-- [ ] Workspace Personal funciona.
-- [ ] Gymbros y Squads cargan.
-- [ ] Workspace Gym funciona.
-- [ ] Gym vs Gym carga.
-- [ ] Retos muestra navegacion unificada: 1v1 / Gym / Squads / Patrocinados / Temporadas.
-- [ ] Temporada Squad acumula TP y conserva historico.
-- [ ] Temporada Gym acumula GP y conserva historico.
-- [ ] Workspace Brand funciona.
-- [ ] Branded Challenge se publica, acepta evidencia y puede aprobarse.
-- [ ] Brand crea Sponsored Gym Competition con al menos 2 Gyms.
-- [ ] Gym Owner/Admin recibe invitacion y puede aceptar/rechazar.
-- [ ] Leaderboard patrocinado usa GP de la ventana configurada.
-- [ ] Reward fisico genera QR, valida entrega y cambia ISSUED → REDEEMED.
-- [ ] Rewards Analytics refleja canjes/entregas.
-- [ ] Recompensa Sponsored no se duplica.
-- [ ] Docker queda `Up` / `healthy`.
+- [ ] CI en verde.
+- [ ] `migrate` termina con `applied=N, already applied=M` sin errores.
+- [ ] `/api/ready` responde `ready`.
+- [ ] Registro, confirmación por correo, login y recuperación de contraseña funcionan.
+- [ ] Workspace Personal, Gym y Brand cargan.
+- [ ] Subir, ver y borrar evidencia en un reto.
+- [ ] Aprobar un reto con recompensa en DC con un presupuesto activo.
+- [ ] Canje en el marketplace y validación por el proveedor.
+- [ ] `check:integrity` sin filas con problemas.
+- [ ] Último backup verificado con `restore-check` (o snapshot de RDS).
 - [ ] Refresh directo de rutas SPA no devuelve 404.
-- [ ] `git status` termina limpio despues del push.
 
-## Documentacion adicional
+## Documentación
 
-- `docs/ARCHITECTURE.md`
-- `docs/DEPLOYMENT.md`
-- `docs/TESTING.md`
-- `docs/RELEASE_CHECKLIST.md`
+| Documento | Contenido |
+| --- | --- |
+| `docs/README.md` | Índice de toda la documentación: vigente, especificaciones e histórico |
+| `docs/ENTREGA_LOCAL.md` | Cómo correrlo en local, cuentas de demostración y resultados de las pruebas |
+| `docs/DECISIONES_PRODUCCION.md` | Checklist de decisiones para AWS |
+| `docs/DEPLOYMENT.md` | Configuración, despliegue, AWS, backups, importación y observabilidad |
+| `docs/TESTING.md` | Suites de pruebas, CI, datos demo, integridad y carga |
+| `docs/SPEC_MIGRACION_BACKEND_PROPIO.md` | Migración de Supabase al backend propio y registro de cambios |
+| `docs/ARCHITECTURE.md` | Arquitectura de la aplicación |
+| `docs/RELEASE_CHECKLIST.md` | Checklist de release detallado |
+| `DOCKER.md` | Uso de Docker en el proyecto |
 
 ## Licencia y media
 

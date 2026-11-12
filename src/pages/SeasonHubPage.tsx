@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppHeader } from '../components/AppHeader';
 import { ChallengeCenterNav } from '../components/ChallengeCenterNav';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { supabase } from '../lib/supabase';
+import { backend } from '../lib/backend';
 
 type RankRow = { id: string; name: string; points: number; completed?: number };
 type Season = { id: string; name: string; status: string; starts_at: string; ends_at: string; season_type: string; leaderboard: RankRow[] };
@@ -48,13 +48,13 @@ export function SeasonHubPage() {
   const canRespond = gym && (activeWorkspace.role === 'owner' || activeWorkspace.role === 'admin');
 
   const load = useCallback(async () => {
-    if (!supabase) return;
+    if (!backend) return;
     setLoading(true); setError('');
-    const hubResult = await supabase.rpc('get_season_hub');
+    const hubResult = await backend.rpc('get_season_hub');
     if (hubResult.error) { setError(hubResult.error.message); setLoading(false); return; }
     setHub((hubResult.data ?? EMPTY) as HubData);
     if (gym && activeWorkspace.organizationId) {
-      const inviteResult = await supabase.rpc('get_my_sponsored_gym_invitations', { p_organization_id: activeWorkspace.organizationId });
+      const inviteResult = await backend.rpc('get_my_sponsored_gym_invitations', { p_organization_id: activeWorkspace.organizationId });
       if (inviteResult.error) setError(inviteResult.error.message);
       else setInvites((inviteResult.data ?? []) as GymInvite[]);
     } else setInvites([]);
@@ -66,9 +66,9 @@ export function SeasonHubPage() {
   const pending = useMemo(() => invites.filter((item) => item.entry_status === 'invited'), [invites]);
 
   const respond = async (item: GymInvite, accept: boolean) => {
-    if (!supabase || !activeWorkspace.organizationId || !canRespond) return;
+    if (!backend || !activeWorkspace.organizationId || !canRespond) return;
     setActing(item.id); setError('');
-    const { error: rpcError } = await supabase.rpc('respond_sponsored_gym_competition', { p_season_id: item.id, p_organization_id: activeWorkspace.organizationId, p_accept: accept });
+    const { error: rpcError } = await backend.rpc('respond_sponsored_gym_competition', { p_season_id: item.id, p_organization_id: activeWorkspace.organizationId, p_accept: accept });
     setActing('');
     if (rpcError) { setError(rpcError.message); return; }
     await load();

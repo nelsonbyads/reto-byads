@@ -8,7 +8,7 @@ import {
   resolvePartnerPointConfig,
   type PartnerPointConfig,
 } from "../lib/partnerPoints";
-import { supabase } from "../lib/supabase";
+import { backend } from "../lib/backend";
 import type { AppExercise, DiceLevel } from "../types/exercise";
 
 interface Props {
@@ -46,7 +46,7 @@ export function OrganizationBattleButton({ exercise, reps, diceLevel }: Props) {
     [exercise.name, reps],
   );
   const canManage =
-    user?.provider === "supabase" &&
+    user?.provider === "cloud" &&
     activeWorkspace.kind === "gym" &&
     Boolean(activeWorkspace.organizationId) &&
     ["owner", "admin", "coach"].includes(activeWorkspace.role ?? "");
@@ -70,11 +70,11 @@ export function OrganizationBattleButton({ exercise, reps, diceLevel }: Props) {
       !canManage ||
       !verified ||
       !user ||
-      !supabase ||
+      !backend ||
       !activeWorkspace.organizationId
     )
       return;
-    const client = supabase;
+    const client = backend;
     let active = true;
     const load = async () => {
       setLoading(true);
@@ -133,7 +133,7 @@ export function OrganizationBattleButton({ exercise, reps, diceLevel }: Props) {
   };
   const createBattle = async () => {
     if (
-      !supabase ||
+      !backend ||
       !activeWorkspace.organizationId ||
       !rivalId ||
       !canManage ||
@@ -142,7 +142,7 @@ export function OrganizationBattleButton({ exercise, reps, diceLevel }: Props) {
       return;
     setSending(true);
     setError("");
-    const { data, error: rpcError } = await supabase.rpc(
+    const { data, error: rpcError } = await backend.rpc(
       "create_organization_battle",
       {
         p_challenger_organization_id: activeWorkspace.organizationId,

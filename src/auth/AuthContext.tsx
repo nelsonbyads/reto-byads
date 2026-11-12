@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { readAuthLinkToken } from '../lib/authLinkToken';
+import { backend, type BackendUser } from '../lib/backend';
 import { readStorage, writeStorage } from '../lib/storage';
 
 export type SignupIntent = 'personal' | 'gym' | 'brand';
@@ -10,7 +10,7 @@ export interface AuthUser {
   email: string;
   name: string;
   role: 'user' | 'admin' | 'guest';
-  provider: 'supabase' | 'guest' | 'local';
+  provider: 'cloud' | 'guest' | 'local';
   username?: string | null;
   avatarUrl?: string | null;
   signupIntent?: SignupIntent | null;
@@ -35,37 +35,41 @@ interface AuthContextValue {
   completePasswordRecovery: (newPassword: string) => Promise<void>;
   cancelPasswordRecovery: () => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  confirmEmail: (token: string) => Promise<void>;
+  resendConfirmation: (email: string) => Promise<void>;
   recoveryMode: boolean;
 }
 
 const USERS_KEY = 'dadofit:local-auth:users';
 const SESSION_KEY = 'dadofit:local-auth:session';
-const RECOVERY_SESSION_KEY = 'dadofit:auth:password-recovery';
+const RECOVERY_TOKEN_KEY = 'dadofit:auth:recovery-token';
 
-function urlHasRecoveryIntent(): boolean {
+// Offline local accounts (and the demo admin) exist only in development builds
+// (SEC-07). Production only offers cloud accounts and the guest mode.
+const LOCAL_ACCOUNTS_ENABLED = import.meta.env.DEV;
+
+/** The recovery e-mail links to /reset-password#token=… (legacy: ?token=…); the
+ *  token is moved to sessionStorage and removed from the address bar right away. */
+function captureRecoveryToken(): string | null {
   try {
-    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-    const search = new URLSearchParams(window.location.search);
-    return hash.get('type') === 'recovery' || search.get('type') === 'recovery';
+    if (window.location.pathname === '/reset-password') {
+      const { token, cleanedUrl } = readAuthLinkToken(window.location.href, 'token');
+      if (token) {
+        sessionStorage.setItem(RECOVERY_TOKEN_KEY, token);
+        window.history.replaceState(window.history.state, '', cleanedUrl);
+        return token;
+      }
+    }
+    return sessionStorage.getItem(RECOVERY_TOKEN_KEY);
   } catch {
-    return false;
+    return null;
   }
 }
 
-function readRecoveryMarker(): boolean {
-  try {
-    return localStorage.getItem(RECOVERY_SESSION_KEY) === '1' || urlHasRecoveryIntent();
-  } catch {
-    return urlHasRecoveryIntent();
-  }
+function clearRecoveryToken() {
+  try { sessionStorage.removeItem(RECOVERY_TOKEN_KEY); } catch { /* ignore */ }
 }
 
-function writeRecoveryMarker(active: boolean): void {
-  try {
-    if (active) localStorage.setItem(RECOVERY_SESSION_KEY, '1');
-    else localStorage.removeItem(RECOVERY_SESSION_KEY);
-  } catch { /* ignore */ }
-}
 const DEMO_USER: StoredUser = {
   id: 'demo-admin',
   email: 'admin@dadofit.local',
@@ -78,258 +82,170 @@ const DEMO_USER: StoredUser = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 function getStoredUsers(): StoredUser[] {
+  if (!LOCAL_ACCOUNTS_ENABLED) return [];
   const users = readStorage<StoredUser[]>(USERS_KEY, []);
   return users.some((item) => item.email === DEMO_USER.email) ? users : [DEMO_USER, ...users];
 }
 
 function localPublicUser(user: StoredUser): AuthUser {
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    provider: 'local',
-    signupIntent: 'personal',
-  };
+  return { id: user.id, email: user.email, name: user.name, role: user.role, provider: 'local', signupIntent: 'personal' };
 }
 
 function readFallbackSession(): AuthUser | null {
   const stored = readStorage<AuthUser | null>(SESSION_KEY, null);
   if (!stored) return null;
-  if (stored.provider === 'guest' || stored.provider === 'local') return stored;
+  if (stored.provider === 'guest') return stored;
+  if (stored.provider === 'local' && LOCAL_ACCOUNTS_ENABLED) return stored;
   return null;
 }
 
-async function cloudPublicUser(user: SupabaseUser): Promise<AuthUser> {
+function clearFallbackSession() {
+  try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+}
+
+function cloudPublicUser(user: BackendUser): AuthUser {
   const fallbackName =
     user.user_metadata?.display_name?.trim?.() ||
     user.user_metadata?.full_name?.trim?.() ||
     user.email?.split('@')[0] ||
     'Gymbro';
-
-  let profile: { display_name?: string | null; username?: string | null; avatar_url?: string | null; signup_intent?: string | null } | null = null;
-
-  if (supabase) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('display_name, username, avatar_url, signup_intent')
-      .eq('id', user.id)
-      .maybeSingle();
-    profile = data;
-  }
-
-  const profileIntent = profile?.signup_intent;
+  const profileIntent = user.profile?.signup_intent;
   const metadataIntent = user.user_metadata?.account_type;
   const signupIntent: SignupIntent = profileIntent === 'gym' || profileIntent === 'brand'
     ? profileIntent
     : metadataIntent === 'gym' || metadataIntent === 'brand'
       ? metadataIntent
       : 'personal';
-
   return {
     id: user.id,
     email: user.email ?? '',
-    name: profile?.display_name?.trim() || fallbackName,
-    username: profile?.username ?? null,
-    avatarUrl: profile?.avatar_url ?? null,
+    name: user.profile?.display_name?.trim() || fallbackName,
+    username: user.profile?.username ?? null,
+    avatarUrl: user.profile?.avatar_url ?? null,
     role: user.app_metadata?.role === 'admin' ? 'admin' : 'user',
-    provider: 'supabase',
+    provider: 'cloud',
     signupIntent,
   };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => readFallbackSession());
-  const [loading, setLoading] = useState(isSupabaseConfigured);
-  const [recoveryMode, setRecoveryMode] = useState(() => {
-    const active = readRecoveryMarker();
-    if (active) writeRecoveryMarker(true);
-    return active;
-  });
-
-  const setRecoveryActive = (active: boolean) => {
-    writeRecoveryMarker(active);
-    setRecoveryMode(active);
-  };
+  const [loading, setLoading] = useState(true);
+  const [recoveryToken, setRecoveryToken] = useState<string | null>(() => captureRecoveryToken());
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
     let mounted = true;
-
-    const hydrate = async (supabaseUser: SupabaseUser | null) => {
+    const unsubscribe = backend.auth.onChange((next) => {
       if (!mounted) return;
-      if (!supabaseUser) {
+      if (next) {
+        setUser(cloudPublicUser(next));
+        clearFallbackSession();
+      } else {
         setUser(readFallbackSession());
-        setLoading(false);
-        return;
       }
-
-      const next = await cloudPublicUser(supabaseUser);
-      if (!mounted) return;
-      setUser(next);
-      setLoading(false);
-      try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
-    };
-
-    void supabase.auth.getSession().then(({ data }) => hydrate(data.session?.user ?? null));
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') setRecoveryActive(true);
-      else if (event === 'SIGNED_OUT') setRecoveryActive(false);
-      window.setTimeout(() => { void hydrate(session?.user ?? null); }, 0);
     });
-
+    void backend.auth.restore().then((restored) => {
+      if (!mounted) return;
+      if (restored) {
+        setUser(cloudPublicUser(restored));
+        clearFallbackSession();
+      }
+      setLoading(false);
+    });
     return () => {
       mounted = false;
-      authListener.subscription.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
   const login = async (email: string, password: string) => {
     const normalized = email.trim().toLowerCase();
 
-    if (normalized === DEMO_USER.email && password === DEMO_USER.password) {
-      if (supabase) await supabase.auth.signOut({ scope: 'local' });
-      const next = localPublicUser(DEMO_USER);
-      setUser(next);
-      writeStorage(SESSION_KEY, next);
-      return;
-    }
-
-    if (supabase) {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: normalized, password });
-      if (!error && data.user) {
-        const next = await cloudPublicUser(data.user);
-        setUser(next);
-        try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
-        return;
-      }
-
-      const localMatch = getStoredUsers().find(
-        (item) => item.email.toLowerCase() === normalized && item.password === password,
-      );
+    if (LOCAL_ACCOUNTS_ENABLED) {
+      const localMatch = getStoredUsers().find((item) => item.email.toLowerCase() === normalized && item.password === password);
       if (localMatch) {
         const next = localPublicUser(localMatch);
         setUser(next);
         writeStorage(SESSION_KEY, next);
         return;
       }
-
-      throw new Error(error?.message === 'Invalid login credentials' ? 'Correo o contraseña incorrectos.' : (error?.message ?? 'No pudimos iniciar sesión.'));
     }
 
-    const match = getStoredUsers().find(
-      (item) => item.email.toLowerCase() === normalized && item.password === password,
-    );
-    if (!match) throw new Error('Correo o contraseña incorrectos.');
-    const next = localPublicUser(match);
-    setUser(next);
-    writeStorage(SESSION_KEY, next);
+    const result = await backend.auth.login(normalized, password);
+    if (!result.ok) throw new Error(result.error?.message ?? 'No pudimos iniciar sesión.');
+    setUser(cloudPublicUser(result.body.session.user));
+    clearFallbackSession();
   };
 
   const register = async (name: string, email: string, password: string, signupIntent: SignupIntent = 'personal'): Promise<RegisterResult> => {
-    const normalized = email.trim().toLowerCase();
-    const cleanName = name.trim();
-
-    if (supabase) {
-      const { data, error } = await supabase.auth.signUp({
-        email: normalized,
-        password,
-        options: { data: { display_name: cleanName, account_type: signupIntent } },
-      });
-      if (error) throw new Error(error.message);
-
-      if (data.session && data.user) {
-        const next = await cloudPublicUser(data.user);
-        setUser(next);
-        return { requiresEmailConfirmation: false };
-      }
-
-      return { requiresEmailConfirmation: true };
-    }
-
-    const users = getStoredUsers();
-    if (users.some((item) => item.email.toLowerCase() === normalized)) {
-      throw new Error('Ya existe una cuenta con ese correo.');
-    }
-
-    const nextStored: StoredUser = {
-      id: `local-${Date.now()}`,
-      email: normalized,
-      name: cleanName,
-      role: 'user',
+    const result = await backend.auth.register({
+      email: email.trim().toLowerCase(),
       password,
-      signupIntent: 'personal',
-    };
-    writeStorage(USERS_KEY, [...users, nextStored]);
-    const next = localPublicUser(nextStored);
-    setUser(next);
-    writeStorage(SESSION_KEY, next);
-    return { requiresEmailConfirmation: false };
+      display_name: name.trim(),
+      account_type: signupIntent,
+    });
+    if (!result.ok) throw new Error(result.error?.message ?? 'No pudimos crear la cuenta.');
+    if (result.body.session) {
+      setUser(cloudPublicUser(result.body.session.user));
+      clearFallbackSession();
+      return { requiresEmailConfirmation: false };
+    }
+    return { requiresEmailConfirmation: true };
   };
 
   const requestPasswordReset = async (email: string) => {
-    if (!supabase) throw new Error('La recuperación de contraseña requiere una cuenta cloud.');
-    const normalized = email.trim().toLowerCase();
-    const redirectTo = `${window.location.origin}/reset-password`;
-    const { error } = await supabase.auth.resetPasswordForEmail(normalized, { redirectTo });
-    if (error) throw new Error(error.message || 'No pudimos enviar el enlace de recuperación.');
+    const result = await backend.auth.forgotPassword(email.trim().toLowerCase());
+    if (!result.ok) throw new Error(result.error?.message ?? 'No pudimos enviar el enlace de recuperación.');
   };
 
   const completePasswordRecovery = async (newPassword: string) => {
-    if (!supabase) throw new Error('La recuperación de contraseña requiere una cuenta cloud.');
-    if (!recoveryMode) throw new Error('El enlace de recuperación no es válido o ya expiró.');
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) throw new Error(error.message || 'No pudimos actualizar la contraseña.');
-    setRecoveryActive(false);
-    await supabase.auth.signOut({ scope: 'local' });
+    if (!recoveryToken) throw new Error('El enlace de recuperación no es válido o ya expiró.');
+    const result = await backend.auth.resetPassword(recoveryToken, newPassword);
+    if (!result.ok) throw new Error(result.error?.message ?? 'No pudimos actualizar la contraseña.');
+    clearRecoveryToken();
+    setRecoveryToken(null);
+    await backend.auth.logout();
     setUser(null);
   };
 
   const cancelPasswordRecovery = async () => {
-    setRecoveryActive(false);
-    if (supabase) await supabase.auth.signOut({ scope: 'local' });
-    setUser(null);
-    try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+    clearRecoveryToken();
+    setRecoveryToken(null);
   };
 
   const changePassword = async (currentPassword: string, newPassword: string) => {
-    if (!supabase || !user || user.provider !== 'supabase') throw new Error('Esta acción requiere una cuenta cloud.');
-    const { error: verifyError } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword });
-    if (verifyError) throw new Error(verifyError.message === 'Invalid login credentials' ? 'La contraseña actual es incorrecta.' : verifyError.message);
-    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-    if (updateError) throw new Error(updateError.message || 'No pudimos actualizar la contraseña.');
+    if (!user || user.provider !== 'cloud') throw new Error('Esta acción requiere una cuenta cloud.');
+    const result = await backend.auth.changePassword(currentPassword, newPassword);
+    if (!result.ok) throw new Error(result.error?.message ?? 'No pudimos actualizar la contraseña.');
+  };
+
+  const confirmEmail = async (token: string) => {
+    const result = await backend.auth.confirmEmail(token);
+    if (!result.ok) throw new Error(result.error?.message ?? 'No pudimos confirmar el correo.');
+  };
+
+  const resendConfirmation = async (email: string) => {
+    await backend.auth.resendConfirmation(email.trim().toLowerCase());
   };
 
   const loginAsGuest = () => {
-    const next: AuthUser = {
-      id: 'guest',
-      email: '',
-      name: 'Invitado',
-      role: 'guest',
-      provider: 'guest',
-      signupIntent: 'personal',
-    };
+    const next: AuthUser = { id: 'guest', email: '', name: 'Invitado', role: 'guest', provider: 'guest', signupIntent: 'personal' };
     setUser(next);
     writeStorage(SESSION_KEY, next);
   };
 
   const logout = async () => {
-    setRecoveryActive(false);
-    if (user?.provider === 'supabase' && supabase) {
-      await supabase.auth.signOut({ scope: 'local' });
-    }
+    if (user?.provider === 'cloud') await backend.auth.logout();
     setUser(null);
-    try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+    clearFallbackSession();
   };
 
+  const recoveryMode = Boolean(recoveryToken);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, loading, login, register, loginAsGuest, logout, requestPasswordReset, completePasswordRecovery, cancelPasswordRecovery, changePassword, recoveryMode }),
-    [user, loading, recoveryMode],
+    () => ({ user, loading, login, register, loginAsGuest, logout, requestPasswordReset, completePasswordRecovery, cancelPasswordRecovery, changePassword, confirmEmail, resendConfirmation, recoveryMode }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, loading, recoveryToken],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
