@@ -68,7 +68,7 @@ services:
     profiles: ["disabled"]
 
   backup:
-    image: postgres:17.6-alpine
+    image: postgres:18.4-alpine
     security_opt:
       - no-new-privileges:true
     depends_on:
