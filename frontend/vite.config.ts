@@ -66,6 +66,6 @@ export default defineConfig({
     },
   },
   preview: { port: 4173 },
-  // The API (server/) has its own node:test suites that need a running stack.
+  // The API (backend/) has its own node:test suites that need a running stack.
   test: { include: ['src/**/*.test.ts'] },
 });

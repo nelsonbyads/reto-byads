@@ -302,6 +302,21 @@ Destino de producción: AWS (decisiones en `docs/DECISIONES_PRODUCCION.md`). Est
 
 Siembra por la API (`server/scripts/seed-demo.mjs`): 132 cuentas, 10 organizaciones, 89 retos, 889 participaciones, 733 evidencias, 38 premios, 408 canjes, 12 campañas de anuncios. Destapó un bug presente también en Supabase: `eco4c_grant_dc` fallaba con 42702 (`new_balance` ambiguo) siempre que un presupuesto DC pagaba, y devolvía 500 al aprobar retos con DadoCoins. Corregido en `db/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`, con prueba de regresión. Integridad 12/12, carga de 0 errores en más de 11.000 peticiones (detalles en `docs/ENTREGA_LOCAL.md`).
 
+### Reorganización del repositorio (2026-11-12) ✅
+
+Frontend y backend quedan separados por carpeta, cada uno con sus dependencias. Las rutas citadas antes en este documento corresponden a la estructura anterior:
+
+| Antes | Ahora |
+|---|---|
+| `src/`, `public/`, `index.html`, `vite.config.ts`, `data/`, `images/`, `videos/`, `scripts/` | `frontend/…` |
+| `infra/web/` (Dockerfile, nginx) | `frontend/` |
+| `server/` | `backend/` |
+| `db/compat`, `db/migrations` | `database/compat`, `database/migrations` |
+| `supabase/migrations`, `supabase/tests` | `database/legacy-migrations`, `database/tests` |
+| `Dockerfile`, `docker-compose.yml`, `docker/` y `supabase/config.toml` de la raíz | `legacy/` |
+
+El runner registra cada migración solo por su nombre de archivo, así que moverlas no altera los checksums ya aplicados. La raíz conserva un `package.json` con las herramientas comunes (ESLint, Prettier) y atajos (`npm run dev`, `build`, `test`, `test:api`, `lint`, `typecheck`, `install:all`).
+
 ### M12 — Corte (pendiente; requiere decisión y ventana)
 
 1. Elegir servidor, dominio y proveedor SMTP; crear `infra/.env.prod`.

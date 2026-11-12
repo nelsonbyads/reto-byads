@@ -97,22 +97,28 @@ C:\Users\USUARIO\Documents\Dice-Fitness\reto-byads
 
 ```text
 reto-byads/
-├── src/                 SPA React (cliente de la API: src/lib/backend.ts)
-│   ├── admin/sections/  backoffice SuperAdmin, una sección por archivo
-│   └── types/database.ts  tipos generados desde el esquema (no editar a mano)
-├── server/              API propia (Node 22 + Fastify)
+├── frontend/            Web (React + Vite)
+│   ├── src/             SPA (cliente de la API: src/lib/backend.ts)
+│   │   ├── admin/sections/   backoffice SuperAdmin, una sección por archivo
+│   │   └── types/database.ts tipos generados desde el esquema (no editar a mano)
+│   ├── public/ data/ images/ videos/   estáticos y catálogo de ejercicios
+│   ├── scripts/         dataset y copia de multimedia
+│   └── Dockerfile, nginx.conf, package.json
+├── backend/             API propia (Node 22 + Fastify)
 │   ├── src/             auth, /api/rpc, /api/db, /api/files, almacenamiento disk/S3
 │   ├── scripts/         tipos de BD, importación, siembra demo, integridad, carga
-│   └── test/            node:test (unitarios + integración)
-├── db/compat/           capa de compatibilidad SQL (roles, auth.uid(), storage)
-├── db/migrations/       migraciones del backend propio
-├── supabase/migrations/ migraciones históricas (siguen aplicándose; no borrar)
-├── supabase/tests/      suites pgTAP
-├── infra/               Docker Compose, nginx, Caddy, migrate/backup/import
-├── infra/seed/          cuentas demo y copias locales (ignorado por git)
+│   ├── test/            node:test (unitarios + integración)
+│   └── Dockerfile, package.json
+├── database/
+│   ├── compat/          capa de compatibilidad SQL (roles, auth.uid(), storage)
+│   ├── legacy-migrations/  migraciones históricas (siguen aplicándose; no borrar)
+│   ├── migrations/      migraciones del backend propio
+│   └── tests/           suites pgTAP
+├── infra/               Docker Compose, Caddy, migrate/backup/import
+│   └── seed/            cuentas demo y copias locales (ignorado por git)
 ├── docs/                documentación (vivos: README, ARCHITECTURE, DEPLOYMENT, TESTING, ENTREGA_LOCAL, DECISIONES_PRODUCCION)
-├── data/ images/ videos/ public/
-├── Dockerfile, docker-compose.yml, docker/   LEGADO (web antigua contra Supabase): no usar
+├── legacy/              LEGADO (web antigua contra Supabase y config de Supabase CLI): no usar
+├── package.json         herramientas comunes (ESLint, Prettier) y atajos (npm run dev/build/test/lint)
 └── README.md, DOCKER.md, LICENSE, NOTICE.md
 ```
 
@@ -131,7 +137,7 @@ React 18 · TypeScript · Vite · React Router DOM · Lucide React · CSS custom
 Backend (propio, en Docker; Supabase ya NO se usa):
 
 ```text
-API Node 22 + Fastify (server/)
+API Node 22 + Fastify (backend/)
 PostgreSQL 17 con RLS
 RPCs SECURITY DEFINER (la lógica de economía y retos vive en SQL)
 Autenticación propia: argon2id, access token en memoria + refresh rotativo en cookie httpOnly, CSRF
@@ -173,10 +179,10 @@ Comandos mínimos antes de entregar:
 
 ```bash
 npm run lint
-npx tsc -p tsconfig.app.json --noEmit
+npm run typecheck
 npm test
 npm run build
-cd server && npm test        # con el stack levantado y límites de peticiones altos (docs/TESTING.md)
+cd backend && npm test        # con el stack levantado y límites de peticiones altos (docs/TESTING.md)
 ```
 
 Cuentas de demostración y datos de prueba: `docs/ENTREGA_LOCAL.md`.
@@ -190,7 +196,7 @@ Guía completa: `DOCKER.md`. Reglas:
 - Proyecto Compose: `reto-byads-stack` (`infra/docker-compose.yml`).
 - Nunca `docker compose down --volumes`, `docker volume rm` sobre `reto-byads-stack_*` ni limpiezas globales (`prune`).
 - Para parar: `stop`; para aplicar cambios: `up -d --build api web`.
-- Los archivos de la raíz (`Dockerfile`, `docker-compose.yml`, `docker/`) y el contenedor `dadofit-web` (puerto 8781) son la versión antigua contra Supabase Cloud: no usarlos (escriben en producción de Supabase).
+- Los archivos de `legacy/supabase-web/` (`Dockerfile`, `docker-compose.yml`, `nginx.conf`) y el contenedor `dadofit-web` (puerto 8781) son la versión antigua contra Supabase Cloud: no usarlos (escriben en producción de Supabase).
 
 No ejecutar:
 
@@ -208,7 +214,7 @@ Supabase Cloud (proyecto `DadoFit Development`, ref `hobsttxpvgxqneqaynyi`, us-w
 
 - Sus datos ya se importaron a Docker con éxito (ensayo del 2026-11-11, `docs/DEPLOYMENT.md` §6).
 - Credenciales para repetir la importación: `infra/.env.import` (ignorado por git). Nunca imprimirlas ni pegarlas en chats, ZIPs o commits.
-- Si se activan presupuestos DC allí, aplicar antes la corrección `db/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`.
+- Si se activan presupuestos DC allí, aplicar antes la corrección `database/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`.
 - Retirarlo (proyecto Cloud, contenedores `supabase_*` locales, archivos legados) es irreversible y requiere confirmación expresa recurso por recurso.
 
 ---
@@ -217,15 +223,15 @@ Supabase Cloud (proyecto `DadoFit Development`, ref `hobsttxpvgxqneqaynyi`, us-w
 
 Nunca modificar una migración ya aplicada: el runner (`infra/db/migrate.sh`) guarda un checksum por archivo en `schema_migrations` y falla si un archivo aplicado cambió.
 
-Crear siempre una migración nueva en `db/migrations/`:
+Crear siempre una migración nueva en `database/migrations/`:
 
 ```text
 YYYYMMDDHHMMSS_fix_description.sql
 ```
 
-Orden de aplicación: `db/compat` → `supabase/migrations` → `db/migrations`. Las migraciones deben ser aditivas (añadir antes de quitar) para permitir rollback de imágenes.
+Orden de aplicación: `database/compat` → `database/legacy-migrations` → `database/migrations`. Las migraciones deben ser aditivas (añadir antes de quitar) para permitir rollback de imágenes.
 
-Después de cambiar funciones o tablas expuestas: actualizar la lista blanca (`server/src/rpcAllowlist.js` / `catalog.js`) si aplica y regenerar `src/types/database.ts` (`npm --prefix server run db:types`).
+Después de cambiar funciones o tablas expuestas: actualizar la lista blanca (`backend/src/rpcAllowlist.js` / `catalog.js`) si aplica y regenerar `frontend/src/types/database.ts` (`npm --prefix backend run db:types`).
 
 No borrar historial.
 
@@ -531,8 +537,8 @@ Cada ZIP debe contener únicamente lo necesario.
 Sí:
 
 ```text
-src/
-supabase/migrations/
+frontend/src/
+database/legacy-migrations/
 scripts/
 docs/
 ```
@@ -543,9 +549,9 @@ No:
 node_modules
 .git
 dist
-data/
-images/ masivas
-videos/
+frontend/data/
+frontend/images/ masivas
+frontend/videos/
 .env.local
 secretos
 ```
@@ -1645,9 +1651,9 @@ Catálogo:
 No romper carga del dataset ni mover:
 
 ```text
-data/
-images/
-videos/
+frontend/data/
+frontend/images/
+frontend/videos/
 ```
 
 innecesariamente.
@@ -2236,8 +2242,8 @@ Esta sección reemplaza las notas de validación anteriores que mencionan `SUPAB
 
 - Migración Supabase → backend propio completa (M0–M11 + endurecimiento S1–S6). Detalle: `docs/SPEC_MIGRACION_BACKEND_PROPIO.md`.
 - Datos reales de Supabase Cloud importados y verificados en Docker; login con contraseñas heredadas comprobado.
-- Base local poblada con datos demo (`server/scripts/seed-demo.mjs`): 132 cuentas, gyms, marcas, retos, premios, canjes y publicidad. Integridad 12/12; carga sin errores (`docs/ENTREGA_LOCAL.md`).
-- Bug corregido: `eco4c_grant_dc` devolvía 500 al pagar DC desde un presupuesto activo (`db/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`, con prueba de regresión).
+- Base local poblada con datos demo (`backend/scripts/seed-demo.mjs`): 132 cuentas, gyms, marcas, retos, premios, canjes y publicidad. Integridad 12/12; carga sin errores (`docs/ENTREGA_LOCAL.md`).
+- Bug corregido: `eco4c_grant_dc` devolvía 500 al pagar DC desde un presupuesto activo (`database/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`, con prueba de regresión).
 - Preparado para AWS (RDS, S3, SES, Secrets Manager, CloudWatch); decisiones pendientes en `docs/DECISIONES_PRODUCCION.md` (la principal: dónde corre el cómputo).
 - Pruebas: API 46/46 (disco y S3) + economía 3/3, Vitest 172/172, ESLint y TypeScript sin errores, Trivy sin HIGH/CRITICAL con parche.
 

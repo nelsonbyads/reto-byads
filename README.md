@@ -47,10 +47,10 @@ DadoFit es una SPA de fitness gamificado construida con React, TypeScript y Vite
 - React Router DOM (`BrowserRouter`)
 - Lucide React
 - CSS propio organizado por versión/feature
-- Tipos de la base de datos generados desde el esquema (`src/types/database.ts`): `backend.rpc()` y `backend.from()` validan nombres y argumentos
+- Tipos de la base de datos generados desde el esquema (`frontend/src/types/database.ts`): `backend.rpc()` y `backend.from()` validan nombres y argumentos
 
 ### Backend (propio, en Docker)
-- API Node 22 + Fastify (`server/`): autenticación, acceso a datos y archivos.
+- API Node 22 + Fastify (`backend/`): autenticación, acceso a datos y archivos.
 - PostgreSQL 17 con Row Level Security (RLS). La lógica de economía y retos vive en SQL: RPCs y funciones `SECURITY DEFINER`.
 - Archivos de evidencia servidos con URLs firmadas y verificación del contenido real del archivo. Se guardan según `STORAGE_DRIVER`:
   - `disk`: un volumen local (desarrollo);
@@ -123,20 +123,36 @@ Un usuario personal puede crear un Squad. Crear un Gym o una Brand requiere la c
 
 ## Estructura
 
+El repositorio separa cada parte en su carpeta, con sus propias dependencias:
+
 ```text
-src/                   SPA React (cliente de la API en src/lib/backend.ts)
-  admin/sections/      secciones del backoffice de SuperAdmin
-  types/database.ts    tipos generados desde el esquema (no editar a mano)
-server/                API propia (Fastify): auth, /api/rpc, /api/db/query, /api/files
-  scripts/             tipos de BD, importación, datos demo, integridad y carga
-db/compat/             capa de compatibilidad SQL (roles, auth.uid(), esquema storage)
-supabase/migrations/   migraciones históricas (se mantienen hasta retirar Supabase)
-db/migrations/         migraciones del backend propio
-supabase/tests/        suites pgTAP
-infra/                 Docker Compose, nginx, Caddy, migraciones, backups e importación
-infra/seed/            cuentas demo y copia de datos locales (ignorado por git)
-docs/                  documentación (ver abajo)
+reto-byads/
+├── frontend/            Web (React + Vite) — se despliega como sitio estático
+│   ├── src/             código de la SPA (cliente de la API en src/lib/backend.ts)
+│   │   ├── admin/sections/   secciones del backoffice de SuperAdmin
+│   │   └── types/database.ts tipos generados desde el esquema (no editar a mano)
+│   ├── public/  data/  images/  videos/   estáticos y catálogo de ejercicios
+│   ├── scripts/         preparación del dataset y copia de multimedia al build
+│   ├── Dockerfile  nginx.conf  security-headers.conf   imagen web (nginx)
+│   └── package.json
+├── backend/             API (Fastify): auth, /api/rpc, /api/db/query, /api/files
+│   ├── src/  test/
+│   ├── scripts/         tipos de BD, importación, datos demo, integridad y carga
+│   ├── Dockerfile
+│   └── package.json
+├── database/            SQL de PostgreSQL
+│   ├── compat/          capa de compatibilidad (roles, auth.uid(), esquema storage)
+│   ├── legacy-migrations/   migraciones heredadas de la etapa Supabase
+│   ├── migrations/      migraciones del backend propio
+│   └── tests/           suites pgTAP
+├── infra/               orquestación: Docker Compose, Caddy, migrate, backups, importación
+│   └── seed/            cuentas demo y copia de datos locales (ignorado por git)
+├── docs/                documentación (ver abajo)
+├── legacy/              restos de la versión Supabase (no se usan; se retiran con Supabase)
+└── package.json         herramientas comunes (ESLint, Prettier) y atajos de npm
 ```
+
+Orden de aplicación de las migraciones: `database/compat` → `database/legacy-migrations` → `database/migrations`.
 
 ## Puesta en marcha (stack completo en Docker)
 
@@ -163,11 +179,11 @@ La base local puede poblarse con unos 130 usuarios, gimnasios, marcas, retos, pr
 
 ## Desarrollo del frontend
 
-Con el stack levantado (al menos `db`, `mailpit` y `api`):
+Con el stack levantado (al menos `db`, `mailpit` y `api`), desde la raíz:
 
 ```bash
-npm install
-npm run dev
+npm run install:all   # dependencias de la raíz (herramientas), frontend/ y backend/
+npm run dev           # equivale a: npm --prefix frontend run dev
 ```
 
 - Vite (http://localhost:5175) reenvía `/api` a la API en `127.0.0.1:8782`, así que la cookie de sesión es de primera parte, igual que en producción.
@@ -176,24 +192,24 @@ npm run dev
 Cuando cambie una función o tabla expuesta, regenera los tipos. La CI falla si quedan desactualizados:
 
 ```bash
-DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix server run db:types
+DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix backend run db:types
 ```
 
 ## Tests y calidad
 
 ```bash
 npm run lint                               # ESLint (web + API)
-npx tsc -p tsconfig.app.json --noEmit      # tipos
+npm run typecheck      # tipos
 npm test                                   # frontend (Vitest)
 docker compose -f infra/docker-compose.yml --env-file infra/.env --profile tests run --rm sqltest   # migraciones desde cero + pgTAP
-cd server && npm test                      # API: unitarios + integración (requiere el stack; ver docs/TESTING.md)
+cd backend && npm test                      # API: unitarios + integración (requiere el stack; ver docs/TESTING.md)
 ```
 
 Con la base local poblada:
 
 ```bash
-DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix server run check:integrity   # 12 invariantes de la economía y los datos
-npm --prefix server run load:test          # prueba de carga con usuarios demo (subir antes los límites de la API, ver docs/TESTING.md)
+DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix backend run check:integrity   # 12 invariantes de la economía y los datos
+npm --prefix backend run load:test          # prueba de carga con usuarios demo (subir antes los límites de la API, ver docs/TESTING.md)
 ```
 
 Los detalles de cada suite (variables, límites de peticiones y la ejecución contra S3 simulado) están en `docs/TESTING.md`.
@@ -264,11 +280,11 @@ Rollback = volver al IMAGE_TAG anterior (las migraciones son aditivas)
 No eliminar:
 
 ```text
-data/
-images/
-videos/
+frontend/data/
+frontend/images/
+frontend/videos/
 LICENSE
 NOTICE.md
 ```
 
-`dist/`, `node_modules/` y `public/data/exercises.min.json` pueden regenerarse cuando corresponda.
+`dist/`, `node_modules/` y `frontend/public/data/exercises.min.json` pueden regenerarse cuando corresponda.

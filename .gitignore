@@ -12,5 +12,5 @@ src-backup/
 .vscode/
 .idea/
 
-# Local demo accounts written by server/scripts/seed-demo.mjs
+# Local demo accounts written by backend/scripts/seed-demo.mjs
 infra/seed/

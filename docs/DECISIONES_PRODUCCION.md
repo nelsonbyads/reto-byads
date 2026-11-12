@@ -47,7 +47,7 @@ Hoy el proyecto solo lo usa una persona, así que el corte se reduce a desplegar
 - [ ] Retirar Supabase y los archivos legados una vez verificados los datos en AWS (confirmación expresa por recurso).
 
 ### 7. Repositorio
-- [ ] Multimedia (`images/`, `videos/`) dentro de git: moverla a S3/CloudFront, a Git LFS, o dejarla como está.
+- [ ] Multimedia (`frontend/images/`, `frontend/videos/`) dentro de git: moverla a S3/CloudFront, a Git LFS, o dejarla como está.
 - [ ] Formatear todo el código con Prettier en un commit dedicado (cambia ~100 archivos solo en formato).
 - [ ] Fijar las GitHub Actions por SHA en lugar de etiqueta (más seguro ante etiquetas movidas; Dependabot las mantiene).
 

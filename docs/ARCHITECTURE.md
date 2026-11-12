@@ -18,7 +18,7 @@ edge  ── Caddy con TLS (Compose)  |  ALB + ACM (AWS)
 web   ── nginx sin privilegios: SPA, cabeceras de seguridad, CSP, proxy /api
   |
   v  /api
-api   ── Node 22 + Fastify (server/)
+api   ── Node 22 + Fastify (backend/)
   |      +-- /api/auth   registro, login, refresh, logout, confirmación, recuperación
   |      +-- /api/rpc    funciones SQL de una lista blanca            (backend.rpc())
   |      +-- /api/db     consultas acotadas por tabla/acción/columna  (backend.from())
@@ -27,7 +27,7 @@ api   ── Node 22 + Fastify (server/)
   +----> PostgreSQL 17 (Docker local | RDS en AWS)
   |        +-- RLS en todas las tablas de negocio
   |        +-- RPC SECURITY DEFINER: economía, retos, anti-farming, marketplace, publicidad
-  |        +-- auth.users / auth.uid() y storage.objects (capa de compatibilidad, db/compat)
+  |        +-- auth.users / auth.uid() y storage.objects (capa de compatibilidad, database/compat)
   |
   +----> Almacenamiento de archivos (STORAGE_DRIVER)
   |        +-- disk: volumen local (desarrollo)
@@ -46,13 +46,13 @@ Así, RLS y `auth.uid()` funcionan igual que cuando el backend era Supabase. La 
 
 ### Lista blanca
 
-- **RPC:** solo se pueden llamar las funciones de `server/src/rpcAllowlist.js`.
-- **Tablas:** `/api/db` solo permite las operaciones de `TABLE_ALLOWLIST` (`server/src/catalog.js`); por ejemplo, `friendships` admite escritura y `wallets` solo lectura.
+- **RPC:** solo se pueden llamar las funciones de `backend/src/rpcAllowlist.js`.
+- **Tablas:** `/api/db` solo permite las operaciones de `TABLE_ALLOWLIST` (`backend/src/catalog.js`); por ejemplo, `friendships` admite escritura y `wallets` solo lectura.
 - **Catálogo:** al arrancar, la API lee de la base la firma de cada función y las columnas de cada tabla, y valida contra eso cada petición.
 
 ### Tipos compartidos
 
-`server/scripts/generate-db-types.mjs` genera `src/types/database.ts` desde el esquema, con argumentos y resultados de cada RPC y columnas de cada tabla.
+`backend/scripts/generate-db-types.mjs` genera `frontend/src/types/database.ts` desde el esquema, con argumentos y resultados de cada RPC y columnas de cada tabla.
 - `backend.rpc()` y `backend.from()` validan en compilación el nombre y los argumentos.
 - La CI regenera los tipos sobre una base recién migrada y falla si el archivo quedó desactualizado.
 
@@ -122,7 +122,7 @@ Cada pago lleva una clave de idempotencia. Los saldos se mueven solo desde funci
 - `gym_point_ledger`;
 - `sponsor_point_ledger`.
 
-`server/scripts/check-integrity.mjs` verifica que todo cuadre: saldos, presupuestos, inventarios y cupones.
+`backend/scripts/check-integrity.mjs` verifica que todo cuadre: saldos, presupuestos, inventarios y cupones.
 
 ## 6. Retos y evidencia
 
@@ -201,10 +201,10 @@ Detalles en `docs/DEPLOYMENT.md` §9 y `docs/DECISIONES_PRODUCCION.md`.
 
 ## 12. Temas visuales (oscuro, claro y pastel)
 
-- **Atributo:** el tema se guarda en el navegador (`dadofit:theme:v15.8`) y se aplica como `<html data-dadofit-theme>`. `src/lib/theme.ts` lo aplica al arrancar, así que también rige en las páginas sin encabezado.
+- **Atributo:** el tema se guarda en el navegador (`dadofit:theme:v15.8`) y se aplica como `<html data-dadofit-theme>`. `frontend/src/lib/theme.ts` lo aplica al arrancar, así que también rige en las páginas sin encabezado.
 - **Capas compartidas:** el sistema visual (`v15.8-fitness-premium.css` y `v15.8.1-global-visual-system.css`) está escrito una sola vez y aplica a los tres temas.
 - **Colores:** cada color de esas capas es `var(--dfgt-<rol>, <color oscuro original>)`. En oscuro esas variables no existen, así que se usa el color original y el tema queda idéntico al diseño de referencia. Se verificó comparando los estilos calculados de unos 3.300 elementos: sin ninguna diferencia.
-- **Paletas:** `src/styles/v16-themes.css` define las paletas de claro y pastel. Contiene:
+- **Paletas:** `frontend/src/styles/v16-themes.css` define las paletas de claro y pastel. Contiene:
   - los roles base: fondo, paneles, texto, relleno de acento, acento como texto, superficie fuerte, tintes y sombras;
   - el mapeo de las paletas antiguas;
   - unos pocos ajustes de componentes (dock de publicidad, avatares, notificaciones, backoffice).
@@ -215,6 +215,6 @@ Detalles en `docs/DEPLOYMENT.md` §9 y `docs/DECISIONES_PRODUCCION.md`.
 
 ## 13. Dataset de ejercicios
 
-`data/exercises.json` (1.324 ejercicios) se compacta en `public/data/exercises.min.json` al hacer `npm run dev` y `npm run build`. Cada ejercicio incluye nombre, zona corporal, equipo, objetivo, grupo muscular, instrucciones, imagen y media.
+`frontend/data/exercises.json` (1.324 ejercicios) se compacta en `frontend/public/data/exercises.min.json` al hacer `npm run dev` y `npm run build`. Cada ejercicio incluye nombre, zona corporal, equipo, objetivo, grupo muscular, instrucciones, imagen y media.
 
 Los retos patrocinados pueden usar un ejercicio del catálogo o una actividad personalizada.

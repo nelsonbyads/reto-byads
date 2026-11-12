@@ -5,7 +5,7 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /
+    directory: /frontend
     schedule: { interval: weekly, day: monday }
     cooldown: { default-days: 14 }
     open-pull-requests-limit: 5
@@ -14,7 +14,16 @@ updates:
         update-types: [minor, patch]
 
   - package-ecosystem: npm
-    directory: /server
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    cooldown: { default-days: 14 }
+    open-pull-requests-limit: 3
+    groups:
+      tooling-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /backend
     schedule: { interval: weekly, day: monday }
     cooldown: { default-days: 14 }
     open-pull-requests-limit: 5
@@ -23,7 +32,7 @@ updates:
         update-types: [minor, patch]
 
   - package-ecosystem: docker
-    directories: [/server, /infra/web, /infra/db]
+    directories: [/backend, /frontend, /infra/db]
     schedule: { interval: weekly, day: monday }
     cooldown: { default-days: 14 }
 

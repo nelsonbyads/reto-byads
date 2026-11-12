@@ -54,15 +54,15 @@ services:
       PGDATABASE: ${POSTGRES_DB:-dadofit}
       PGUSER: ${POSTGRES_USER:-postgres}
       PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      # 1) compatibility layer, 2) historical migrations (kept in
-      # supabase/migrations until the cutover), 3) own-backend migrations.
+      # 1) compatibility layer, 2) historical migrations (inherited from the
+      # Supabase era), 3) own-backend migrations. All live in database/.
       MIGRATION_DIRS: /migrations/compat:/migrations/app:/migrations/own
       ALLOW_CHECKSUM_DRIFT: ${ALLOW_CHECKSUM_DRIFT:-0}
       DADOFIT_API_DB_PASSWORD: ${API_DB_PASSWORD:?API_DB_PASSWORD is required}
     volumes:
-      - ../db/compat:/migrations/compat:ro
-      - ../supabase/migrations:/migrations/app:ro
-      - ../db/migrations:/migrations/own:ro
+      - ../database/compat:/migrations/compat:ro
+      - ../database/legacy-migrations:/migrations/app:ro
+      - ../database/migrations:/migrations/own:ro
       - ./db/migrate.sh:/usr/local/bin/dadofit-migrate:ro
     entrypoint: ["sh", "/usr/local/bin/dadofit-migrate"]
     restart: "no"
@@ -80,7 +80,7 @@ services:
   api:
     <<: *no-new-privileges
     build:
-      context: ../server
+      context: ../backend
     image: dadofit-api:${IMAGE_TAG:-local}
     read_only: true
     tmpfs:
@@ -129,8 +129,8 @@ services:
   web:
     <<: *no-new-privileges
     build:
-      context: ..
-      dockerfile: infra/web/Dockerfile
+      context: ../frontend
+      dockerfile: Dockerfile
     image: dadofit-web:${IMAGE_TAG:-local}
     read_only: true
     tmpfs:
@@ -184,10 +184,10 @@ services:
       dockerfile: Dockerfile.sqltest
     image: dadofit-sqltest:local
     volumes:
-      - ../db/compat:/migrations/compat:ro
-      - ../supabase/migrations:/migrations/app:ro
-      - ../db/migrations:/migrations/own:ro
-      - ../supabase/tests:/tests:ro
+      - ../database/compat:/migrations/compat:ro
+      - ../database/legacy-migrations:/migrations/app:ro
+      - ../database/migrations:/migrations/own:ro
+      - ../database/tests:/tests:ro
     restart: "no"
     profiles: ["tests"]
 

@@ -38,7 +38,7 @@ if (!process.env.DATABASE_ADMIN_URL) throw new Error('DATABASE_ADMIN_URL is requ
 // Utilities
 // --------------------------------------------------------------------------
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
-const exercises = JSON.parse(await readFile(path.resolve(here, '../../data/exercises.json'), 'utf8'));
+const exercises = JSON.parse(await readFile(path.resolve(here, '../../frontend/data/exercises.json'), 'utf8'));
 const DICE = ['amateur', 'beginner', 'intermediate', 'advanced'];
 let seed = 20261111;
 const rand = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296);
@@ -48,7 +48,7 @@ const chance = (p) => rand() < p;
 const exercise = () => { const e = pick(exercises); return { id: String(e.id), name: String(e.name).slice(0, 120) }; };
 // Demo creatives use the project's own exercise images (served by the web at
 // /images/...), so the demo works offline and needs no third-party host.
-const LOCAL_IMAGES = (await readdir(path.resolve(here, '../../images'))).filter((f) => /\.(jpe?g|png|webp)$/i.test(f));
+const LOCAL_IMAGES = (await readdir(path.resolve(here, '../../frontend/images'))).filter((f) => /\.(jpe?g|png|webp)$/i.test(f));
 const img = (key) => {
   let hash = 0;
   for (const ch of String(key)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
@@ -199,7 +199,7 @@ async function main() {
   await mkdir(path.dirname(USERS_FILE), { recursive: true });
   const describe = (c) => ({ email: c.email, password: DEMO_PASSWORD, name: c.name, id: c.id });
   await writeFile(USERS_FILE, JSON.stringify({
-    note: 'Cuentas de demostración locales (sembradas por server/scripts/seed-demo.mjs). No usar fuera de local.',
+    note: 'Cuentas de demostración locales (sembradas por backend/scripts/seed-demo.mjs). No usar fuera de local.',
     admin: describe(superadmin), gymOwners: gymOwners.map(describe), brandOwners: brandOwners.map(describe),
     brandCoAdmin: describe(brandCoAdmin), athletes: athletes.map(describe),
   }, null, 2));

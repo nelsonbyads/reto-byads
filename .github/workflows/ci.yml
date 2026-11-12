@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  frontend:
-    name: Frontend (lint, typecheck, unit tests, build)
+  lint:
+    name: Lint (frontend + backend)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,11 +22,28 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+          cache-dependency-path: package-lock.json
+      # The root package.json only holds the shared tooling (ESLint, Prettier).
+      - run: npm ci
+      # Errors fail, warnings are reported.
+      - run: npm run lint
+
+  frontend:
+    name: Frontend (typecheck, unit tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
       - run: npm ci --ignore-scripts
       - run: npm run prepare
-      # Lints the web app and the API sources (errors fail, warnings are reported).
-      - run: npm run lint
-      - run: npx tsc -p tsconfig.app.json --noEmit
+      - run: npm run typecheck
       - run: npm test
       - run: npm run build
 
@@ -38,14 +55,14 @@ jobs:
       - name: No new grants to anon outside the reviewed public functions
         run: |
           allowed='dadofit_health|get_dadofit_schema_version|submit_support_request|get_active_ad|get_active_ads|record_ad_event|__eco4b_consume_test'
-          if grep -nE "grant[^;]*to[^;]*\banon\b" db/migrations/*.sql supabase/migrations/*.sql | grep -vE "$allowed"; then
+          if grep -nE "grant[^;]*to[^;]*\banon\b" database/migrations/*.sql database/legacy-migrations/*.sql | grep -vE "$allowed"; then
             echo "::error::A migration grants privileges to anon. Review it and extend the allowlist only if intended."
             exit 1
           fi
       - name: Migrations must not contain test hooks or environment-specific data
         run: |
-          if grep -nE "__[a-z0-9_]+_test\b|TEMPORARY test hook" db/migrations/*.sql; then
-            echo "::error::Test hooks belong in db/tests, not in migrations."
+          if grep -nE "__[a-z0-9_]+_test\b|TEMPORARY test hook" database/migrations/*.sql; then
+            echo "::error::Test hooks belong in database/tests, not in migrations."
             exit 1
           fi
 
@@ -93,7 +110,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: server/package-lock.json
+          cache-dependency-path: backend/package-lock.json
       - name: Start database, mail catcher, S3 mock and API
         run: |
           C="docker compose -f infra/docker-compose.yml --env-file infra/.env.example"
@@ -103,9 +120,9 @@ jobs:
           $C up -d --build api
           for i in $(seq 1 60); do curl -fsS http://127.0.0.1:8782/api/ready && break; sleep 2; done
       - run: npm ci
-        working-directory: server
+        working-directory: backend
       - name: Unit + integration tests
-        working-directory: server
+        working-directory: backend
         run: npm test
         env:
           BASE_URL: http://127.0.0.1:8782
@@ -113,11 +130,11 @@ jobs:
           DATABASE_ADMIN_URL: postgres://postgres:ci-postgres-password@127.0.0.1:55432/dadofit
       - name: Frontend database types match the migrated schema
         if: matrix.storage == 'disk'
-        working-directory: server
+        working-directory: backend
         run: |
           node scripts/generate-db-types.mjs
-          git diff --exit-code -- ../src/types/database.ts || {
-            echo "::error::src/types/database.ts is stale. Run: npm --prefix server run db:types"; exit 1; }
+          git diff --exit-code -- ../frontend/src/types/database.ts || {
+            echo "::error::frontend/src/types/database.ts is stale. Run: npm --prefix backend run db:types"; exit 1; }
         env:
           DATABASE_ADMIN_URL: postgres://postgres:ci-postgres-password@127.0.0.1:55432/dadofit
       - name: API logs on failure
@@ -137,12 +154,12 @@ jobs:
           node-version-file: .nvmrc
       - name: npm audit (runtime dependencies, high and critical)
         run: |
-          npm audit --omit=dev --audit-level=high
-          npm --prefix server audit --omit=dev --audit-level=high
+          npm --prefix frontend audit --omit=dev --audit-level=high
+          npm --prefix backend audit --omit=dev --audit-level=high
       - name: Build images
         run: |
-          docker build -t dadofit-api:scan server
-          docker build -t dadofit-web:scan -f infra/web/Dockerfile .
+          docker build -t dadofit-api:scan backend
+          docker build -t dadofit-web:scan frontend
       - name: Trivy (fixable HIGH/CRITICAL vulnerabilities fail the build)
         run: |
           for image in dadofit-api:scan dadofit-web:scan; do
@@ -151,7 +168,7 @@ jobs:
           done
       - name: Trivy misconfiguration scan (Dockerfiles and Compose, report only)
         run: |
-          for target in /src/infra /src/server; do
+          for target in /src/infra /src/backend /src/frontend; do
             docker run --rm -v "$PWD:/src:ro" "$TRIVY_IMAGE" config \
-              --severity HIGH,CRITICAL --skip-dirs /src/server/node_modules --exit-code 0 "$target"
+              --severity HIGH,CRITICAL --skip-dirs /src/backend/node_modules --skip-dirs /src/frontend/node_modules --exit-code 0 "$target"
           done

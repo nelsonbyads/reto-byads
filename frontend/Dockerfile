@@ -1,3 +1,4 @@
+# DadoFit web: Vite build served by unprivileged nginx. Build context: frontend/
 FROM node:22.23.4-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -13,8 +14,8 @@ FROM nginxinc/nginx-unprivileged:1.30.6-alpine AS runtime
 USER root
 RUN apk upgrade --no-cache
 USER 101
-COPY infra/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY infra/web/security-headers.conf /etc/nginx/snippets/security-headers.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

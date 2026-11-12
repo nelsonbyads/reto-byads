@@ -4,7 +4,7 @@
 //   MAILPIT_URL         Mailpit HTTP API (default http://127.0.0.1:8785)
 //   DATABASE_ADMIN_URL  owner connection, only for fixtures (platform admin, suspension checks)
 //
-// Run: npm test   (from server/, with the stack up)
+// Run: npm test   (from backend/, with the stack up)
 
 import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';

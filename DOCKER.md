@@ -9,8 +9,8 @@ Todo DadoFit corre en Docker Compose; el stack completo (base de datos, API, web
 | `infra/docker-compose.yml` | Stack local (proyecto Compose `reto-byads-stack`) |
 | `infra/docker-compose.prod.yml` | Overrides de producción: solo Caddy publica 80/443, SMTP real, backups, límites de recursos |
 | `infra/.env.example` | Plantilla de variables. Se copia a `infra/.env` (local) o a `infra/.env.prod` (producción); ninguno de los dos se versiona |
-| `server/Dockerfile` | Imagen de la API (`dadofit-api`): Node 22 Alpine, usuario `node`, sin npm/yarn en runtime |
-| `infra/web/Dockerfile` | Imagen web (`dadofit-web`): build de Vite + nginx sin privilegios (puerto 8080), cabeceras de seguridad, CSP y proxy `/api` |
+| `backend/Dockerfile` | Imagen de la API (`dadofit-api`): Node 22 Alpine, usuario `node`, sin npm/yarn en runtime |
+| `frontend/Dockerfile` | Imagen web (`dadofit-web`): build de Vite + nginx sin privilegios (puerto 8080), cabeceras de seguridad, CSP y proxy `/api` |
 | `infra/edge/Caddyfile` | Proxy de borde con TLS automático (producción con Compose) |
 | `infra/db/` | Migraciones (`migrate.sh`), backups (`backup.sh`), simulacro de restauración y tests pgTAP |
 | `infra/scripts/import-from-supabase.sh` | Importación única de datos desde Supabase |
@@ -118,7 +118,7 @@ Quedan restos de la versión anterior basada en Supabase. No se deben usar y se 
 
 | Recurso | Qué es | Estado |
 | --- | --- | --- |
-| `Dockerfile`, `docker-compose.yml` y `docker/nginx.conf` de la raíz | Proyecto `reto-byads-web`: la web antigua, compilada contra Supabase Cloud (puerto 8781). Escribe en los datos de producción de Supabase | Contenedor `dadofit-web` detenido. Si se reconstruye con el código actual, sale una web sin API |
+| `legacy/supabase-web/` (`Dockerfile`, `docker-compose.yml`, `nginx.conf`) | Proyecto `reto-byads-web`: la web antigua, compilada contra Supabase Cloud (puerto 8781). Escribe en los datos de producción de Supabase | Contenedor `dadofit-web` detenido. Si se reconstruye con el código actual, sale una web sin API |
 | Contenedores `supabase_*_reto-byads` y sus volúmenes | Supabase local que se usaba antes para desarrollar | Detenidos y vacíos |
 
 Borrarlos es irreversible. Se hará con confirmación expresa, nombrando cada recurso.

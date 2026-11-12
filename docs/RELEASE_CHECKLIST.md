@@ -83,7 +83,7 @@ Checklist para liberar una versión del backend propio (local o AWS). La versió
 ## 10. Repositorio
 - [ ] `git status` revisado: sin `infra/.env*`, `infra/seed/` ni dumps.
 - [ ] No se subieron secretos.
-- [ ] `data/`, `images/`, `videos/`, `LICENSE` y `NOTICE.md` conservados.
+- [ ] `frontend/data/`, `frontend/images/`, `frontend/videos/`, `LICENSE` y `NOTICE.md` conservados.
 - [ ] README, `docs/ARCHITECTURE.md` y este checklist al día.
 - [ ] Cambios integrados por pull request con CI en verde, sin push directo a `main`.
 - [ ] Rollback preparado: `IMAGE_TAG` anterior anotado (las migraciones son aditivas).

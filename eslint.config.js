@@ -9,19 +9,18 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   {
     ignores: [
-      'dist/**',
-      'node_modules/**',
-      'server/node_modules/**',
-      'public/**',
-      'data/**',
-      'supabase/**',
+      '**/node_modules/**',
+      'frontend/dist/**',
+      'frontend/public/**',
+      'frontend/data/**',
+      'legacy/**',
       '**/*.tsbuildinfo',
     ],
   },
 
-  // Web app
+  // Web app (frontend/)
   {
-    files: ['src/**/*.{ts,tsx}'],
+    files: ['frontend/src/**/*.{ts,tsx}'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: { ecmaVersion: 2022, globals: globals.browser },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
@@ -34,9 +33,9 @@ export default tseslint.config(
     },
   },
 
-  // API, scripts and tooling (plain ESM JavaScript on Node)
+  // API (backend/), build scripts and tooling (plain ESM JavaScript on Node)
   {
-    files: ['server/**/*.js', 'server/**/*.mjs', 'scripts/**/*.mjs', '*.js'],
+    files: ['backend/**/*.js', 'backend/**/*.mjs', 'frontend/scripts/**/*.mjs', '*.js'],
     extends: [js.configs.recommended],
     languageOptions: { ecmaVersion: 2024, sourceType: 'module', globals: globals.node },
     rules: {

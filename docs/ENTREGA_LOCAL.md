@@ -38,7 +38,7 @@ Todas usan la contraseña **`DadoFit-Demo-2026!`** (solo local). La lista comple
 
 ## 4. Qué contiene la base de demostración
 
-Generada por `server/scripts/seed-demo.mjs`, que recorre los flujos **por la API real**, como cada tipo de usuario, de modo que todas las reglas de negocio se aplican igual que en uso normal:
+Generada por `backend/scripts/seed-demo.mjs`, que recorre los flujos **por la API real**, como cada tipo de usuario, de modo que todas las reglas de negocio se aplican igual que en uso normal:
 
 | Módulo | Volumen |
 | --- | --- |
@@ -53,7 +53,7 @@ Generada por `server/scripts/seed-demo.mjs`, que recorre los flujos **por la API
 
 ## 5. Verificaciones realizadas
 
-- **Integridad de la economía** (`npm --prefix server run check:integrity`): 12/12 controles OK.
+- **Integridad de la economía** (`npm --prefix backend run check:integrity`): 12/12 controles OK.
   - Saldos de DadoCoins y de puntos iguales a la suma de sus movimientos, sin saldos negativos.
   - Presupuestos DC nunca sobrepasados y consistentes con sus movimientos.
   - Canjes dentro del inventario y del máximo por usuario.
@@ -61,7 +61,7 @@ Generada por `server/scripts/seed-demo.mjs`, que recorre los flujos **por la API
 - **Reglas de negocio:** la siembra comprobó que la API rechaza lo que debe rechazar: saldo insuficiente, premio agotado, gimnasio del que no se es miembro, límites anti-abuso. No hubo ningún error interno en la corrida final.
 - **Compra real desde la interfaz:** un atleta canjeó un cupón de 10 DC. Su saldo bajó de 12 a 2, recibió un código del lote y el canje apareció en "Mis canjes".
 - **Navegador:** se recorrieron los paneles de superadmin, gimnasio, marca y atleta con datos, sin errores.
-- **Carga** (`npm --prefix server run load:test`, 40 usuarios con sesión y una mezcla de lecturas típicas de la app):
+- **Carga** (`npm --prefix backend run load:test`, 40 usuarios con sesión y una mezcla de lecturas típicas de la app):
 
 | Concurrencia | Peticiones/s | Mediana | p95 | Errores |
 | --- | --- | --- | --- | --- |
@@ -76,8 +76,8 @@ Generada por `server/scripts/seed-demo.mjs`, que recorre los flujos **por la API
 
 La siembra destapó un fallo que también existe en producción (Supabase): **al aprobar un reto con recompensa en DadoCoins y un presupuesto activo, la API devolvía error 500** (`column reference "new_balance" is ambiguous` en `eco4c_grant_dc`). No se notaba porque en producción no hay presupuestos activos.
 
-- **Corrección:** `db/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`.
-- **Prueba de regresión:** en `server/test/economy.integration.test.js`; falla sin la corrección y pasa con ella.
+- **Corrección:** `database/migrations/20261111120000_fix_eco4c_grant_dc_ambiguous_balance.sql`.
+- **Prueba de regresión:** en `backend/test/economy.integration.test.js`; falla sin la corrección y pasa con ella.
 - **Producción en Supabase:** si se activan presupuestos DC allí antes de migrar a AWS, hay que aplicarle esta corrección primero.
 
 ## 7. Repetir o reiniciar las pruebas
@@ -96,9 +96,9 @@ Para volver a sembrar, la API debe arrancar con límites altos, porque todos los
 ```bash
 RATE_LIMIT_AUTH_PER_MINUTE=10000 RATE_LIMIT_GLOBAL_PER_MINUTE=100000 RATE_LIMIT_PUBLIC_RPC_PER_MINUTE=100000 RATE_LIMIT_UPLOADS_PER_MINUTE=100000 \
   docker compose -f infra/docker-compose.yml --env-file infra/.env up -d api
-DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix server run seed:demo
-DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix server run check:integrity
-npm --prefix server run load:test
+DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix backend run seed:demo
+DATABASE_ADMIN_URL=postgres://postgres:<POSTGRES_PASSWORD>@127.0.0.1:55432/dadofit npm --prefix backend run check:integrity
+npm --prefix backend run load:test
 docker compose -f infra/docker-compose.yml --env-file infra/.env up -d api      # límites normales
 ```
 
