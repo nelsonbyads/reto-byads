@@ -8,7 +8,7 @@ RUN npm run build
 
 # Unprivileged variant: runs as uid 101 on port 8080, so the container needs no
 # capabilities and works with a read-only root filesystem (+ tmpfs /tmp).
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine AS runtime
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine AS runtime
 # Pick up Alpine security fixes published after the base image was built.
 USER root
 RUN apk upgrade --no-cache
