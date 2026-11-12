@@ -1,7 +1,7 @@
 # Ephemeral Postgres with pgTAP to run the SQL test suites (mounted at /tests)
 # against a database migrated from scratch. Never used for
 # real data: the cluster lives in the container and disappears with it.
-FROM postgres:17.6-alpine
+FROM postgres:18.4-alpine
 
 ARG PGTAP_VERSION=1.3.3
 RUN apk add --no-cache --virtual .pgtap-build make perl curl patch \
