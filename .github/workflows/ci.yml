@@ -17,8 +17,8 @@ jobs:
     name: Lint (frontend + backend)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -35,8 +35,8 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -51,7 +51,7 @@ jobs:
     name: Migration guardrails
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: No new grants to anon outside the reviewed public functions
         run: |
           allowed='dadofit_health|get_dadofit_schema_version|submit_support_request|get_active_ad|get_active_ads|record_ad_event|__eco4b_consume_test'
@@ -70,7 +70,7 @@ jobs:
     name: SQL migrations + pgTAP
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build and run the pgTAP suite on a database migrated from scratch
         run: |
           docker compose -f infra/docker-compose.yml --env-file infra/.env.example --profile tests build sqltest
@@ -105,8 +105,8 @@ jobs:
       S3_ACCESS_KEY_ID: ci-local
       S3_SECRET_ACCESS_KEY: ci-local
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -148,8 +148,8 @@ jobs:
       # Trivy pinned by digest (0.76.0): a moved tag cannot change what runs here.
       TRIVY_IMAGE: aquasec/trivy@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
       - name: npm audit (runtime dependencies, high and critical)
