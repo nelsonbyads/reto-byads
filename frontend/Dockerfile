@@ -1,5 +1,5 @@
 # DadoFit web: Vite build served by unprivileged nginx. Build context: frontend/
-FROM node:22.23.4-alpine AS build
+FROM node:26.13.0-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 # Install without running "prepare" before the dataset is copied.
